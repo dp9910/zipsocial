@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Create Post</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#8ce830",
+                        "background-light": "#f7f8f6",
+                        "background-dark": "#192111",
+                    },
+                    fontFamily: {
+                        "display": ["Be Vietnam Pro", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="flex flex-col h-screen">
+<header class="flex items-center justify-between p-4 border-b border-primary/20 dark:border-primary/30">
+<button class="text-black dark:text-white">
+<span class="material-symbols-outlined">close</span>
+</button>
+<h1 class="text-lg font-bold text-black dark:text-white">Create Post</h1>
+<button class="px-6 py-2 text-sm font-bold text-background-dark bg-primary rounded-full">
+                Post
+            </button>
+</header>
+<main class="flex-grow p-4 flex flex-col">
+<div class="flex items-start space-x-3">
+<div class="w-12 h-12 rounded-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDEBpgAeZMM-wk4MDjz06TwkYf7Of2fubCcFcCy9VSRAvRMaJPuGT4mifzArLjqHg1FUZfluXivvb2Ln9Cxsz390HwM4yhnwPT2Dcntu9PJdBu721etJqRGd39FfoSSIkN9Nqhe1WLe--aqJjE7s6MgEUwY2PKHuiyaoTUd9mvZOQLjrE69tij4BWpI_WOVIZOvgZ38vy15EanjbDI4tiIlGNP2LNZQqGMQVvD5bbmgKIGqbyIwZtPFI44XWQkiF0OUvDhGilwlukg");'></div>
+<textarea class="w-full h-48 p-0 bg-transparent text-black dark:text-white placeholder-black/50 dark:placeholder-white/50 border-none focus:ring-0 resize-none text-lg" placeholder="What's on your mind?"></textarea>
+</div>
+</main>
+<footer class="p-4 border-t border-primary/20 dark:border-primary/30">
+<div class="flex items-center space-x-4">
+<button class="text-black dark:text-white">
+<span class="material-symbols-outlined text-2xl">photo_camera</span>
+</button>
+<button class="text-black dark:text-white">
+<span class="material-symbols-outlined text-2xl">videocam</span>
+</button>
+<button class="text-black dark:text-white">
+<span class="material-symbols-outlined text-2xl">image</span>
+</button>
+<button class="text-black dark:text-white">
+<span class="material-symbols-outlined text-2xl">alternate_email</span>
+</button>
+</div>
+</footer>
+</div>
+</body></html>

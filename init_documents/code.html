@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Stitch Design</title>
+<link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#8ce830",
+                        "background-light": "#f7f8f6",
+                        "background-dark": "#192111",
+                        "content-light": "#192111",
+                        "content-dark": "#f7f8f6",
+                        "subtle-light": "#3b4d28",
+                        "subtle-dark": "#c0eea7",
+                    },
+                    fontFamily: {
+                        "display": ["Be Vietnam Pro"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .icon-active {
+            color: #8ce830;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="flex flex-col min-h-screen">
+<header class="sticky top-0 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm z-10">
+<div class="flex items-center p-4 justify-between">
+<div class="w-10"></div>
+<h1 class="text-lg font-bold text-content-light dark:text-content-dark">Feed</h1>
+<button class="flex items-center justify-center h-10 w-10 text-content-light dark:text-content-dark">
+<svg fill="currentColor" height="24" viewbox="0 0 256 256" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"></path>
+</svg>
+</button>
+</div>
+</header>
+<main class="flex-grow">
+<div class="p-4">
+<div class="bg-background-light dark:bg-background-dark rounded-xl shadow-sm overflow-hidden border border-primary/20 dark:border-primary/30">
+<div class="w-full bg-center bg-no-repeat aspect-video bg-cover" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBy0Np8tHXoTsMmzt6SUOv5aEuxyC6zHvooGHppJ_0fuYOWrHTpSRNoTI_F1YqQSPdUuuenaSHN3BfAojH3NqLwo4SXkcS_I3ZHPvM7vv9OlwgwcGhR-KXjHx3zIFuKnAnpt2aBAvkR-2HdflHbZRQp6fG2tTDOt_TUaldX0Gu4DfVulv0rK2wls_Lah6cVxfRQs9Ompldji70StXdQmTtVMVg6pDU56fGV2jpzLKwgufWLmt9kwpjXfkg0KMWUlFAc9eu7WffXcRg");'></div>
+<div class="p-4">
+<h2 class="text-lg font-bold text-content-light dark:text-content-dark">The future of AI is here</h2>
+<p class="text-sm text-subtle-light dark:text-subtle-dark mt-1">AI is rapidly evolving, and its impact on society is becoming increasingly significant. From healthcare to finance, AI is transforming industries and creating new opportunities. However, it also raises ethical concerns that need to be addressed.</p>
+<p class="text-xs text-subtle-light/70 dark:text-subtle-dark/70 mt-2">2d ago</p>
+</div>
+<div class="flex justify-around items-center border-t border-primary/20 dark:border-primary/30 text-subtle-light dark:text-subtle-dark">
+<button class="flex items-center gap-2 p-3 hover:bg-primary/10 rounded-full transition-colors">
+<svg fill="currentColor" height="20" viewbox="0 0 256 256" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M205.66,117.66a8,8,0,0,1-11.32,0L136,59.31V216a8,8,0,0,1-16,0V59.31L61.66,117.66a8,8,0,0,1-11.32-11.32l72-72a8,8,0,0,1,11.32,0l72,72A8,8,0,0,1,205.66,117.66Z"></path></svg>
+<span class="text-sm font-semibold">123</span>
+</button>
+<button class="flex items-center gap-2 p-3 hover:bg-primary/10 rounded-full transition-colors">
+<svg fill="currentColor" height="20" viewbox="0 0 256 256" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M205.66,149.66l-72,72a8,8,0,0,1-11.32,0l-72-72a8,8,0,0,1,11.32-11.32L120,196.69V40a8,8,0,0,1,16,0V196.69l58.34-58.35a8,8,0,0,1,11.32,11.32Z"></path></svg>
+<span class="text-sm font-semibold">45</span>
+</button>
+<button class="flex items-center gap-2 p-3 hover:bg-primary/10 rounded-full transition-colors">
+<svg fill="currentColor" height="20" viewbox="0 0 256 256" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M140,128a12,12,0,1,1-12-12A12,12,0,0,1,140,128ZM84,116a12,12,0,1,0,12,12A12,12,0,0,0,84,116Zm88,0a12,12,0,1,0,12,12A12,12,0,0,0,172,116Zm60,12A104,104,0,0,1,79.12,219.82L45.07,231.17a16,16,0,0,1-20.24-20.24l11.35-34.05A104,104,0,1,1,232,128Zm-16,0A88,88,0,1,0,51.81,172.06a8,8,0,0,1,.66,6.54L40,216,77.4,203.53a7.85,7.85,0,0,1,2.53-.42,8,8,0,0,1,4,1.08A88,88,0,0,0,216,128Z"></path></svg>
+<span class="text-sm font-semibold">67</span>
+</button>
+<button class="flex items-center gap-1 p-3 hover:bg-primary/10 rounded-full transition-colors">
+<svg fill="currentColor" height="20" viewbox="0 0 256 256" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M34.76,42A8,8,0,0,0,32,48V216a8,8,0,0,0,16,0V171.77c26.79-21.16,49.87-9.75,76.45,3.41,16.4,8.11,34.06,16.85,53,16.85,13.93,0,28.54-4.75,43.82-18a8,8,0,0,0,2.76-6V48A8,8,0,0,0,210.76,42c-28,24.23-51.72,12.49-79.21-1.12C103.07,26.76,70.78,10.79,34.76,42ZM208,164.25c-26.79,21.16-49.87,9.74-76.45-3.41-25-12.35-52.81-26.13-83.55-8.4V51.79c26.79-21.16,49.87-9.75,76.45,3.4,25,12.35,52.82,26.13,83.55,8.4Z"></path></svg>
+</button>
+</div>
+</div>
+</div>
+<div class="p-4">
+<div class="bg-background-light dark:bg-background-dark rounded-xl shadow-sm overflow-hidden border border-primary/20 dark:border-primary/30">
+<div class="w-full bg-center bg-no-repeat aspect-video bg-cover" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAzJIkMaxaqOkdtD1SJgGxo0V4ZO7_bJVcOGhtiXoYX33nqflngr_haZOBmYA2GlIFaDU7VjfnVEzX6Qp20fDw0rcFczCARKwzZDoiWyJi-3KEv-CG72-tQ29tsmhKKHmg_2NfzpsfMamUFQKC4lVgyZFOYnfSQp-SN03NAtYxQhB0QE6cZt-6BBiKmoWTo6mCnzaCozkhai_W4JSVitE6aPIfg9Kf0dAZWOQoEtq3TZZV9qglGYHrV4a2iUrwOKKwufw8l9b0YExM");'></div>
+<div class="p-4">
+<h2 class="text-lg font-bold text-content-light dark:text-content-dark">The rise of remote work</h2>
+<p class="text-sm text-subtle-light dark:text-subtle-dark mt-1">Remote work has become increasingly popular in recent years, offering flexibility and work-life balance. However, it also presents challenges such as maintaining productivity and team cohesion. Companies need to adapt their strategies to support remote employees effectively.</p>
+<p class="text-xs text-subtle-light/70 dark:text-subtle-dark/70 mt-2">1d ago</p>
+</div>
+<div class="flex justify-around items-center border-t border-primary/20 dark:border-primary/30 text-subtle-light dark:text-subtle-dark">
+<button class="flex items-center gap-2 p-3 hover:bg-primary/10 rounded-full transition-colors">
+<svg fill="currentColor" height="20" viewbox="0 0 256 256" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M205.66,117.66a8,8,0,0,1-11.32,0L136,59.31V216a8,8,0,0,1-16,0V59.31L61.66,117.66a8,8,0,0,1-11.32-11.32l72-72a8,8,0,0,1,11.32,0l72,72A8,8,0,0,1,205.66,117.66Z"></path></svg>
+<span class="text-sm font-semibold">89</span>
+</button>
+<button class="flex items-center gap-2 p-3 hover:bg-primary/10 rounded-full transition-colors">
+<svg fill="currentColor" height="20" viewbox="0 0 256 256" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M205.66,149.66l-72,72a8,8,0,0,1-11.32,0l-72-72a8,8,0,0,1,11.32-11.32L120,196.69V40a8,8,0,0,1,16,0V196.69l58.34-58.35a8,8,0,0,1,11.32,11.32Z"></path></svg>
+<span class="text-sm font-semibold">23</span>
+</button>
+<button class="flex items-center gap-2 p-3 hover:bg-primary/10 rounded-full transition-colors">
+<svg fill="currentColor" height="20" viewbox="0 0 256 256" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M140,128a12,12,0,1,1-12-12A12,12,0,0,1,140,128ZM84,116a12,12,0,1,0,12,12A12,12,0,0,0,84,116Zm88,0a12,12,0,1,0,12,12A12,12,0,0,0,172,116Zm60,12A104,104,0,0,1,79.12,219.82L45.07,231.17a16,16,0,0,1-20.24-20.24l11.35-34.05A104,104,0,1,1,232,128Zm-16,0A88,88,0,1,0,51.81,172.06a8,8,0,0,1,.66,6.54L40,216,77.4,203.53a7.85,7.85,0,0,1,2.53-.42,8,8,0,0,1,4,1.08A88,88,0,0,0,216,128Z"></path></svg>
+<span class="text-sm font-semibold">45</span>
+</button>
+<button class="flex items-center gap-1 p-3 hover:bg-primary/10 rounded-full transition-colors">
+<svg fill="currentColor" height="20" viewbox="0 0 256 256" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M34.76,42A8,8,0,0,0,32,48V216a8,8,0,0,0,16,0V171.77c26.79-21.16,49.87-9.75,76.45,3.41,16.4,8.11,34.06,16.85,53,16.85,13.93,0,28.54-4.75,43.82-18a8,8,0,0,0,2.76-6V48A8,8,0,0,0,210.76,42c-28,24.23-51.72,12.49-79.21-1.12C103.07,26.76,70.78,10.79,34.76,42ZM208,164.25c-26.79,21.16-49.87,9.74-76.45-3.41-25-12.35-52.81-26.13-83.55-8.4V51.79c26.79-21.16,49.87-9.75,76.45,3.4,25,12.35,52.82,26.13,83.55,8.4Z"></path></svg>
+</button>
+</div>
+</div>
+</div>
+<div class="p-4">
+<div class="bg-background-light dark:bg-background-dark rounded-xl shadow-sm overflow-hidden border border-primary/20 dark:border-primary/30">
+<div class="w-full bg-center bg-no-repeat aspect-video bg-cover" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD5MRoJ1NpJs6X3B6zyt0kTnbmhzXfmcm9sknaIMnxuoW5aft7oUNuPd0zTnz3p5Iw03c1ZX_QcijjeOl8vHiPRONPBuDyZc0LMlTWBcLexkJGFWp2SUOkzkGgMcFujGxsClXyz5iT9TP6Ty4u0PzepY3hTTS0x2_be-d_lGV2rRlUiFzAKvqWs-2hJ0ei3m-uu9TkpWYKgY1SkvLbQ1AOhK0msWTISKWgZcBg7n-oW1pZggOvj0qJr9AYRfC5XS2Iur_Zmw0Ef1C8");'></div>
+<div class="p-4">
+<h2 class="text-lg font-bold text-content-light dark:text-content-dark">The importance of mental health</h2>
+<p class="text-sm text-subtle-light dark:text-subtle-dark mt-1">Mental health is crucial for overall well-being, yet it often receives less attention than physical health. Raising awareness and providing support for mental health issues is essential for creating a healthier society.</p>
+<p class="text-xs text-subtle-light/70 dark:text-subtle-dark/70 mt-2">3d ago</p>
+</div>
+<div class="flex justify-around items-center border-t border-primary/20 dark:border-primary/30 text-subtle-light dark:text-subtle-dark">
+<button class="flex items-center gap-2 p-3 hover:bg-primary/10 rounded-full transition-colors">
+<svg fill="currentColor" height="20" viewbox="0 0 256 256" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M205.66,117.66a8,8,0,0,1-11.32,0L136,59.31V216a8,8,0,0,1-16,0V59.31L61.66,117.66a8,8,0,0,1-11.32-11.32l72-72a8,8,0,0,1,11.32,0l72,72A8,8,0,0,1,205.66,117.66Z"></path></svg>
+<span class="text-sm font-semibold">56</span>
+</button>
+<button class="flex items-center gap-2 p-3 hover:bg-primary/10 rounded-full transition-colors">
+<svg fill="currentColor" height="20" viewbox="0 0 256 256" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M205.66,149.66l-72,72a8,8,0,0,1-11.32,0l-72-72a8,8,0,0,1,11.32-11.32L120,196.69V40a8,8,0,0,1,16,0V196.69l58.34-58.35a8,8,0,0,1,11.32,11.32Z"></path></svg>
+<span class="text-sm font-semibold">12</span>
+</button>
+<button class="flex items-center gap-2 p-3 hover:bg-primary/10 rounded-full transition-colors">
+<svg fill="currentColor" height="20" viewbox="0 0 256 256" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M140,128a12,12,0,1,1-12-12A12,12,0,0,1,140,128ZM84,116a12,12,0,1,0,12,12A12,12,0,0,0,84,116Zm88,0a12,12,0,1,0,12,12A12,12,0,0,0,172,116Zm60,12A104,104,0,0,1,79.12,219.82L45.07,231.17a16,16,0,0,1-20.24-20.24l11.35-34.05A104,104,0,1,1,232,128Zm-16,0A88,88,0,1,0,51.81,172.06a8,8,0,0,1,.66,6.54L40,216,77.4,203.53a7.85,7.85,0,0,1,2.53-.42,8,8,0,0,1,4,1.08A88,88,0,0,0,216,128Z"></path></svg>
+<span class="text-sm font-semibold">34</span>
+</button>
+<button class="flex items-center gap-1 p-3 hover:bg-primary/10 rounded-full transition-colors">
+<svg fill="currentColor" height="20" viewbox="0 0 256 256" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M34.76,42A8,8,0,0,0,32,48V216a8,8,0,0,0,16,0V171.77c26.79-21.16,49.87-9.75,76.45,3.41,16.4,8.11,34.06,16.85,53,16.85,13.93,0,28.54-4.75,43.82-18a8,8,0,0,0,2.76-6V48A8,8,0,0,0,210.76,42c-28,24.23-51.72,12.49-79.21-1.12C103.07,26.76,70.78,10.79,34.76,42ZM208,164.25c-26.79,21.16-49.87,9.74-76.45-3.41-25-12.35-52.81-26.13-83.55-8.4V51.79c26.79-21.16,49.87-9.75,76.45,3.4,25,12.35,52.82,26.13,83.55,8.4Z"></path></svg>
+</button>
+</div>
+</div>
+</div>
+</main>
+<footer class="sticky bottom-0 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm pb-safe">
+<div class="flex justify-around items-center p-2 border-t border-primary/20 dark:border-primary/30">
+<a class="flex flex-col items-center justify-center p-2 rounded-lg w-1/3 text-primary" href="#">
+<svg fill="currentColor" height="24" viewbox="0 0 256 256" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M224,115.55V208a16,16,0,0,1-16,16H168a16,16,0,0,1-16-16V168a8,8,0,0,0-8-8H112a8,8,0,0,0-8,8v40a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V115.55a16,16,0,0,1,5.17-11.78l80-75.48.11-.11a16,16,0,0,1,21.53,0,1.14,1.14,0,0,0,.11.11l80,75.48A16,16,0,0,1,224,115.55Z"></path></svg>
+<span class="text-xs font-bold">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center p-2 rounded-lg w-1/3 text-subtle-light dark:text-subtle-dark hover:text-primary transition-colors" href="#">
+<svg fill="currentColor" height="24" viewbox="0 0 256 256" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32Zm0,176H48V48H208V208Zm-32-80a8,8,0,0,1-8,8H136v32a8,8,0,0,1-16,0V136H88a8,8,0,0,1,0-16h32V88a8,8,0,0,1,16,0v32h32A8,8,0,0,1,176,128Z"></path></svg>
+<span class="text-xs font-bold">Post</span>
+</a>
+<a class="flex flex-col items-center justify-center p-2 rounded-lg w-1/3 text-subtle-light dark:text-subtle-dark hover:text-primary transition-colors" href="#">
+<svg fill="currentColor" height="24" viewbox="0 0 256 256" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"></path></svg>
+<span class="text-xs font-bold">Profile</span>
+</a>
+</div>
+</footer>
+</div>
+</body></html>
