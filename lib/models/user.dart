@@ -9,6 +9,7 @@ class AppUser {
   final String? bio;
   final int followerCount;
   final int followingCount;
+  final int postCount;
   final bool isProfileComplete;
 
   AppUser({
@@ -22,6 +23,7 @@ class AppUser {
     this.bio,
     this.followerCount = 0,
     this.followingCount = 0,
+    this.postCount = 0,
     this.isProfileComplete = false,
   });
 
@@ -37,6 +39,7 @@ class AppUser {
       bio: json['bio'],
       followerCount: json['follower_count'] ?? 0,
       followingCount: json['following_count'] ?? 0,
+      postCount: json['post_count'] ?? 0,
       isProfileComplete: json['is_profile_complete'] ?? false,
     );
   }
@@ -53,6 +56,7 @@ class AppUser {
       'bio': bio,
       'follower_count': followerCount,
       'following_count': followingCount,
+      'post_count': postCount,
       'is_profile_complete': isProfileComplete,
     };
   }

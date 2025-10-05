@@ -17,6 +17,7 @@ class PostService {
     final userProfile = await FirebaseAuthService.getUserProfile();
     if (userProfile == null) throw Exception('User profile not found');
 
+    // Create the post
     final response = await _client
         .from('posts')
         .insert({
@@ -27,9 +28,20 @@ class PostService {
           'tag': _tagToString(tag),
           'event_details': eventDetails,
           'created_at': DateTime.now().toIso8601String(),
+          'is_active': true,
         })
         .select()
         .single();
+
+    // Update user's post count
+    try {
+      await _client.rpc('increment_post_count', params: {
+        'user_id': user.uid,
+      });
+    } catch (e) {
+      print('Error updating post count: $e');
+      // Don't throw here - post was created successfully
+    }
 
     return Post.fromJson(response);
   }

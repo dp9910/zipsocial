@@ -57,6 +57,10 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadFeed();
   }
 
+  void refreshFeed() {
+    _loadFeed();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

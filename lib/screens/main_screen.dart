@@ -13,19 +13,50 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
+  final GlobalKey<State<HomeScreen>> _homeKey = GlobalKey<State<HomeScreen>>();
+  final GlobalKey<State<ProfileScreen>> _profileKey = GlobalKey<State<ProfileScreen>>();
   
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const CreatePostScreen(),
-    const ProfileScreen(),
-  ];
+  late final List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+    _screens = [
+      HomeScreen(key: _homeKey),
+      const CreatePostScreen(),
+      ProfileScreen(key: _profileKey),
+    ];
+  }
+
+  Future<void> _onTabTap(int index) async {
+    if (index == 1) {
+      // Navigate to create post as a modal
+      final result = await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => const CreatePostScreen(),
+          fullscreenDialog: true,
+        ),
+      );
+      
+      // If post was created, refresh home feed and profile
+      if (result == true) {
+        (_homeKey.currentState as dynamic)?.refreshFeed();
+        (_profileKey.currentState as dynamic)?.refreshProfile();
+      }
+    } else {
+      setState(() => _currentIndex = index);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
+        index: _currentIndex == 1 ? 0 : _currentIndex, // Don't show create post in stack
+        children: [
+          _screens[0], // Home
+          _screens[2], // Profile (index 2 becomes 1 in stack)
+        ],
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
@@ -38,7 +69,7 @@ class _MainScreenState extends State<MainScreen> {
         ),
         child: BottomNavigationBar(
           currentIndex: _currentIndex,
-          onTap: (index) => setState(() => _currentIndex = index),
+          onTap: _onTabTap,
           type: BottomNavigationBarType.fixed,
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           selectedItemColor: AppTheme.primary,

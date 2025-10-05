@@ -37,6 +37,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  void refreshProfile() {
+    setState(() => _isLoading = true);
+    _loadUserProfile();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -156,7 +161,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               children: [
                                 _buildStatCard(
                                   'Posts',
-                                  '0',
+                                  _user!.postCount.toString(),
                                   Icons.edit_note,
                                 ),
                                 _buildStatCard(

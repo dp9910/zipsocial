@@ -192,6 +192,7 @@ class FirebaseAuthService {
             'default_zipcode': defaultZipcode,
             'follower_count': 0,
             'following_count': 0,
+            'post_count': 0,
             'is_profile_complete': true,
             'created_at': DateTime.now().toIso8601String(),
           })

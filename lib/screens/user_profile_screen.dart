@@ -210,7 +210,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     children: [
                       _buildStatCard(
                         'Posts',
-                        '0',
+                        _user!.postCount.toString(),
                         Icons.edit_note,
                       ),
                       _buildStatCard(
