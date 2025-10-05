@@ -13,6 +13,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _zipcodeController = TextEditingController();
+  final FocusNode _zipcodeFocusNode = FocusNode(); // Add FocusNode
   List<Post> _posts = [];
   final List<PostTag> _selectedTags = [];
   bool _isLoading = false;
@@ -24,12 +25,25 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadFeed();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Explicitly unfocus the TextField when the screen becomes active
+    _zipcodeFocusNode.unfocus();
+  }
+
+  @override
+  void dispose() {
+    _zipcodeFocusNode.dispose(); // Dispose FocusNode
+    super.dispose();
+  }
+
   Future<void> _loadFeed() async {
     if (_zipcodeController.text.isEmpty) return;
 
     // Dismiss keyboard
     FocusScope.of(context).unfocus();
-    
+
     setState(() => _isLoading = true);
     
     try {
@@ -96,6 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Expanded(
                       child: TextField(
                         controller: _zipcodeController,
+                        focusNode: _zipcodeFocusNode, // Assign FocusNode
                         decoration: InputDecoration(
                           labelText: 'Zip Code',
                           border: OutlineInputBorder(

@@ -135,9 +135,22 @@ The app successfully demonstrates the core concept: **hyper-local social network
 - ✅ Category-based post filtering (news, events, fun facts, random)
 - ✅ Live feed updates when posts are created
 - ✅ Modal post creation with success feedback
+- ✅ Event posts with detailed event information fields
+
+### Recent Progress & Fixes
+- **Post Interaction Functionality:**
+    - Implemented like, dislike, and save functionality for posts.
+    - Ensured correct parsing and display of user's interaction status (vote, saved) from Supabase.
+    - Updated Supabase schema and functions (manual steps for user) to support `upvotes` and `downvotes` counts directly in the `posts` table.
+- **Improved UI Responsiveness:**
+    - Eliminated automatic full feed refresh after each post interaction, improving user experience.
+    - Implemented local optimistic UI updates for post interactions.
+- **Keypad Auto-Focus Prevention:**
+    - Resolved issue where the numeric keypad would automatically appear on the feed tab after navigating back from other screens (e.g., "Create Post").
+    - Implemented explicit focus management using `FocusNode` and `didChangeDependencies` in `HomeScreen`.
 
 ### Phase 4: Enhanced Post Features (Current Priority)
-- [ ] Post interactions (like, dislike, save functionality)
+- [x] Post interactions (like, dislike, save functionality)
 - [ ] Comment system with threaded discussions
 - [ ] Real-time notifications for interactions
 - [ ] Post sharing and mention functionality
@@ -208,6 +221,8 @@ lib/
 - ✅ CocoaPods dependency conflicts → Resolved GTMSessionFetcher version
 - ✅ Missing URL schemes → Added Firebase and Google auth schemes
 - ✅ UI overflow on smaller screens → Responsive design improvements
+- ✅ Post interactions not persisting/displaying correctly → Fixed by standardizing Supabase client, correcting `Post.fromJson` parsing, and updating Supabase schema/functions for vote counts.
+- ✅ Automatic keypad appearance on feed tab → Fixed by implementing explicit focus management in `HomeScreen`.
 
 ### Current Known Issues
 - ⚠️ Supabase URL needs proper configuration for user profile creation
