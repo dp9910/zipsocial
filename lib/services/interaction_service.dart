@@ -32,6 +32,7 @@ class InteractionService {
       if (response.statusCode != 200) {
         throw Exception('Failed to toggle vote: ${response.body}');
       }
+      print('Successfully toggled vote for post $postId. New vote: $isUpvote'); // Add this line
     } catch (e) {
       print('Error toggling vote: $e');
       rethrow;
@@ -43,8 +44,26 @@ class InteractionService {
       await _supabase.functions.invoke('report_post', body: {
         'post_id': postId,
       });
+      print('Successfully reported post $postId'); // Add this line
     } catch (e) {
       print('Error reporting post: $e');
+      rethrow;
+    }
+  }
+
+  static Future<void> savePost(String postId, bool isSaved) async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
+
+      await _supabase.from('post_interactions').upsert({
+        'post_id': postId,
+        'user_id': user.id,
+        'is_saved': isSaved,
+      });
+      print('Successfully saved post $postId. Is saved: $isSaved'); // Add this line
+    } catch (e) {
+      print('Error saving post: $e');
       rethrow;
     }
   }

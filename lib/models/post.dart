@@ -1,3 +1,5 @@
+import '../services/supabase_auth_service.dart';
+
 enum PostTag { news, funFacts, events, random }
 
 class Post {
@@ -36,6 +38,28 @@ class Post {
   });
 
   factory Post.fromJson(Map<String, dynamic> json) {
+    final List<dynamic>? interactions = json['post_interactions'];
+    bool? currentUserVote;
+    bool isSavedByCurrentUser = false;
+
+    if (interactions != null && interactions.isNotEmpty) {
+      final userInteraction = interactions.firstWhere(
+        (interaction) => interaction['user_id'] == SupabaseAuthService.currentUser?.id,
+        orElse: () => null,
+      );
+
+      if (userInteraction != null) {
+        if (userInteraction['vote'] == 'up') {
+          currentUserVote = true;
+        } else if (userInteraction['vote'] == 'down') {
+          currentUserVote = false;
+        } else {
+          currentUserVote = null;
+        }
+        isSavedByCurrentUser = userInteraction['is_saved'] ?? false;
+      }
+    }
+
     return Post(
       id: json['id'],
       userId: json['user_id'],
@@ -49,8 +73,8 @@ class Post {
       isActive: json['is_active'] ?? true,
       upvotes: json['upvotes'] ?? 0,
       downvotes: json['downvotes'] ?? 0,
-      userVote: json['user_vote'],
-      isSaved: json['is_saved'] ?? false,
+      userVote: currentUserVote,
+      isSaved: isSavedByCurrentUser,
       commentCount: json['comment_count'] ?? 0,
     );
   }

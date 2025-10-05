@@ -1,9 +1,10 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/supabase_config.dart';
 import '../models/post.dart';
 import 'supabase_auth_service.dart'; // Changed import
 
 class PostService {
-  static final _client = SupabaseConfig.client;
+  static final _client = Supabase.instance.client;
 
   static Future<Post> createPost({
     required String content,
@@ -46,7 +47,7 @@ class PostService {
     return Post.fromJson(response);
   }
 
-  static Future<List<Post>> getFeed({
+  static Future<List<Map<String, dynamic>>> getFeedRaw({
     required String zipcode,
     List<PostTag>? tags,
     int limit = 50,
@@ -56,7 +57,7 @@ class PostService {
         .from('posts')
         .select('''
           *,
-          post_interactions!left(vote, is_saved)
+          post_interactions!left(user_id, vote, is_saved)
         ''')
         .eq('zipcode', zipcode)
         .eq('is_active', true);
@@ -70,7 +71,17 @@ class PostService {
         .order('created_at', ascending: false)
         .range(offset, offset + limit - 1);
 
-    return response.map<Post>((json) => Post.fromJson(json)).toList();
+    return response;
+  }
+
+  static Future<List<Post>> getFeed({
+    required String zipcode,
+    List<PostTag>? tags,
+    int limit = 50,
+    int offset = 0,
+  }) async {
+    final rawResponse = await getFeedRaw(zipcode: zipcode, tags: tags, limit: limit, offset: offset);
+    return rawResponse.map<Post>((json) => Post.fromJson(json)).toList();
   }
 
   static String _tagToString(PostTag tag) {
@@ -80,5 +91,39 @@ class PostService {
       case PostTag.events: return 'events';
       case PostTag.random: return 'random';
     }
+  }
+}
+
+
+class PostInteractionService {
+  static final _client = Supabase.instance.client;
+
+  static Future<void> vote(String postId, bool isUpvote) async {
+    final user = SupabaseAuthService.currentUser;
+    if (user == null) throw Exception('User not authenticated');
+
+    await _client.from('post_interactions').upsert({
+      'post_id': postId,
+      'user_id': user.id,
+      'vote': isUpvote ? 1 : -1,
+    });
+  }
+
+  static Future<void> report(String postId) async {
+    final user = SupabaseAuthService.currentUser;
+    if (user == null) throw Exception('User not authenticated');
+
+    await _client.rpc('report_post', params: {'post_id': postId});
+  }
+
+  static Future<void> save(String postId, bool isSaved) async {
+    final user = SupabaseAuthService.currentUser;
+    if (user == null) throw Exception('User not authenticated');
+
+    await _client.from('post_interactions').upsert({
+      'post_id': postId,
+      'user_id': user.id,
+      'is_saved': isSaved,
+    });
   }
 }

@@ -33,10 +33,12 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _isLoading = true);
     
     try {
-      final posts = await PostService.getFeed(
+      final rawResponse = await PostService.getFeedRaw(
         zipcode: _zipcodeController.text,
         tags: _selectedTags.isEmpty ? null : _selectedTags,
       );
+      print('Raw Supabase response for feed: $rawResponse'); // Add this line
+      final posts = rawResponse.map<Post>((json) => Post.fromJson(json)).toList();
       setState(() => _posts = posts);
     } catch (e) {
       if (mounted) {
@@ -158,9 +160,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           itemCount: _posts.length,
                           itemBuilder: (context, index) {
+                            final post = _posts[index];
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 16),
-                              child: PostCard(post: _posts[index]),
+                              child: PostCard(
+                                post: post,
+                              ),
                             );
                           },
                         ),

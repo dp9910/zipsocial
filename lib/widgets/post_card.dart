@@ -7,8 +7,9 @@ import '../services/interaction_service.dart';
 
 class PostCard extends StatefulWidget {
   final Post post;
+  final VoidCallback? onPostUpdated; // Reintroducing this field
 
-  const PostCard({super.key, required this.post});
+  const PostCard({Key? key, required this.post, this.onPostUpdated}) : super(key: key);
 
   @override
   State<PostCard> createState() => _PostCardState();
@@ -31,6 +32,18 @@ class _PostCardState extends State<PostCard> {
     _reportCount = widget.post.reportCount;
   }
 
+  @override
+  void didUpdateWidget(covariant PostCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.post != oldWidget.post) {
+      _userVote = widget.post.userVote;
+      _upvotes = widget.post.upvotes;
+      _downvotes = widget.post.downvotes;
+      _isSaved = widget.post.isSaved;
+      _reportCount = widget.post.reportCount;
+    }
+  }
+
   Future<void> _onVote(bool isUpvote) async {
     final originalVote = _userVote;
     final originalUpvotes = _upvotes;
@@ -51,6 +64,7 @@ class _PostCardState extends State<PostCard> {
 
     try {
       await InteractionService.toggleVote(widget.post.id, _userVote);
+      widget.onPostUpdated?.call(); // Invoke callback
     } catch (e) {
       setState(() {
         _userVote = originalVote;
@@ -64,19 +78,38 @@ class _PostCardState extends State<PostCard> {
   }
 
   Future<void> _onReport() async {
-    if (_isSaved) return;
+    final originalReportCount = _reportCount;
 
     setState(() {
-      _isSaved = true;
       _reportCount++;
     });
 
     try {
       await InteractionService.reportPost(widget.post.id);
+      widget.onPostUpdated?.call(); // Invoke callback
     } catch (e) {
       setState(() {
-        _isSaved = false;
-        _reportCount--;
+        _reportCount = originalReportCount;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    }
+  }
+
+  Future<void> _onSave() async {
+    final originalIsSaved = _isSaved;
+
+    setState(() {
+      _isSaved = !_isSaved;
+    });
+
+    try {
+      await InteractionService.savePost(widget.post.id, _isSaved);
+      widget.onPostUpdated?.call(); // Invoke callback
+    } catch (e) {
+      setState(() {
+        _isSaved = originalIsSaved;
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
@@ -252,11 +285,10 @@ class _PostCardState extends State<PostCard> {
                   },
                 ),
                 _ActionButton(
-                  icon: _isSaved ? Icons.flag : Icons.flag_outlined,
-                  count: _reportCount,
+                  icon: _isSaved ? Icons.bookmark : Icons.bookmark_border,
                   isActive: _isSaved,
-                  activeColor: Colors.red,
-                  onPressed: _onReport,
+                  activeColor: Colors.blue,
+                  onPressed: _onSave,
                 ),
               ],
             ),
