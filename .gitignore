@@ -68,3 +68,4 @@ google-services.json
 # Web
 /web/
 lib/generated_plugin_registrant.dart
+*.json
