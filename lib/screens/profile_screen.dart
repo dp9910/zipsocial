@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../services/firebase_auth_service.dart';
 import '../models/user.dart';
+import 'edit_profile_screen.dart';
+import 'settings_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -46,8 +48,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined),
-            onPressed: () {
-              // Navigate to settings
+            onPressed: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const SettingsScreen(),
+                ),
+              );
             },
           ),
         ],
@@ -175,30 +181,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _buildActionButton(
                         'Edit Profile',
                         Icons.edit_outlined,
-                        () {
-                          // Navigate to edit profile
+                        () async {
+                          if (_user != null) {
+                            final result = await Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => EditProfileScreen(user: _user!),
+                              ),
+                            );
+                            
+                            // Reload profile if changes were made
+                            if (result == true) {
+                              _loadUserProfile();
+                            }
+                          }
                         },
                       ),
                       
-                      const SizedBox(height: 16),
-                      
-                      _buildActionButton(
-                        'Privacy Settings',
-                        Icons.privacy_tip_outlined,
-                        () {
-                          // Navigate to privacy settings
-                        },
-                      ),
-                      
-                      const SizedBox(height: 16),
-                      
-                      _buildActionButton(
-                        'Help & Support',
-                        Icons.help_outline,
-                        () {
-                          // Navigate to help
-                        },
-                      ),
+                      // Commented out for future implementation
+                      // const SizedBox(height: 16),
+                      // 
+                      // _buildActionButton(
+                      //   'Privacy Settings',
+                      //   Icons.privacy_tip_outlined,
+                      //   () {
+                      //     // Navigate to privacy settings
+                      //   },
+                      // ),
+                      // 
+                      // const SizedBox(height: 16),
+                      // 
+                      // _buildActionButton(
+                      //   'Help & Support',
+                      //   Icons.help_outline,
+                      //   () {
+                      //     // Navigate to help
+                      //   },
+                      // ),
                       
                       const SizedBox(height: 32),
                       
