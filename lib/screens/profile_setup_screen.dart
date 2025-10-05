@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/firebase_auth_service.dart';
+import '../services/supabase_auth_service.dart';
 import '../models/user.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
@@ -30,49 +30,31 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   }
 
   Future<void> _loadUserData() async {
-    final firebaseUser = FirebaseAuthService.currentUser;
-    if (firebaseUser != null && mounted) {
-      // For new users, create a temporary user object with Firebase user data
-      setState(() {
-        _currentUser = AppUser(
-          id: firebaseUser.uid,
-          customUserId: _generateDisplayUserId(), // Generate a temporary display ID
-          createdAt: DateTime.now(),
-          email: firebaseUser.email,
-          phoneNumber: firebaseUser.phoneNumber,
+    setState(() => _isLoading = true);
+    try {
+      final user = await SupabaseAuthService.getUserProfile();
+      if (user != null && mounted) {
+        setState(() {
+          _currentUser = user;
+          if (user.nickname != null) {
+            _nicknameController.text = user.nickname!;
+          }
+          if (user.bio != null) {
+            _bioController.text = user.bio!;
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading profile: $e')),
         );
-      });
-      
-      // Try to load existing profile if it exists
-      try {
-        final existingUser = await FirebaseAuthService.getUserProfile();
-        if (existingUser != null && mounted) {
-          setState(() {
-            _currentUser = existingUser;
-            if (existingUser.nickname != null) {
-              _nicknameController.text = existingUser.nickname!;
-            }
-            if (existingUser.bio != null) {
-              _bioController.text = existingUser.bio!;
-            }
-          });
-        }
-      } catch (e) {
-        // Ignore error for new users - they don't have a profile yet
-        print('No existing profile found (this is normal for new users): $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
       }
     }
-  }
-
-  String _generateDisplayUserId() {
-    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-    final random = DateTime.now().millisecondsSinceEpoch;
-    return chars[(random % 26)] + 
-           chars[((random ~/ 26) % 36)] + 
-           chars[((random ~/ 936) % 36)] + 
-           chars[((random ~/ 33696) % 36)] + 
-           chars[((random ~/ 1213056) % 36)] + 
-           chars[((random ~/ 43670016) % 36)];
   }
 
   Future<void> _completeProfile() async {
@@ -81,31 +63,13 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final firebaseUser = FirebaseAuthService.currentUser;
-      if (firebaseUser == null) {
-        throw Exception('No authenticated user found');
-      }
-
-      // Check if user profile already exists
-      final existingUser = await FirebaseAuthService.getUserProfile();
-      
-      if (existingUser == null) {
-        // Create new user profile
-        await FirebaseAuthService.createUserProfile(
-          nickname: _nicknameController.text.trim(),
-          bio: _bioController.text.trim().isEmpty ? null : _bioController.text.trim(),
-        );
-      } else {
-        // Update existing profile
-        await FirebaseAuthService.updateUserProfile(
-          nickname: _nicknameController.text.trim(),
-          bio: _bioController.text.trim().isEmpty ? null : _bioController.text.trim(),
-          isProfileComplete: true,
-        );
-      }
+      await SupabaseAuthService.updateUserProfile(
+        nickname: _nicknameController.text.trim(),
+        bio: _bioController.text.trim().isEmpty ? null : _bioController.text.trim(),
+        isProfileComplete: true,
+      );
       
       if (mounted) {
-        // Navigate back to main app flow by triggering a rebuild of AuthWrapper
         Navigator.of(context).pushNamedAndRemoveUntil('/main', (route) => false);
       }
     } catch (e) {
@@ -214,7 +178,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        _currentUser?.customUserId ?? 'Loading...',
+                        _currentUser?.customUserId ?? 'Loading...', 
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -331,7 +295,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                       controller: _bioController,
                       enabled: true,
                       decoration: InputDecoration(
-                        hintText: 'Tell your community about yourself...',
+                        hintText: 'Tell your community about yourself...', 
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(color: Colors.grey.shade300),

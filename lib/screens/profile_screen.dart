@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/firebase_auth_service.dart';
+import '../services/supabase_auth_service.dart';
 import '../models/user.dart';
 import 'edit_profile_screen.dart';
 import 'settings_screen.dart';
@@ -23,7 +23,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _loadUserProfile() async {
     try {
-      final user = await FirebaseAuthService.getUserProfile();
+      final user = await SupabaseAuthService.getUserProfile();
       if (mounted) {
         setState(() {
           _user = user;
@@ -231,9 +231,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         height: 50,
                         child: OutlinedButton.icon(
                           onPressed: () async {
-                            await FirebaseAuthService.signOut();
+                            await SupabaseAuthService.signOut();
                           },
-                          icon: const Icon(Icons.logout),
+                          icon: const Icon(Icons.logout), 
                           label: const Text('Sign Out'),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Colors.red,

@@ -1,6 +1,6 @@
 import '../config/supabase_config.dart';
 import '../models/post.dart';
-import 'firebase_auth_service.dart';
+import 'supabase_auth_service.dart'; // Changed import
 
 class PostService {
   static final _client = SupabaseConfig.client;
@@ -11,17 +11,17 @@ class PostService {
     required PostTag tag,
     Map<String, dynamic>? eventDetails,
   }) async {
-    final user = FirebaseAuthService.currentUser;
+    final user = SupabaseAuthService.currentUser; // Changed service call
     if (user == null) throw Exception('User not authenticated');
 
-    final userProfile = await FirebaseAuthService.getUserProfile();
+    final userProfile = await SupabaseAuthService.getUserProfile(); // Changed service call
     if (userProfile == null) throw Exception('User profile not found');
 
     // Create the post
     final response = await _client
         .from('posts')
         .insert({
-          'user_id': user.uid,
+          'user_id': user.id, // Changed user.uid to user.id
           'username': userProfile.customUserId,
           'zipcode': zipcode,
           'content': content,
@@ -36,7 +36,7 @@ class PostService {
     // Update user's post count
     try {
       await _client.rpc('increment_post_count', params: {
-        'user_id': user.uid,
+        'user_id': user.id, // Changed user.uid to user.id
       });
     } catch (e) {
       print('Error updating post count: $e');

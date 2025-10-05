@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'config/firebase_config.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'config/supabase_config.dart';
 import 'config/theme.dart';
 import 'screens/auth_screen.dart';
 import 'screens/main_screen.dart';
 import 'screens/profile_setup_screen.dart';
-import 'services/firebase_auth_service.dart';
+import 'services/supabase_auth_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await FirebaseConfig.initialize();
   await SupabaseConfig.initialize();
   runApp(const ZipSocialApp());
 }
@@ -39,12 +37,13 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
+    return StreamBuilder<AuthState>(
+      stream: SupabaseAuthService.authStateChanges,
       builder: (context, snapshot) {
-        if (snapshot.hasData && snapshot.data != null) {
+        final session = snapshot.data?.session;
+        if (session != null) {
           return FutureBuilder(
-            future: FirebaseAuthService.getUserProfile(),
+            future: SupabaseAuthService.getUserProfile(),
             builder: (context, userSnapshot) {
               if (userSnapshot.connectionState == ConnectionState.waiting) {
                 return const Scaffold(

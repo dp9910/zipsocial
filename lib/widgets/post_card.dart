@@ -2,11 +2,87 @@ import 'package:flutter/material.dart';
 import '../models/post.dart';
 import '../config/theme.dart';
 import '../screens/user_profile_screen.dart';
+import '../screens/comments_screen.dart';
+import '../services/interaction_service.dart';
 
-class PostCard extends StatelessWidget {
+class PostCard extends StatefulWidget {
   final Post post;
 
   const PostCard({super.key, required this.post});
+
+  @override
+  State<PostCard> createState() => _PostCardState();
+}
+
+class _PostCardState extends State<PostCard> {
+  late bool? _userVote;
+  late int _upvotes;
+  late int _downvotes;
+  late bool _isSaved;
+  late int _reportCount;
+
+  @override
+  void initState() {
+    super.initState();
+    _userVote = widget.post.userVote;
+    _upvotes = widget.post.upvotes;
+    _downvotes = widget.post.downvotes;
+    _isSaved = widget.post.isSaved;
+    _reportCount = widget.post.reportCount;
+  }
+
+  Future<void> _onVote(bool isUpvote) async {
+    final originalVote = _userVote;
+    final originalUpvotes = _upvotes;
+    final originalDownvotes = _downvotes;
+
+    setState(() {
+      if (_userVote == isUpvote) {
+        _userVote = null;
+        isUpvote ? _upvotes-- : _downvotes--;
+      } else {
+        if (_userVote != null) { // Changing vote
+          isUpvote ? _downvotes-- : _upvotes--;
+        }
+        isUpvote ? _upvotes++ : _downvotes++;
+        _userVote = isUpvote;
+      }
+    });
+
+    try {
+      await InteractionService.toggleVote(widget.post.id, _userVote);
+    } catch (e) {
+      setState(() {
+        _userVote = originalVote;
+        _upvotes = originalUpvotes;
+        _downvotes = originalDownvotes;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    }
+  }
+
+  Future<void> _onReport() async {
+    if (_isSaved) return;
+
+    setState(() {
+      _isSaved = true;
+      _reportCount++;
+    });
+
+    try {
+      await InteractionService.reportPost(widget.post.id);
+    } catch (e) {
+      setState(() {
+        _isSaved = false;
+        _reportCount--;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,15 +91,14 @@ class PostCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Hero Image (placeholder for now)
           Container(
             width: double.infinity,
             height: 200,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  _getTagColor(post.tag).withOpacity(0.7),
-                  _getTagColor(post.tag).withOpacity(0.9),
+                  _getTagColor(widget.post.tag).withOpacity(0.7),
+                  _getTagColor(widget.post.tag).withOpacity(0.9),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -35,30 +110,27 @@ class PostCard extends StatelessWidget {
             ),
             child: Center(
               child: Icon(
-                _getTagIcon(post.tag),
+                _getTagIcon(widget.post.tag),
                 size: 48,
                 color: Colors.white,
               ),
             ),
           ),
-          
-          // Content
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header with tag
                 Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: _getTagColor(post.tag),
+                        color: _getTagColor(widget.post.tag),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        post.tagDisplay,
+                        widget.post.tagDisplay,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
@@ -72,8 +144,8 @@ class PostCard extends StatelessWidget {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => UserProfileScreen(
-                              userId: post.userId,
-                              customUserId: post.username,
+                              userId: widget.post.userId,
+                              customUserId: widget.post.username,
                             ),
                           ),
                         );
@@ -85,7 +157,7 @@ class PostCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          '@${post.username}',
+                          '@${widget.post.username}',
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             color: const Color(0xFF8CE830),
@@ -95,7 +167,7 @@ class PostCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      ' · ${_formatTime(post.createdAt)} · ${post.zipcode}',
+                      ' · ${_formatTime(widget.post.createdAt)} · ${widget.post.zipcode}',
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.secondary.withOpacity(0.7),
                         fontSize: 12,
@@ -104,15 +176,11 @@ class PostCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-                
-                // Content
                 Text(
-                  post.content,
+                  widget.post.content,
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
-                
-                // Event Details
-                if (post.tag == PostTag.events && post.eventDetails != null) ...[
+                if (widget.post.tag == PostTag.events && widget.post.eventDetails != null) ...[
                   const SizedBox(height: 12),
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -131,15 +199,15 @@ class PostCard extends StatelessWidget {
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 4),
-                        ...post.eventDetails!.entries
+                        ...widget.post.eventDetails!.entries
                             .where((e) => e.value?.toString().isNotEmpty == true)
                             .map((e) => Padding(
-                              padding: const EdgeInsets.only(top: 2),
-                              child: Text(
-                                '${_capitalize(e.key)}: ${e.value}',
-                                style: const TextStyle(fontSize: 13),
-                              ),
-                            )),
+                                  padding: const EdgeInsets.only(top: 2),
+                                  child: Text(
+                                    '${_capitalize(e.key)}: ${e.value}',
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
+                                )),
                       ],
                     ),
                   ),
@@ -147,8 +215,6 @@ class PostCard extends StatelessWidget {
               ],
             ),
           ),
-          
-          // Action Bar
           Container(
             decoration: BoxDecoration(
               border: Border(
@@ -161,25 +227,36 @@ class PostCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _ActionButton(
-                  icon: Icons.keyboard_arrow_up,
-                  count: post.upvotes,
-                  isActive: post.userVote == true,
-                  onPressed: () {},
+                  icon: _userVote == true ? Icons.favorite : Icons.favorite_border,
+                  count: _upvotes,
+                  isActive: _userVote == true,
+                  activeColor: Colors.red,
+                  onPressed: () => _onVote(true),
                 ),
                 _ActionButton(
-                  icon: Icons.keyboard_arrow_down,
-                  count: post.downvotes,
-                  isActive: post.userVote == false,
-                  onPressed: () {},
+                  icon: _userVote == false ? Icons.thumb_down : Icons.thumb_down_outlined,
+                  count: _downvotes,
+                  isActive: _userVote == false,
+                  activeColor: Colors.amber,
+                  onPressed: () => _onVote(false),
                 ),
                 _ActionButton(
                   icon: Icons.chat_bubble_outline,
-                  count: 0, // Comments not implemented yet
-                  onPressed: () {},
+                  count: widget.post.commentCount,
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => CommentsScreen(postId: widget.post.id),
+                      ),
+                    );
+                  },
                 ),
                 _ActionButton(
-                  icon: post.isSaved ? Icons.flag : Icons.flag_outlined,
-                  onPressed: () {},
+                  icon: _isSaved ? Icons.flag : Icons.flag_outlined,
+                  count: _reportCount,
+                  isActive: _isSaved,
+                  activeColor: Colors.red,
+                  onPressed: _onReport,
                 ),
               ],
             ),
@@ -192,15 +269,17 @@ class PostCard extends StatelessWidget {
   String _formatTime(DateTime dateTime) {
     final now = DateTime.now();
     final difference = now.difference(dateTime);
-    
-    if (difference.inDays > 0) {
-      return '${difference.inDays}d';
+
+    if (difference.inDays > 7) {
+      return '${dateTime.month}/${dateTime.day}/${dateTime.year}';
     } else if (difference.inHours > 0) {
-      return '${difference.inHours}h';
+      return '${difference.inHours}h ago';
     } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m';
+      return '${difference.inMinutes}m ago';
+    } else if (difference.inSeconds > 10) {
+      return '${difference.inSeconds}s ago';
     } else {
-      return 'now';
+      return 'just now';
     }
   }
 
@@ -242,16 +321,22 @@ class _ActionButton extends StatelessWidget {
   final int? count;
   final bool isActive;
   final VoidCallback onPressed;
+  final Color? activeColor;
 
   const _ActionButton({
     required this.icon,
     this.count,
     this.isActive = false,
     required this.onPressed,
+    this.activeColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    final color = isActive 
+      ? (activeColor ?? AppTheme.primary) 
+      : Theme.of(context).colorScheme.secondary;
+
     return InkWell(
       onTap: onPressed,
       borderRadius: BorderRadius.circular(999),
@@ -263,9 +348,7 @@ class _ActionButton extends StatelessWidget {
             Icon(
               icon,
               size: 20,
-              color: isActive 
-                ? AppTheme.primary 
-                : Theme.of(context).colorScheme.secondary,
+              color: color,
             ),
             if (count != null) ...[
               const SizedBox(width: 4),
@@ -274,9 +357,7 @@ class _ActionButton extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: isActive 
-                    ? AppTheme.primary 
-                    : Theme.of(context).colorScheme.secondary,
+                  color: color,
                 ),
               ),
             ],

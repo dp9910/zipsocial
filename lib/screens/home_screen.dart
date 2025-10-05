@@ -26,6 +26,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadFeed() async {
     if (_zipcodeController.text.isEmpty) return;
+
+    // Dismiss keyboard
+    FocusScope.of(context).unfocus();
     
     setState(() => _isLoading = true);
     

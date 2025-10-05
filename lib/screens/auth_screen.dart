@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/firebase_auth_service.dart';
+import '../services/supabase_auth_service.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -9,20 +9,19 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  final _phoneController = TextEditingController();
-  final _otpController = TextEditingController();
-  bool _isOtpSent = false;
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _isSignUp = false;
   bool _isLoading = false;
   bool _isGoogleLoading = false;
 
-  Future<void> _sendOtp() async {
-    if (_phoneController.text.isEmpty) return;
+  Future<void> _signInWithEmail() async {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) return;
     
     setState(() => _isLoading = true);
     
     try {
-      await FirebaseAuthService.signInWithPhone(_phoneController.text);
-      setState(() => _isOtpSent = true);
+      await SupabaseAuthService.signInWithEmail(_emailController.text, _passwordController.text);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -30,17 +29,25 @@ class _AuthScreenState extends State<AuthScreen> {
         );
       }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) { // Added mounted check
+        setState(() => _isLoading = false);
+      }
     }
   }
 
-  Future<void> _verifyOtp() async {
-    if (_otpController.text.isEmpty) return;
+  Future<void> _signUpWithEmail() async {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) return;
     
     setState(() => _isLoading = true);
     
     try {
-      await FirebaseAuthService.verifyOTP(_otpController.text);
+      await SupabaseAuthService.signUpWithEmail(_emailController.text, _passwordController.text);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Confirmation email sent! Please check your inbox.')),
+        );
+        setState(() => _isSignUp = false);
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -48,7 +55,9 @@ class _AuthScreenState extends State<AuthScreen> {
         );
       }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) { // Added mounted check
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -56,7 +65,7 @@ class _AuthScreenState extends State<AuthScreen> {
     setState(() => _isGoogleLoading = true);
     
     try {
-      await FirebaseAuthService.signInWithGoogle();
+      await SupabaseAuthService.signInWithGoogle();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -64,7 +73,9 @@ class _AuthScreenState extends State<AuthScreen> {
         );
       }
     } finally {
-      setState(() => _isGoogleLoading = false);
+      if (mounted) { // Added mounted check
+        setState(() => _isGoogleLoading = false);
+      }
     }
   }
 
@@ -103,150 +114,104 @@ class _AuthScreenState extends State<AuthScreen> {
               ),
               const SizedBox(height: 48),
               
-              if (!_isOtpSent) ...[
-                // Google Sign-In Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton.icon(
-                    onPressed: _isGoogleLoading ? null : _signInWithGoogle,
-                    icon: _isGoogleLoading 
-                      ? const SizedBox(
-                          width: 20, height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.g_mobiledata, size: 24),
-                    label: const Text('Continue with Google'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black87,
-                      elevation: 1,
-                      side: BorderSide(color: Colors.grey.shade300),
-                    ),
+              // Google Sign-In Button
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton.icon(
+                  onPressed: _isGoogleLoading ? null : _signInWithGoogle,
+                  icon: _isGoogleLoading 
+                    ? const SizedBox(
+                        width: 20, height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.g_mobiledata, size: 24),
+                  label: const Text('Continue with Google'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black87,
+                    elevation: 1,
+                    side: BorderSide(color: Colors.grey.shade300),
                   ),
                 ),
-                
-                const SizedBox(height: 16),
-                
-                // Divider
-                Row(
-                  children: [
-                    Expanded(child: Divider(color: Colors.grey.shade300)),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'OR',
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontWeight: FontWeight.w500,
-                        ),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Divider
+              Row(
+                children: [
+                  Expanded(child: Divider(color: Colors.grey.shade300)),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      'OR',
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                    Expanded(child: Divider(color: Colors.grey.shade300)),
-                  ],
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // Phone Number Input
-                TextField(
-                  controller: _phoneController,
-                  decoration: InputDecoration(
-                    labelText: 'Phone Number',
-                    hintText: '+1 (555) 123-4567',
-                    prefixIcon: const Icon(Icons.phone),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
                   ),
-                  keyboardType: TextInputType.phone,
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // Phone Sign-In Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton.icon(
-                    onPressed: _isLoading ? null : _sendOtp,
-                    icon: _isLoading 
-                      ? const SizedBox(
-                          width: 20, height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.sms),
-                    label: const Text('Send Verification Code'),
+                  Expanded(child: Divider(color: Colors.grey.shade300)),
+                ],
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Email Input
+              TextField(
+                controller: _emailController,
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  prefixIcon: const Icon(Icons.email),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-              ] else ...[
-                // OTP Verification Section
-                const Text(
-                  'Enter Verification Code',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
+                keyboardType: TextInputType.emailAddress,
+              ),
+              
+              const SizedBox(height: 16),
+
+              // Password Input
+              TextField(
+                controller: _passwordController,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  prefixIcon: const Icon(Icons.lock),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'We sent a code to ${_phoneController.text}',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.secondary,
-                  ),
+                obscureText: true,
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Buttons
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : (_isSignUp ? _signUpWithEmail : _signInWithEmail),
+                  child: _isLoading 
+                    ? const CircularProgressIndicator()
+                    : Text(_isSignUp ? 'Sign Up' : 'Sign In'),
                 ),
-                const SizedBox(height: 24),
-                
-                TextField(
-                  controller: _otpController,
-                  decoration: InputDecoration(
-                    labelText: 'Verification Code',
-                    hintText: '123456',
-                    prefixIcon: const Icon(Icons.security),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  keyboardType: TextInputType.number,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    letterSpacing: 2,
-                  ),
-                ),
-                
-                const SizedBox(height: 16),
-                
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _verifyOtp,
-                    child: _isLoading 
-                      ? const CircularProgressIndicator()
-                      : const Text('Verify Code'),
-                  ),
-                ),
-                
-                const SizedBox(height: 16),
-                
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TextButton.icon(
-                      onPressed: () => setState(() => _isOtpSent = false),
-                      icon: const Icon(Icons.arrow_back),
-                      label: const Text('Back'),
-                    ),
-                    const SizedBox(width: 16),
-                    TextButton.icon(
-                      onPressed: _sendOtp,
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('Resend Code'),
-                    ),
-                  ],
-                ),
-              ],
+              ),
+
+              const SizedBox(height: 16),
+
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _isSignUp = !_isSignUp;
+                  });
+                },
+                child: Text(_isSignUp 
+                  ? 'Already have an account? Sign In'
+                  : 'Don\'t have an account? Sign Up'),
+              ),
               
               const SizedBox(height: 32),
               

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart';
-import '../services/firebase_auth_service.dart';
+import '../services/supabase_auth_service.dart'; // Changed import
 
 class UserProfileScreen extends StatefulWidget {
   final String userId;
@@ -31,7 +31,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   Future<void> _loadUserProfile() async {
     try {
-      final user = await FirebaseAuthService.getUserProfileById(widget.userId);
+      final user = await SupabaseAuthService.getUserProfileById(widget.userId); // Changed service call
       if (mounted) {
         setState(() {
           _user = user;
@@ -50,7 +50,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   Future<void> _checkFollowStatus() async {
     try {
-      final isFollowing = await FirebaseAuthService.isFollowing(widget.userId);
+      final isFollowing = await SupabaseAuthService.isFollowing(widget.userId); // Changed service call
       if (mounted) {
         setState(() => _isFollowing = isFollowing);
       }
@@ -64,9 +64,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
     try {
       if (_isFollowing) {
-        await FirebaseAuthService.unfollowUser(widget.userId);
+        await SupabaseAuthService.unfollowUser(widget.userId); // Changed service call
       } else {
-        await FirebaseAuthService.followUser(widget.userId);
+        await SupabaseAuthService.followUser(widget.userId); // Changed service call
       }
       
       setState(() => _isFollowing = !_isFollowing);
@@ -108,7 +108,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       );
     }
 
-    final isOwnProfile = FirebaseAuthService.currentUser?.uid == widget.userId;
+    final isOwnProfile = SupabaseAuthService.currentUser?.id == widget.userId; // Changed service call
 
     return Scaffold(
       appBar: AppBar(
@@ -129,13 +129,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    const Color(0xFF8CE830).withValues(alpha: 0.1),
-                    const Color(0xFF8CE830).withValues(alpha: 0.05),
+                    const Color(0xFF8CE830).withOpacity(0.1),
+                    const Color(0xFF8CE830).withOpacity(0.05),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: const Color(0xFF8CE830).withValues(alpha: 0.2),
+                  color: const Color(0xFF8CE830).withOpacity(0.2),
                 ),
               ),
               child: Column(
@@ -151,12 +151,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         end: Alignment.bottomRight,
                         colors: [
                           const Color(0xFF8CE830),
-                          const Color(0xFF8CE830).withValues(alpha: 0.8),
+                          const Color(0xFF8CE830).withOpacity(0.8),
                         ],
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF8CE830).withValues(alpha: 0.3),
+                          color: const Color(0xFF8CE830).withOpacity(0.3),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),

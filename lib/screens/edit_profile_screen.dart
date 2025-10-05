@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart';
-import '../services/firebase_auth_service.dart';
+import '../services/supabase_auth_service.dart'; // Changed import
 
 class EditProfileScreen extends StatefulWidget {
   final AppUser user;
@@ -50,7 +50,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await FirebaseAuthService.updateUserProfile(
+      await SupabaseAuthService.updateUserProfile( // Changed service call
         nickname: _nicknameController.text.trim(),
         bio: _bioController.text.trim().isEmpty ? null : _bioController.text.trim(),
       );
@@ -154,12 +154,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             end: Alignment.bottomRight,
                             colors: [
                               const Color(0xFF8CE830),
-                              const Color(0xFF8CE830).withValues(alpha: 0.8),
+                              const Color(0xFF8CE830).withOpacity(0.8),
                             ],
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF8CE830).withValues(alpha: 0.3),
+                              color: const Color(0xFF8CE830).withOpacity(0.3),
                               blurRadius: 20,
                               offset: const Offset(0, 10),
                             ),
@@ -282,6 +282,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _bioController,
+                      enabled: true,
                       decoration: InputDecoration(
                         hintText: 'Tell your community about yourself...',
                         border: OutlineInputBorder(
@@ -323,10 +324,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF8CE830).withValues(alpha: 0.1),
+                    color: const Color(0xFF8CE830).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: const Color(0xFF8CE830).withValues(alpha: 0.3),
+                      color: const Color(0xFF8CE830).withOpacity(0.3),
                     ),
                   ),
                   child: Row(

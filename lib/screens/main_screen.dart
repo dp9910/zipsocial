@@ -52,10 +52,10 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
-        index: _currentIndex == 1 ? 0 : _currentIndex, // Don't show create post in stack
+        index: _currentIndex == 2 ? 1 : 0,
         children: [
           _screens[0], // Home
-          _screens[2], // Profile (index 2 becomes 1 in stack)
+          _screens[2], // Profile
         ],
       ),
       bottomNavigationBar: Container(

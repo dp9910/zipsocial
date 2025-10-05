@@ -52,15 +52,7 @@
 			<string>GoogleSignIn</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.919813529279-7aoun3mf2rfk85ajk7abr41bnqiq7vb0</string>
-			</array>
-		</dict>
-		<dict>
-			<key>CFBundleURLName</key>
-			<string>FirebaseAuth</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>app-1-919813529279-ios-bb97d10ed77efe471eb00a</string>
+				<string>com.googleusercontent.apps.867310496279-s4n7jhbrm5c3r74314nug67hdm04ch9n</string>
 			</array>
 		</dict>
 	</array>

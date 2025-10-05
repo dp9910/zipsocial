@@ -15,6 +15,7 @@ class Post {
   final int downvotes;
   final bool? userVote;
   final bool isSaved;
+  final int commentCount;
 
   Post({
     required this.id,
@@ -31,6 +32,7 @@ class Post {
     this.downvotes = 0,
     this.userVote,
     this.isSaved = false,
+    this.commentCount = 0,
   });
 
   factory Post.fromJson(Map<String, dynamic> json) {
@@ -49,6 +51,44 @@ class Post {
       downvotes: json['downvotes'] ?? 0,
       userVote: json['user_vote'],
       isSaved: json['is_saved'] ?? false,
+      commentCount: json['comment_count'] ?? 0,
+    );
+  }
+
+  // Add copyWith method
+  Post copyWith({
+    String? id,
+    String? userId,
+    String? username,
+    String? zipcode,
+    String? content,
+    PostTag? tag,
+    Map<String, dynamic>? eventDetails,
+    DateTime? createdAt,
+    int? reportCount,
+    bool? isActive,
+    int? upvotes,
+    int? downvotes,
+    bool? userVote,
+    bool? isSaved,
+    int? commentCount,
+  }) {
+    return Post(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      username: username ?? this.username,
+      zipcode: zipcode ?? this.zipcode,
+      content: content ?? this.content,
+      tag: tag ?? this.tag,
+      eventDetails: eventDetails ?? this.eventDetails,
+      createdAt: createdAt ?? this.createdAt,
+      reportCount: reportCount ?? this.reportCount,
+      isActive: isActive ?? this.isActive,
+      upvotes: upvotes ?? this.upvotes,
+      downvotes: downvotes ?? this.downvotes,
+      userVote: userVote ?? this.userVote,
+      isSaved: isSaved ?? this.isSaved,
+      commentCount: commentCount ?? this.commentCount,
     );
   }
 
