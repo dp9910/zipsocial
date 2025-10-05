@@ -5,6 +5,8 @@ import 'config/supabase_config.dart';
 import 'config/theme.dart';
 import 'screens/auth_screen.dart';
 import 'screens/main_screen.dart';
+import 'screens/profile_setup_screen.dart';
+import 'services/firebase_auth_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +26,10 @@ class ZipSocialApp extends StatelessWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
       home: const AuthWrapper(),
+      routes: {
+        '/main': (context) => const MainScreen(),
+        '/profile-setup': (context) => const ProfileSetupScreen(),
+      },
     );
   }
 }
@@ -37,7 +43,23 @@ class AuthWrapper extends StatelessWidget {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.hasData && snapshot.data != null) {
-          return const MainScreen();
+          return FutureBuilder(
+            future: FirebaseAuthService.getUserProfile(),
+            builder: (context, userSnapshot) {
+              if (userSnapshot.connectionState == ConnectionState.waiting) {
+                return const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
+              }
+              
+              final user = userSnapshot.data;
+              if (user == null || !user.isProfileComplete) {
+                return const ProfileSetupScreen();
+              }
+              
+              return const MainScreen();
+            },
+          );
         } else {
           return const AuthScreen();
         }

@@ -5,6 +5,11 @@ class AppUser {
   final String? email;
   final DateTime createdAt;
   final String? defaultZipcode;
+  final String? nickname;
+  final String? bio;
+  final int followerCount;
+  final int followingCount;
+  final bool isProfileComplete;
 
   AppUser({
     required this.id,
@@ -13,6 +18,11 @@ class AppUser {
     this.email,
     required this.createdAt,
     this.defaultZipcode,
+    this.nickname,
+    this.bio,
+    this.followerCount = 0,
+    this.followingCount = 0,
+    this.isProfileComplete = false,
   });
 
   factory AppUser.fromJson(Map<String, dynamic> json) {
@@ -23,6 +33,11 @@ class AppUser {
       email: json['google_email'],
       createdAt: DateTime.parse(json['created_at']),
       defaultZipcode: json['default_zipcode'],
+      nickname: json['nickname'],
+      bio: json['bio'],
+      followerCount: json['follower_count'] ?? 0,
+      followingCount: json['following_count'] ?? 0,
+      isProfileComplete: json['is_profile_complete'] ?? false,
     );
   }
 
@@ -34,6 +49,11 @@ class AppUser {
       'google_email': email,
       'created_at': createdAt.toIso8601String(),
       'default_zipcode': defaultZipcode,
+      'nickname': nickname,
+      'bio': bio,
+      'follower_count': followerCount,
+      'following_count': followingCount,
+      'is_profile_complete': isProfileComplete,
     };
   }
 }

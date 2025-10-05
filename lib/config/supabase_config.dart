@@ -1,10 +1,8 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseConfig {
-  static const String url = String.fromEnvironment('SUPABASE_URL', 
-    defaultValue: 'YOUR_SUPABASE_URL');
-  static const String anonKey = String.fromEnvironment('SUPABASE_ANON_KEY', 
-    defaultValue: 'YOUR_SUPABASE_ANON_KEY');
+  static const String url = 'https://xtvtewfmzvmpzahlmbsj.supabase.co';
+  static const String anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh0dnRld2ZtenZtcHphaGxtYnNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk2MTQ1NjMsImV4cCI6MjA3NTE5MDU2M30.k1WvFeTpM1wOzvN6f2_i3rxb7dEyQXvu2FLeQZrtGhQ';
 
   static Future<void> initialize() async {
     await Supabase.initialize(

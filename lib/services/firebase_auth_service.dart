@@ -169,6 +169,178 @@ class FirebaseAuthService {
     }
   }
 
+  static Future<AppUser?> createUserProfile({
+    required String nickname,
+    String? bio,
+    String? defaultZipcode,
+  }) async {
+    final user = currentUser;
+    if (user == null) throw Exception('No authenticated user');
+
+    final customUserId = _generateUserId();
+    
+    try {
+      final response = await _supabase
+          .from('users')
+          .insert({
+            'id': user.uid,
+            'custom_user_id': customUserId,
+            'phone_number': user.phoneNumber,
+            'google_email': user.email,
+            'nickname': nickname,
+            'bio': bio,
+            'default_zipcode': defaultZipcode,
+            'follower_count': 0,
+            'following_count': 0,
+            'is_profile_complete': true,
+            'created_at': DateTime.now().toIso8601String(),
+          })
+          .select()
+          .single();
+
+      return AppUser.fromJson(response);
+    } catch (e) {
+      print('Error creating user profile: $e');
+      throw Exception('Failed to create profile: $e');
+    }
+  }
+
+  static Future<AppUser?> updateUserProfile({
+    String? nickname,
+    String? bio,
+    String? defaultZipcode,
+    bool? isProfileComplete,
+  }) async {
+    final user = currentUser;
+    if (user == null) return null;
+
+    try {
+      final updateData = <String, dynamic>{};
+      
+      if (nickname != null) updateData['nickname'] = nickname;
+      if (bio != null) updateData['bio'] = bio;
+      if (defaultZipcode != null) updateData['default_zipcode'] = defaultZipcode;
+      if (isProfileComplete != null) updateData['is_profile_complete'] = isProfileComplete;
+      
+      final response = await _supabase
+          .from('users')
+          .update(updateData)
+          .eq('id', user.uid)
+          .select()
+          .single();
+
+      return AppUser.fromJson(response);
+    } catch (e) {
+      print('Error updating user profile: $e');
+      throw Exception('Failed to update profile: $e');
+    }
+  }
+
+  static Future<AppUser?> getUserProfileById(String userId) async {
+    try {
+      final response = await _supabase
+          .from('users')
+          .select()
+          .eq('id', userId)
+          .single();
+
+      return AppUser.fromJson(response);
+    } catch (e) {
+      print('Error getting user profile by ID: $e');
+      return null;
+    }
+  }
+
+  static Future<AppUser?> getUserProfileByCustomId(String customUserId) async {
+    try {
+      final response = await _supabase
+          .from('users')
+          .select()
+          .eq('custom_user_id', customUserId)
+          .single();
+
+      return AppUser.fromJson(response);
+    } catch (e) {
+      print('Error getting user profile by custom ID: $e');
+      return null;
+    }
+  }
+
+  static Future<void> followUser(String targetUserId) async {
+    final user = currentUser;
+    if (user == null) throw Exception('Not authenticated');
+
+    try {
+      // Insert follow relationship
+      await _supabase
+          .from('followers')
+          .insert({
+            'follower_id': user.uid,
+            'following_id': targetUserId,
+            'created_at': DateTime.now().toIso8601String(),
+          });
+
+      // Update follower count for target user
+      await _supabase.rpc('increment_follower_count', params: {
+        'user_id': targetUserId,
+      });
+
+      // Update following count for current user
+      await _supabase.rpc('increment_following_count', params: {
+        'user_id': user.uid,
+      });
+    } catch (e) {
+      print('Error following user: $e');
+      throw Exception('Failed to follow user: $e');
+    }
+  }
+
+  static Future<void> unfollowUser(String targetUserId) async {
+    final user = currentUser;
+    if (user == null) throw Exception('Not authenticated');
+
+    try {
+      // Delete follow relationship
+      await _supabase
+          .from('followers')
+          .delete()
+          .eq('follower_id', user.uid)
+          .eq('following_id', targetUserId);
+
+      // Update follower count for target user
+      await _supabase.rpc('decrement_follower_count', params: {
+        'user_id': targetUserId,
+      });
+
+      // Update following count for current user
+      await _supabase.rpc('decrement_following_count', params: {
+        'user_id': user.uid,
+      });
+    } catch (e) {
+      print('Error unfollowing user: $e');
+      throw Exception('Failed to unfollow user: $e');
+    }
+  }
+
+  static Future<bool> isFollowing(String targetUserId) async {
+    final user = currentUser;
+    if (user == null) return false;
+
+    try {
+      final response = await _supabase
+          .from('followers')
+          .select()
+          .eq('follower_id', user.uid)
+          .eq('following_id', targetUserId)
+          .maybeSingle();
+
+      return response != null;
+    } catch (e) {
+      print('Error checking follow status: $e');
+      return false;
+    }
+  }
+
   static Future<void> signOut() async {
     await Future.wait([
       _auth.signOut(),

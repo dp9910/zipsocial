@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/post.dart';
 import '../config/theme.dart';
+import '../screens/user_profile_screen.dart';
 
 class PostCard extends StatelessWidget {
   final Post post;
@@ -66,12 +67,31 @@ class PostCard extends StatelessWidget {
                       ),
                     ),
                     const Spacer(),
-                    Text(
-                      '@${post.username}',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        color: Theme.of(context).colorScheme.secondary,
-                        fontSize: 12,
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => UserProfileScreen(
+                              userId: post.userId,
+                              customUserId: post.username,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '@${post.username}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF8CE830),
+                            fontSize: 12,
+                          ),
+                        ),
                       ),
                     ),
                     Text(
