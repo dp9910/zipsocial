@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/post.dart';
+import '../models/user.dart'; // Corrected import for AppUser
 import '../services/post_service.dart';
+import '../services/supabase_auth_service.dart'; // Import SupabaseAuthService
 import '../widgets/post_card.dart';
 import '../config/theme.dart';
 
@@ -21,7 +23,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _zipcodeController.text = '90210'; // Default for demo
+    _initializeFeed();
+  }
+
+  Future<void> _initializeFeed() async {
+    final userProfile = await SupabaseAuthService.getUserProfile();
+    if (userProfile?.preferredZipcode != null && userProfile!.preferredZipcode!.isNotEmpty) {
+      _zipcodeController.text = userProfile.preferredZipcode!;
+    } else {
+      _zipcodeController.text = '90210'; // Default for demo if no preferred zipcode
+    }
     _loadFeed();
   }
 
@@ -30,6 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.didChangeDependencies();
     // Explicitly unfocus the TextField when the screen becomes active
     _zipcodeFocusNode.unfocus();
+    _initializeFeed(); // Re-initialize feed when dependencies change (e.g., returning from profile edit)
   }
 
   @override

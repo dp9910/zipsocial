@@ -5,6 +5,7 @@ class AppUser {
   final String? email;
   final DateTime createdAt;
   final String? defaultZipcode;
+  final String? preferredZipcode; // Add this line
   final String? nickname;
   final String? bio;
   final int followerCount;
@@ -19,6 +20,7 @@ class AppUser {
     this.email,
     required this.createdAt,
     this.defaultZipcode,
+    this.preferredZipcode, // Add this line
     this.nickname,
     this.bio,
     this.followerCount = 0,
@@ -35,6 +37,7 @@ class AppUser {
       email: json['google_email'],
       createdAt: DateTime.parse(json['created_at']),
       defaultZipcode: json['default_zipcode'],
+      preferredZipcode: json['preferred_zipcode'], // Add this line
       nickname: json['nickname'],
       bio: json['bio'],
       followerCount: json['follower_count'] ?? 0,
@@ -52,6 +55,7 @@ class AppUser {
       'google_email': email,
       'created_at': createdAt.toIso8601String(),
       'default_zipcode': defaultZipcode,
+      'preferred_zipcode': preferredZipcode, // Add this line
       'nickname': nickname,
       'bio': bio,
       'follower_count': followerCount,

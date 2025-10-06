@@ -175,6 +175,7 @@ class SupabaseAuthService {
     required String nickname,
     String? bio,
     bool? isProfileComplete,
+    String? preferredZipcode,
   }) async {
     final user = currentUser;
     if (user == null) throw Exception('Not authenticated');
@@ -184,6 +185,7 @@ class SupabaseAuthService {
       'nickname': nickname,
       'bio': bio,
       'is_profile_complete': isProfileComplete,
+      'preferred_zipcode': preferredZipcode,
     };
 
     updates.removeWhere((key, value) => value == null);

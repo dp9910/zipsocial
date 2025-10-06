@@ -138,6 +138,10 @@ The app successfully demonstrates the core concept: **hyper-local social network
 - ✅ Event posts with detailed event information fields
 
 ### Recent Progress & Fixes
+- **Preferred Zip Code Feature:**
+    - Added a `preferred_zipcode` field to user profiles, allowing users to set a default zip code.
+    - Home feed now automatically filters posts by the user's preferred zip code upon login or refresh.
+    - The preferred zip code is displayed by default in the home screen's zip code search field.
 - **Post Interaction Functionality:**
     - Implemented like, dislike, and save functionality for posts.
     - Ensured correct parsing and display of user's interaction status (vote, saved) from Supabase.
@@ -147,7 +151,7 @@ The app successfully demonstrates the core concept: **hyper-local social network
     - Implemented local optimistic UI updates for post interactions.
 - **Keypad Auto-Focus Prevention:**
     - Resolved issue where the numeric keypad would automatically appear on the feed tab after navigating back from other screens (e.g., "Create Post").
-    - Implemented explicit focus management using `FocusNode` and `didChangeDependencies` in `HomeScreen`.
+    - Implemented explicit focus management using `FocusNode` and `didChangeDependencies` in `HomeScreen` (also used for preferred zip code feature).
 
 ### Phase 4: Enhanced Post Features (Current Priority)
 - [x] Post interactions (like, dislike, save functionality)

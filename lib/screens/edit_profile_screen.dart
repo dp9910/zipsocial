@@ -14,6 +14,7 @@ class EditProfileScreen extends StatefulWidget {
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final _nicknameController = TextEditingController();
   final _bioController = TextEditingController();
+  final _preferredZipcodeController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   bool _hasChanges = false;
@@ -23,22 +24,26 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     super.initState();
     _nicknameController.text = widget.user.nickname ?? '';
     _bioController.text = widget.user.bio ?? '';
-    
+    _preferredZipcodeController.text = widget.user.preferredZipcode ?? '';
+
     _nicknameController.addListener(_onFieldChanged);
     _bioController.addListener(_onFieldChanged);
+    _preferredZipcodeController.addListener(_onFieldChanged);
   }
 
   @override
   void dispose() {
     _nicknameController.dispose();
     _bioController.dispose();
+    _preferredZipcodeController.dispose();
     super.dispose();
   }
 
   void _onFieldChanged() {
     final hasChanges = _nicknameController.text != (widget.user.nickname ?? '') ||
-                      _bioController.text != (widget.user.bio ?? '');
-    
+                      _bioController.text != (widget.user.bio ?? '') ||
+                      _preferredZipcodeController.text != (widget.user.preferredZipcode ?? '');
+
     if (hasChanges != _hasChanges) {
       setState(() => _hasChanges = hasChanges);
     }
@@ -50,11 +55,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await SupabaseAuthService.updateUserProfile( // Changed service call
+      await SupabaseAuthService.updateUserProfile(
         nickname: _nicknameController.text.trim(),
         bio: _bioController.text.trim().isEmpty ? null : _bioController.text.trim(),
+        preferredZipcode: _preferredZipcodeController.text.trim().isEmpty ? null : _preferredZipcodeController.text.trim(),
       );
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -82,7 +88,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Future<bool> _onWillPop() async {
     if (!_hasChanges) return true;
-    
+
     final shouldPop = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -101,7 +107,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ],
       ),
     );
-    
+
     return shouldPop ?? false;
   }
 
@@ -193,9 +199,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(height: 40),
-                
+
                 // Nickname Section
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,9 +261,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Bio Section
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -316,9 +322,64 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                   ],
                 ),
-                
+
+                const SizedBox(height: 24),
+
+                // Preferred Zipcode Section
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.location_on_outlined,
+                          color: Color(0xFF8CE830),
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Preferred Zipcode',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _preferredZipcodeController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        hintText: 'Enter your preferred zip code',
+                        prefixIcon: const Icon(Icons.location_on_outlined),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Color(0xFF8CE830), width: 2),
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                      ),
+                      validator: (value) {
+                        if (value != null && value.isNotEmpty && !RegExp(r'^\d{5}(-\d{4})?$').hasMatch(value)) {
+                          return 'Please enter a valid 5-digit zip code (e.g., 12345 or 12345-6789)';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+
                 const SizedBox(height: 40),
-                
+
                 // Info Card
                 Container(
                   width: double.infinity,

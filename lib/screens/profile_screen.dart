@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/supabase_auth_service.dart';
 import '../models/user.dart';
-import 'edit_profile_screen.dart';
+import 'edit_profile_screen.dart' hide Container;
 import 'settings_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
