@@ -120,10 +120,34 @@ class PostInteractionService {
     final user = SupabaseAuthService.currentUser;
     if (user == null) throw Exception('User not authenticated');
 
-    await _client.from('post_interactions').upsert({
-      'post_id': postId,
-      'user_id': user.id,
-      'is_saved': isSaved,
+    // Use the database function to safely handle save/unsave
+    await _client.rpc('save_post', params: {
+      'post_uuid': postId,
+      'user_uuid': user.id,
+      'is_saved_value': isSaved,
     });
+  }
+
+  /// Get saved posts for current user
+  static Future<List<Post>> getSavedPosts({
+    int limit = 50,
+    int offset = 0,
+  }) async {
+    final user = SupabaseAuthService.currentUser;
+    if (user == null) throw Exception('User not authenticated');
+
+    final response = await _client
+        .from('posts')
+        .select('''
+          *,
+          post_interactions!inner(user_id, vote, is_saved)
+        ''')
+        .eq('post_interactions.user_id', user.id)
+        .eq('post_interactions.is_saved', true)
+        .eq('is_active', true)
+        .order('post_interactions.created_at', ascending: false)
+        .range(offset, offset + limit - 1);
+
+    return response.map<Post>((json) => Post.fromJson(json)).toList();
   }
 }

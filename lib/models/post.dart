@@ -68,7 +68,7 @@ class Post {
       content: json['content'],
       tag: _stringToTag(json['tag']),
       eventDetails: json['event_details'],
-      createdAt: DateTime.parse(json['created_at']),
+      createdAt: DateTime.parse(json['created_at']).toLocal(),
       reportCount: json['report_count'] ?? 0,
       isActive: json['is_active'] ?? true,
       upvotes: json['upvotes'] ?? 0,

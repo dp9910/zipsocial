@@ -302,16 +302,36 @@ class _PostCardState extends State<PostCard> {
     final now = DateTime.now();
     final difference = now.difference(dateTime);
 
-    if (difference.inDays > 7) {
-      return '${dateTime.month}/${dateTime.day}/${dateTime.year}';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}h ago';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m ago';
-    } else if (difference.inSeconds > 10) {
-      return '${difference.inSeconds}s ago';
+    if (difference.inHours < 24) {
+      if (difference.inHours > 0) {
+        return '${difference.inHours}h ago';
+      } else if (difference.inMinutes > 0) {
+        return '${difference.inMinutes}m ago';
+      } else {
+        return 'just now';
+      }
     } else {
-      return 'just now';
+      // Format as "Oct 5, 2025"
+      final month = _getMonthAbbreviation(dateTime.month);
+      return '$month ${dateTime.day}, ${dateTime.year}';
+    }
+  }
+
+  String _getMonthAbbreviation(int month) {
+    switch (month) {
+      case 1: return 'Jan';
+      case 2: return 'Feb';
+      case 3: return 'Mar';
+      case 4: return 'Apr';
+      case 5: return 'May';
+      case 6: return 'Jun';
+      case 7: return 'Jul';
+      case 8: return 'Aug';
+      case 9: return 'Sep';
+      case 10: return 'Oct';
+      case 11: return 'Nov';
+      case 12: return 'Dec';
+      default: return '';
     }
   }
 

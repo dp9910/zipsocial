@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/comment.dart';
 import '../services/comment_service.dart';
+import '../services/supabase_auth_service.dart';
 import '../config/theme.dart';
+import '../widgets/comment_widget.dart';
 
 class CommentsScreen extends StatefulWidget {
   final String postId;
@@ -13,48 +15,103 @@ class CommentsScreen extends StatefulWidget {
 }
 
 class _CommentsScreenState extends State<CommentsScreen> {
-  final _commentController = TextEditingController();
   List<Comment> _comments = [];
   bool _isLoading = true;
-  int _charCount = 0;
+  bool _isRefreshing = false;
+  Comment? _replyingTo;
+  String? _currentUserId;
 
   @override
   void initState() {
     super.initState();
+    _initializeUser();
     _loadComments();
-    _commentController.addListener(() {
-      setState(() {
-        _charCount = _commentController.text.length;
-      });
-    });
+  }
+
+  void _initializeUser() {
+    _currentUserId = SupabaseAuthService.currentUser?.id;
   }
 
   Future<void> _loadComments() async {
-    setState(() => _isLoading = true);
+    if (!_isRefreshing) {
+      setState(() => _isLoading = true);
+    }
+    
     try {
-      final comments = await CommentService.getComments(widget.postId);
-      setState(() => _comments = comments);
+      final comments = await CommentService.getThreadedComments(widget.postId);
+      setState(() {
+        _comments = comments;
+      });
     } catch (e) {
-      // Handle error
+      print('Error loading comments: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load comments: $e')),
+        );
+      }
     } finally {
-      setState(() => _isLoading = false);
+      setState(() {
+        _isLoading = false;
+        _isRefreshing = false;
+      });
     }
   }
 
-  Future<void> _addComment() async {
-    if (_commentController.text.isEmpty) return;
+  Future<void> _refreshComments() async {
+    setState(() => _isRefreshing = true);
+    await _loadComments();
+  }
 
+  void _onCommentAdded(Comment comment) {
+    // Refresh the entire comment tree to get updated counts
+    _refreshComments();
+  }
+
+  void _onReply(Comment comment) {
+    setState(() {
+      _replyingTo = comment;
+    });
+  }
+
+  void _cancelReply() {
+    setState(() {
+      _replyingTo = null;
+    });
+  }
+
+  void _onVoteChanged(Comment updatedComment) {
+    // Update the comment in the list
+    setState(() {
+      _updateCommentInList(updatedComment);
+    });
+  }
+
+  void _updateCommentInList(Comment updatedComment) {
+    void updateComment(List<Comment> comments) {
+      for (int i = 0; i < comments.length; i++) {
+        if (comments[i].id == updatedComment.id) {
+          comments[i] = updatedComment;
+          return;
+        }
+        updateComment(comments[i].replies);
+      }
+    }
+    updateComment(_comments);
+  }
+
+  Future<void> _onDeleteComment(String commentId) async {
     try {
-      await CommentService.addComment(
-        postId: widget.postId,
-        content: _commentController.text,
-      );
-      _commentController.clear();
-      _loadComments(); // Refresh comments
+      await CommentService.deleteComment(commentId);
+      _refreshComments();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Comment deleted')),
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error adding comment: $e')),
+          SnackBar(content: Text('Failed to delete comment: $e')),
         );
       }
     }
@@ -62,76 +119,131 @@ class _CommentsScreenState extends State<CommentsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_currentUserId == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Comments'),
+          centerTitle: true,
+        ),
+        body: const Center(
+          child: Text('Please log in to view comments'),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Comments'),
+        title: Text('Comments (${_getTotalCommentCount()})'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _isLoading ? null : _refreshComments,
+          ),
+        ],
       ),
       body: Column(
         children: [
+          // Main comment input
+          CommentInput(
+            postId: widget.postId,
+            onCommentAdded: _onCommentAdded,
+            placeholder: 'Write a comment...',
+          ),
+          
+          // Reply input (if replying to a comment)
+          if (_replyingTo != null)
+            CommentInput(
+              postId: widget.postId,
+              parentId: _replyingTo!.id,
+              onCommentAdded: (comment) {
+                _onCommentAdded(comment);
+                _cancelReply();
+              },
+              onCancel: _cancelReply,
+              placeholder: 'Reply to @${_replyingTo!.username}...',
+            ),
+          
+          const Divider(height: 1),
+          
+          // Comments list
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _comments.isEmpty
-                    ? const Center(child: Text('No comments yet.'))
-                    : ListView.builder(
-                        itemCount: _comments.length,
-                        itemBuilder: (context, index) {
-                          final comment = _comments[index];
-                          return ListTile(
-                            title: Text(comment.username),
-                            subtitle: Text(comment.content),
-                            trailing: Text(_formatTime(comment.createdAt)),
-                          );
-                        },
+                    ? _buildEmptyState()
+                    : RefreshIndicator(
+                        onRefresh: _refreshComments,
+                        child: ListView.builder(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: _comments.length,
+                          itemBuilder: (context, index) {
+                            return CommentWidget(
+                              comment: _comments[index],
+                              currentUserId: _currentUserId!,
+                              onReply: _onReply,
+                              onVoteChanged: _onVoteChanged,
+                              onDelete: _onDeleteComment,
+                              maxDepth: 5,
+                            );
+                          },
+                        ),
                       ),
           ),
-          _buildCommentInputField(),
         ],
       ),
     );
   }
 
-  Widget _buildCommentInputField() {
-    return Container(
-      padding: const EdgeInsets.all(8.0),
-      decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: Colors.grey.shade300)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _commentController,
-              decoration: InputDecoration(
-                hintText: 'Add a comment...',
-                border: InputBorder.none,
-                counterText: '$_charCount/150',
-              ),
-              maxLength: 150,
+  Widget _buildEmptyState() {
+    return RefreshIndicator(
+      onRefresh: _refreshComments,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Container(
+          height: MediaQuery.of(context).size.height * 0.5,
+          child: const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.chat_bubble_outline,
+                  size: 64,
+                  color: Colors.grey,
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'No comments yet',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Be the first to share your thoughts!',
+                  style: TextStyle(
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.send, color: AppTheme.primary),
-            onPressed: _addComment,
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  String _formatTime(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inDays > 0) {
-      return '${difference.inDays}d';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}h';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m';
-    } else {
-      return 'now';
+  int _getTotalCommentCount() {
+    int count = 0;
+    void countComments(List<Comment> comments) {
+      count += comments.length;
+      for (final comment in comments) {
+        countComments(comment.replies);
+      }
     }
+    countComments(_comments);
+    return count;
   }
 }

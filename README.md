@@ -105,16 +105,19 @@ dependencies:
 
 ## 🎉 MAJOR MILESTONE ACHIEVED
 
-**✅ Core Social Media Functionality Complete!**
+**✅ Full-Featured Social Media Platform Complete!**
 
-Zip Social now has a fully functional social media platform with:
+Zip Social now has a **production-ready social media platform** with:
 - **Complete user authentication and profile management**
 - **Real-time post creation and database integration** 
 - **Zip code-based community discovery and targeting**
 - **Live user interaction system with follow functionality**
+- **🆕 Full threaded comment system with voting and reporting**
+- **🆕 Saved posts collection and management**
+- **🆕 Complete dark mode support**
 - **Modern, intuitive mobile-first design**
 
-The app successfully demonstrates the core concept: **hyper-local social networking** where users can post content targeted to their zip code community and discover local posts from neighbors.
+The app successfully demonstrates **advanced social networking** with industry-standard features like Reddit-style threaded comments, Pinterest-like saved posts, and comprehensive user interaction systems.
 
 ## 🎯 Current Status & Next Phase
 
@@ -137,25 +140,54 @@ The app successfully demonstrates the core concept: **hyper-local social network
 - ✅ Modal post creation with success feedback
 - ✅ Event posts with detailed event information fields
 
-### Recent Progress & Fixes
-- **Preferred Zip Code Feature:**
-    - Added a `preferred_zipcode` field to user profiles, allowing users to set a default zip code.
-    - Home feed now automatically filters posts by the user's preferred zip code upon login or refresh.
-    - The preferred zip code is displayed by default in the home screen's zip code search field.
-- **Post Interaction Functionality:**
-    - Implemented like, dislike, and save functionality for posts.
-    - Ensured correct parsing and display of user's interaction status (vote, saved) from Supabase.
-    - Updated Supabase schema and functions (manual steps for user) to support `upvotes` and `downvotes` counts directly in the `posts` table.
-- **Improved UI Responsiveness:**
-    - Eliminated automatic full feed refresh after each post interaction, improving user experience.
-    - Implemented local optimistic UI updates for post interactions.
-- **Keypad Auto-Focus Prevention:**
-    - Resolved issue where the numeric keypad would automatically appear on the feed tab after navigating back from other screens (e.g., "Create Post").
-    - Implemented explicit focus management using `FocusNode` and `didChangeDependencies` in `HomeScreen` (also used for preferred zip code feature).
+### Recent Progress & Major Updates
 
-### Phase 4: Enhanced Post Features (Current Priority)
+#### **🎉 MAJOR MILESTONE: Threaded Comments System Complete!**
+- **Full Threaded Comment System:**
+    - Implemented industry-standard adjacency list model with recursive CTEs for optimal performance
+    - Complete comment CRUD operations (create, read, update, delete with soft deletes)
+    - Threaded reply system with depth limiting (max 10 levels) and visual indentation
+    - Comment voting system (❤️ like, 👎 dislike) with optimistic UI updates
+    - Comment reporting functionality with 🚩 flag system and count tracking
+    - Smart interaction logic: users can only have one vote active, can switch between votes
+    - Beautiful threaded UI with color-coded depth indicators and collapsible threads
+    - Auto-expansion of first 2 comment levels for better UX
+
+- **Advanced Comment Features:**
+    - Real-time comment counts on posts with automatic database trigger updates
+    - Inline reply functionality with contextual reply input boxes
+    - User ownership validation for edit/delete operations with confirmation dialogs
+    - Dark mode support with proper contrast for all comment components
+    - Responsive design with proper threading visualization
+
+#### **💾 Saved Posts Feature**
+- **Complete Saved Posts System:**
+    - Fixed duplicate key constraint issues with proper database functions
+    - Blue bookmark icon when posts are saved
+    - Dedicated "Saved Posts" screen accessible from user profile
+    - Creative Pinterest-like saved posts collection with pull-to-refresh
+    - Analytics dialog showing saved posts breakdown by category
+    - Empty state with helpful tips for new users
+    - Timeline showing when posts were saved
+
+#### **🌙 Dark Mode UI Improvements**
+- **Fixed Profile Screen Dark Mode:**
+    - Stats cards (Posts, Followers, Following) now use theme-aware colors
+    - User ID badge and nickname properly themed for light/dark modes
+    - Action buttons with proper contrast and theme consistency
+    - All text and backgrounds adapt to system theme preferences
+
+#### **🎨 Enhanced UI/UX Components**
+- **Comment Input Styling:**
+    - Fixed white text on white background issues in dark mode
+    - Proper theme-aware colors for input fields and hint text
+    - Better visual hierarchy with surface colors and outline borders
+
+### Phase 4: Enhanced Post Features ✅ COMPLETED
 - [x] Post interactions (like, dislike, save functionality)
-- [ ] Comment system with threaded discussions
+- [x] **Complete threaded comment system with voting and reporting**
+- [x] **Saved posts collection and management**
+- [x] **Dark mode UI improvements**
 - [ ] Real-time notifications for interactions
 - [ ] Post sharing and mention functionality
 - [ ] Image upload and display in posts
@@ -270,4 +302,4 @@ This project follows clean code principles and minimal dependency philosophy. Wh
 
 ---
 
-**Built with ❤️ using Flutter • Last updated: October 2025**
+**Built with ❤️ using Flutter • Last updated: October 7, 2025**

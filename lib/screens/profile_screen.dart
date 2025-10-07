@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import '../services/supabase_auth_service.dart';
 import '../models/user.dart';
-import 'edit_profile_screen.dart' hide Container;
+import 'edit_profile_screen.dart';
 import 'settings_screen.dart';
+import 'saved_posts_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -125,9 +126,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             // Nickname
                             Text(
                               _user!.nickname ?? 'No nickname set',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                             
@@ -140,14 +142,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.grey.shade100,
+                                color: Theme.of(context).colorScheme.surface.withOpacity(0.7),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
                                 '@${_user!.customUserId}',
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: Colors.grey.shade600,
+                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -199,6 +201,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               _loadUserProfile();
                             }
                           }
+                        },
+                      ),
+                      
+                      const SizedBox(height: 16),
+                      
+                      // Saved Posts Button
+                      _buildActionButton(
+                        'Saved Posts',
+                        Icons.bookmark_outlined,
+                        () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const SavedPostsScreen(),
+                            ),
+                          );
                         },
                       ),
                       
@@ -254,9 +271,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.2)),
       ),
       child: Column(
         children: [
@@ -268,9 +285,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 8),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 4),
@@ -278,7 +296,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             label,
             style: TextStyle(
               fontSize: 12,
-              color: Colors.grey.shade600,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
             ),
           ),
         ],
@@ -294,29 +312,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.grey.shade50,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.2)),
         ),
         child: Row(
           children: [
             Icon(
               icon,
-              color: Colors.grey.shade600,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
               size: 20,
             ),
             const SizedBox(width: 16),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const Spacer(),
             Icon(
               Icons.arrow_forward_ios,
-              color: Colors.grey.shade400,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
               size: 16,
             ),
           ],
