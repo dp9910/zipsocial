@@ -184,12 +184,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     : RefreshIndicator(
                         onRefresh: _loadFeed,
                         child: ListView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          padding: const EdgeInsets.all(16),
                           itemCount: _posts.length,
                           itemBuilder: (context, index) {
                             final post = _posts[index];
                             return Padding(
-                              padding: const EdgeInsets.only(bottom: 16),
+                              padding: const EdgeInsets.only(bottom: 12),
                               child: PostCard(
                                 post: post,
                               ),

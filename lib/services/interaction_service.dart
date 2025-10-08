@@ -41,10 +41,48 @@ class InteractionService {
 
   static Future<void> reportPost(String postId) async {
     try {
-      await _supabase.functions.invoke('report_post', body: {
-        'post_id': postId,
-      });
-      print('Successfully reported post $postId'); // Add this line
+      final user = _supabase.auth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
+
+      // Use the same pattern as the working save function
+      final existingInteraction = await _supabase
+          .from('post_interactions')
+          .select()
+          .eq('post_id', postId)
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+      if (existingInteraction != null) {
+        // Update existing record
+        await _supabase
+            .from('post_interactions')
+            .update({'is_reported': true})
+            .eq('post_id', postId)
+            .eq('user_id', user.id);
+      } else {
+        // Insert new record
+        await _supabase.from('post_interactions').insert({
+          'post_id': postId,
+          'user_id': user.id,
+          'is_reported': true,
+        });
+      }
+
+      // Update report count in posts table
+      final reportCountResponse = await _supabase
+          .from('post_interactions')
+          .select('id')
+          .eq('post_id', postId)
+          .eq('is_reported', true);
+      
+      final reportCount = reportCountResponse.length;
+      
+      await _supabase
+          .from('posts')
+          .update({'report_count': reportCount})
+          .eq('id', postId);
+
+      print('Successfully reported post $postId');
     } catch (e) {
       print('Error reporting post: $e');
       rethrow;

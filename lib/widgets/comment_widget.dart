@@ -147,6 +147,7 @@ class _CommentWidgetState extends State<CommentWidget> {
     final isOwner = widget.comment.userId == widget.currentUserId;
     final canReply = widget.comment.depth < widget.maxDepth;
     final hasReplies = widget.comment.hasReplies;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Container(
       margin: EdgeInsets.only(
@@ -161,12 +162,27 @@ class _CommentWidgetState extends State<CommentWidget> {
           Container(
             decoration: BoxDecoration(
               color: widget.comment.depth > 0 
-                  ? Theme.of(context).colorScheme.surface.withOpacity(0.5)
-                  : Theme.of(context).colorScheme.surface,
+                  ? (isDark 
+                      ? Theme.of(context).colorScheme.surface.withOpacity(0.3)
+                      : Colors.grey.shade800)
+                  : (isDark 
+                      ? Theme.of(context).colorScheme.surface.withOpacity(0.7)
+                      : Colors.grey.shade900),
               borderRadius: BorderRadius.circular(12),
               border: widget.comment.depth > 0 
                   ? Border.all(color: _indentColor, width: 2)
-                  : Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.2)),
+                  : (isDark 
+                      ? Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.3))
+                      : null),
+              boxShadow: isDark 
+                ? null 
+                : [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
             ),
             child: Padding(
               padding: const EdgeInsets.all(12),
@@ -210,7 +226,9 @@ class _CommentWidgetState extends State<CommentWidget> {
                       Text(
                         widget.comment.timeAgo,
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.secondary,
+                          color: isDark 
+                            ? Theme.of(context).colorScheme.secondary
+                            : Colors.grey.shade300,
                           fontSize: 12,
                         ),
                       ),
@@ -268,7 +286,11 @@ class _CommentWidgetState extends State<CommentWidget> {
                   // Comment content
                   Text(
                     widget.comment.content,
-                    style: Theme.of(context).textTheme.bodyMedium,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: isDark 
+                        ? Theme.of(context).colorScheme.onSurface
+                        : Colors.white,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   
@@ -471,9 +493,12 @@ class _CommentActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final color = isActive 
         ? (activeColor ?? AppTheme.primary) 
-        : Theme.of(context).colorScheme.secondary.withOpacity(0.7);
+        : (isDark 
+            ? Theme.of(context).colorScheme.secondary.withOpacity(0.7)
+            : Colors.grey.shade400);
 
     return InkWell(
       onTap: onPressed,

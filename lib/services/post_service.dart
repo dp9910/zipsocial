@@ -113,7 +113,34 @@ class PostInteractionService {
     final user = SupabaseAuthService.currentUser;
     if (user == null) throw Exception('User not authenticated');
 
-    await _client.rpc('report_post', params: {'post_id': postId});
+    try {
+      // Insert or update the report in post_interactions table
+      await _client.from('post_interactions').upsert({
+        'post_id': postId,
+        'user_id': user.id,
+        'is_reported': true,
+        'created_at': DateTime.now().toUtc().toIso8601String(),
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+      });
+
+      // Get current report count and update posts table
+      final reportCountResponse = await _client
+          .from('post_interactions')
+          .select('id')
+          .eq('post_id', postId)
+          .eq('is_reported', true);
+      
+      final reportCount = reportCountResponse.length;
+      
+      await _client
+          .from('posts')
+          .update({'report_count': reportCount})
+          .eq('id', postId);
+          
+    } catch (e) {
+      print('Error in report operation: $e');
+      rethrow;
+    }
   }
 
   static Future<void> save(String postId, bool isSaved) async {
