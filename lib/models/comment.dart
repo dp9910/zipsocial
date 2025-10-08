@@ -1,4 +1,6 @@
 
+import '../utils/time_formatter.dart';
+
 class Comment {
   final String id;
   final String postId;
@@ -163,18 +165,7 @@ class Comment {
 
   // Get formatted time ago string
   String get timeAgo {
-    final now = DateTime.now();
-    final difference = now.difference(createdAt);
-
-    if (difference.inDays > 0) {
-      return '${difference.inDays}d ago';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}h ago';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m ago';
-    } else {
-      return 'now';
-    }
+    return TimeFormatter.formatCommentTime(createdAt);
   }
 
   @override

@@ -28,7 +28,7 @@ class PostService {
           'content': content,
           'tag': _tagToString(tag),
           'event_details': eventDetails,
-          'created_at': DateTime.now().toIso8601String(),
+          'created_at': DateTime.now().toUtc().toIso8601String(),
           'is_active': true,
         })
         .select()

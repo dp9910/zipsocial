@@ -3,6 +3,7 @@ import '../models/post.dart';
 import '../services/post_service.dart';
 import '../config/theme.dart';
 import '../widgets/post_card.dart';
+import '../utils/time_formatter.dart';
 
 class SavedPostsScreen extends StatefulWidget {
   const SavedPostsScreen({super.key});
@@ -227,7 +228,7 @@ class _SavedPostsScreenState extends State<SavedPostsScreen> {
               const SizedBox(height: 12),
               _buildStatRow(
                 'Latest Save',
-                _formatDate(mostRecent),
+                TimeFormatter.formatRelativeTime(mostRecent),
                 Icons.schedule,
               ),
             ],
@@ -277,18 +278,4 @@ class _SavedPostsScreenState extends State<SavedPostsScreen> {
     }
   }
 
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
-
-    if (difference.inDays > 0) {
-      return '${difference.inDays}d ago';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}h ago';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m ago';
-    } else {
-      return 'Just now';
-    }
-  }
 }

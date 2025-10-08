@@ -4,6 +4,7 @@ import '../config/theme.dart';
 import '../screens/user_profile_screen.dart';
 import '../screens/comments_screen.dart';
 import '../services/interaction_service.dart';
+import '../utils/time_formatter.dart';
 
 class PostCard extends StatefulWidget {
   final Post post;
@@ -200,7 +201,7 @@ class _PostCardState extends State<PostCard> {
                       ),
                     ),
                     Text(
-                      ' · ${_formatTime(widget.post.createdAt)} · ${widget.post.zipcode}',
+                      ' · ${TimeFormatter.formatRelativeTime(widget.post.createdAt)} · ${widget.post.zipcode}',
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.secondary.withOpacity(0.7),
                         fontSize: 12,
@@ -298,42 +299,6 @@ class _PostCardState extends State<PostCard> {
     );
   }
 
-  String _formatTime(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inHours < 24) {
-      if (difference.inHours > 0) {
-        return '${difference.inHours}h ago';
-      } else if (difference.inMinutes > 0) {
-        return '${difference.inMinutes}m ago';
-      } else {
-        return 'just now';
-      }
-    } else {
-      // Format as "Oct 5, 2025"
-      final month = _getMonthAbbreviation(dateTime.month);
-      return '$month ${dateTime.day}, ${dateTime.year}';
-    }
-  }
-
-  String _getMonthAbbreviation(int month) {
-    switch (month) {
-      case 1: return 'Jan';
-      case 2: return 'Feb';
-      case 3: return 'Mar';
-      case 4: return 'Apr';
-      case 5: return 'May';
-      case 6: return 'Jun';
-      case 7: return 'Jul';
-      case 8: return 'Aug';
-      case 9: return 'Sep';
-      case 10: return 'Oct';
-      case 11: return 'Nov';
-      case 12: return 'Dec';
-      default: return '';
-    }
-  }
 
   Color _getTagColor(PostTag tag) {
     switch (tag) {
