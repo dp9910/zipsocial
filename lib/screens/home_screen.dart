@@ -30,31 +30,34 @@ class _HomeScreenState extends State<HomeScreen> {
     final userProfile = await SupabaseAuthService.getUserProfile();
     if (userProfile?.preferredZipcode != null && userProfile!.preferredZipcode!.isNotEmpty) {
       _zipcodeController.text = userProfile.preferredZipcode!;
+      _loadFeed();
     } else {
-      _zipcodeController.text = '90210'; // Default for demo if no preferred zipcode
+      // For new users, don't set a default zipcode, let them input their own
+      _zipcodeController.text = '';
+      setState(() {
+        _posts = []; // Clear posts for new users
+      });
     }
-    _loadFeed();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Explicitly unfocus the TextField when the screen becomes active
-    _zipcodeFocusNode.unfocus();
-    _initializeFeed(); // Re-initialize feed when dependencies change (e.g., returning from profile edit)
+    // Only re-initialize if zipcode is empty to avoid overriding user input
+    if (_zipcodeController.text.isEmpty) {
+      _initializeFeed();
+    }
   }
 
   @override
   void dispose() {
-    _zipcodeFocusNode.dispose(); // Dispose FocusNode
+    _zipcodeController.dispose();
+    _zipcodeFocusNode.dispose();
     super.dispose();
   }
 
   Future<void> _loadFeed() async {
     if (_zipcodeController.text.isEmpty) return;
-
-    // Dismiss keyboard
-    FocusScope.of(context).unfocus();
 
     setState(() => _isLoading = true);
     
@@ -122,9 +125,20 @@ class _HomeScreenState extends State<HomeScreen> {
                     Expanded(
                       child: TextField(
                         controller: _zipcodeController,
-                        focusNode: _zipcodeFocusNode, // Assign FocusNode
+                        focusNode: _zipcodeFocusNode,
                         decoration: InputDecoration(
                           labelText: 'Zip Code',
+                          hintText: 'Enter zip code',
+                          suffixIcon: _zipcodeController.text.isNotEmpty 
+                            ? IconButton(
+                                icon: const Icon(Icons.clear),
+                                onPressed: () {
+                                  setState(() {
+                                    _zipcodeController.clear();
+                                  });
+                                },
+                              )
+                            : null,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
                             borderSide: BorderSide(
@@ -143,6 +157,15 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         keyboardType: TextInputType.number,
+                        maxLength: 5,
+                        onChanged: (value) {
+                          setState(() {}); // Rebuild to show/hide clear button
+                        },
+                        onSubmitted: (value) {
+                          if (value.isNotEmpty) {
+                            _loadFeed();
+                          }
+                        },
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -180,7 +203,41 @@ class _HomeScreenState extends State<HomeScreen> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _posts.isEmpty
-                    ? const Center(child: Text('No posts found'))
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(32),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.location_on_outlined,
+                                size: 64,
+                                color: Colors.grey.shade400,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                _zipcodeController.text.isEmpty 
+                                  ? 'Enter your zip code to see local posts'
+                                  : 'No posts found in this area',
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: Colors.grey.shade600,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              if (_zipcodeController.text.isEmpty) ...[
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Connect with your local community',
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Colors.grey.shade500,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      )
                     : RefreshIndicator(
                         onRefresh: _loadFeed,
                         child: ListView.builder(

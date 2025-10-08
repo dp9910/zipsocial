@@ -91,15 +91,40 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+      resizeToAvoidBottomInset: true,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _isLoading ? null : _completeProfile,
+        backgroundColor: const Color(0xFF8CE830),
+        foregroundColor: Colors.white,
+        icon: _isLoading 
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            )
+          : const Icon(Icons.check, size: 20),
+        label: Text(
+          _isLoading ? 'Saving...' : 'Complete',
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                 const SizedBox(height: 40),
                 
                 // Header Section
@@ -376,8 +401,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                   ),
                 ),
                 
-                const SizedBox(height: 24),
-                ],
+                // Add extra bottom padding to ensure button is accessible when keyboard is open
+                SizedBox(height: MediaQuery.of(context).viewInsets.bottom + 24),
+                  ],
+                ),
               ),
             ),
           ),
