@@ -57,6 +57,10 @@ GoogleService-Info.plist
 google-services.json
 *firebase-adminsdk*.json
 
+# Make sure template files are tracked
+!GoogleService-Info.plist.template
+!google-services.json.template
+
 # iOS
 **/ios/Flutter/flutter_export_environment.sh
 **/ios/Podfile.lock

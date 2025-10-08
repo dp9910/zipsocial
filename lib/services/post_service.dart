@@ -120,12 +120,39 @@ class PostInteractionService {
     final user = SupabaseAuthService.currentUser;
     if (user == null) throw Exception('User not authenticated');
 
-    // Use the database function to safely handle save/unsave
-    await _client.rpc('save_post', params: {
-      'post_uuid': postId,
-      'user_uuid': user.id,
-      'is_saved_value': isSaved,
-    });
+    try {
+      // First, try to find existing interaction
+      final existingInteraction = await _client
+          .from('post_interactions')
+          .select()
+          .eq('post_id', postId)
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+      if (existingInteraction != null) {
+        // Update existing record
+        await _client
+            .from('post_interactions')
+            .update({
+              'is_saved': isSaved,
+              'updated_at': DateTime.now().toUtc().toIso8601String(),
+            })
+            .eq('post_id', postId)
+            .eq('user_id', user.id);
+      } else {
+        // Insert new record
+        await _client.from('post_interactions').insert({
+          'post_id': postId,
+          'user_id': user.id,
+          'is_saved': isSaved,
+          'created_at': DateTime.now().toUtc().toIso8601String(),
+          'updated_at': DateTime.now().toUtc().toIso8601String(),
+        });
+      }
+    } catch (e) {
+      print('Error in save operation: $e');
+      rethrow;
+    }
   }
 
   /// Get saved posts for current user

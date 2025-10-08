@@ -35,7 +35,7 @@ class _SavedPostsScreenState extends State<SavedPostsScreen> {
     }
 
     try {
-      final posts = await PostService.getSavedPosts();
+      final posts = await PostInteractionService.getSavedPosts();
       setState(() {
         _savedPosts = posts;
       });
@@ -223,7 +223,7 @@ class _SavedPostsScreenState extends State<SavedPostsScreen> {
                 _getTagIcon(entry.key),
               ),
             ),
-            if (mostRecent != null) ..[
+            if (mostRecent != null) ...[
               const SizedBox(height: 12),
               _buildStatRow(
                 'Latest Save',
