@@ -208,26 +208,43 @@ class SupabaseAuthService {
   static Future<void> followUser(String targetUserId) async {
     final user = currentUser;
     if (user == null) throw Exception('Not authenticated');
+    
+    if (user.id == targetUserId) {
+      throw Exception('Cannot follow yourself');
+    }
+    
     print('followUser: User ${user.id} attempting to follow $targetUserId');
 
     try {
+      // Check if already following to prevent duplicates
+      final existingFollow = await _supabase
+          .from('followers')
+          .select()
+          .eq('follower_id', user.id)
+          .eq('following_id', targetUserId)
+          .maybeSingle();
+      
+      if (existingFollow != null) {
+        print('followUser: Already following this user');
+        return; // Already following
+      }
+
+      // Insert follow relationship
       await _supabase
           .from('followers')
           .insert({
             'follower_id': user.id,
             'following_id': targetUserId,
-            'created_at': DateTime.now().toIso8601String(),
+            'created_at': DateTime.now().toUtc().toIso8601String(),
           });
       print('followUser: Follow relationship inserted.');
 
-      await _supabase.rpc('increment_follower_count', params: {
-        'user_id': targetUserId,
-      });
+      // Update follower count for target user
+      await _updateUserCount(targetUserId, 'follower_count', 1);
       print('followUser: Target user follower count incremented.');
 
-      await _supabase.rpc('increment_following_count', params: {
-        'user_id': user.id,
-      });
+      // Update following count for current user
+      await _updateUserCount(user.id, 'following_count', 1);
       print('followUser: Current user following count incremented.');
     } catch (e) {
       print('Error following user: $e');
@@ -241,6 +258,7 @@ class SupabaseAuthService {
     print('unfollowUser: User ${user.id} attempting to unfollow $targetUserId');
 
     try {
+      // Delete follow relationship
       await _supabase
           .from('followers')
           .delete()
@@ -248,18 +266,40 @@ class SupabaseAuthService {
           .eq('following_id', targetUserId);
       print('unfollowUser: Follow relationship deleted.');
 
-      await _supabase.rpc('decrement_follower_count', params: {
-        'user_id': targetUserId,
-      });
+      // Update follower count for target user
+      await _updateUserCount(targetUserId, 'follower_count', -1);
       print('unfollowUser: Target user follower count decremented.');
 
-      await _supabase.rpc('decrement_following_count', params: {
-        'user_id': user.id,
-      });
+      // Update following count for current user
+      await _updateUserCount(user.id, 'following_count', -1);
       print('unfollowUser: Current user following count decremented.');
     } catch (e) {
       print('Error unfollowing user: $e');
       throw Exception('Failed to unfollow user: $e');
+    }
+  }
+
+  // Helper method to safely update user counts
+  static Future<void> _updateUserCount(String userId, String countField, int change) async {
+    try {
+      // Get current count
+      final response = await _supabase
+          .from('users')
+          .select(countField)
+          .eq('id', userId)
+          .single();
+      
+      final currentCount = response[countField] ?? 0;
+      final newCount = (currentCount + change).clamp(0, double.infinity).toInt();
+      
+      // Update count
+      await _supabase
+          .from('users')
+          .update({countField: newCount})
+          .eq('id', userId);
+    } catch (e) {
+      print('Error updating $countField for user $userId: $e');
+      throw e;
     }
   }
 
