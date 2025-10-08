@@ -188,19 +188,45 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     spacing: 8,
                     children: PostTag.values.map((tag) {
                       final isSelected = _selectedTag == tag;
-                      return ChoiceChip(
-                        label: Text(tag.name),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          if (selected) setState(() => _selectedTag = tag);
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() => _selectedTag = tag);
                         },
-                        backgroundColor: Colors.transparent,
-                        selectedColor: AppTheme.primary.withOpacity(0.2),
-                        checkmarkColor: AppTheme.primary,
-                        side: BorderSide(
-                          color: isSelected 
-                            ? AppTheme.primary 
-                            : AppTheme.primary.withOpacity(0.3),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: isSelected 
+                              ? AppTheme.primary.withOpacity(0.2)
+                              : Colors.transparent,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: isSelected 
+                                ? AppTheme.primary 
+                                : AppTheme.primary.withOpacity(0.3),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (isSelected) ...[
+                                Icon(
+                                  Icons.check_circle,
+                                  size: 16,
+                                  color: AppTheme.primary,
+                                ),
+                                const SizedBox(width: 4),
+                              ],
+                              Text(
+                                tag.name,
+                                style: TextStyle(
+                                  color: isSelected 
+                                    ? AppTheme.primary 
+                                    : Theme.of(context).textTheme.bodyMedium?.color,
+                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     }).toList(),

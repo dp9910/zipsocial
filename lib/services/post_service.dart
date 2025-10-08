@@ -167,12 +167,12 @@ class PostInteractionService {
         .from('posts')
         .select('''
           *,
-          post_interactions!inner(user_id, vote, is_saved)
+          post_interactions!inner(user_id, vote, is_saved, updated_at)
         ''')
         .eq('post_interactions.user_id', user.id)
         .eq('post_interactions.is_saved', true)
         .eq('is_active', true)
-        .order('post_interactions.created_at', ascending: false)
+        .order('created_at', ascending: false)
         .range(offset, offset + limit - 1);
 
     return response.map<Post>((json) => Post.fromJson(json)).toList();
