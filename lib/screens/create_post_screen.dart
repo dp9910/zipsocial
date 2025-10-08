@@ -82,6 +82,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         automaticallyImplyLeading: false,
@@ -112,7 +113,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       body: Column(
         children: [
           Expanded(
-            child: Padding(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,7 +132,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                         child: TextField(
                           controller: _contentController,
                           maxLines: null,
-                          minLines: 8,
+                          minLines: 4,
                           decoration: const InputDecoration(
                             hintText: "What's on your mind?",
                             border: InputBorder.none,
@@ -246,6 +247,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     _buildEventField('Link', _linkController),
                     _buildEventField('Contact', _contactController),
                   ],
+                  
+                  // Add some bottom padding to ensure content is above keyboard
+                  const SizedBox(height: 100),
                 ],
               ),
             ),
