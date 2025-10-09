@@ -219,15 +219,18 @@ class ChatService {
 
       final lastReadAt = DateTime.parse(participantResponse['last_read_at'] as String);
 
-      // Count messages sent after last read time by other users
+      // Count messages sent after last read time by other users (not including own messages)
       final countResponse = await _client
           .from('messages')
           .select('id')
           .eq('conversation_id', conversationId)
-          .neq('sender_id', userId)
+          .neq('sender_id', userId)  // Only count messages from others
+          .eq('is_deleted', false)   // Only count non-deleted messages
           .gt('created_at', lastReadAt.toIso8601String());
 
-      return countResponse.length;
+      final unreadCount = countResponse.length;
+      print('ChatService: Unread count for conversation $conversationId: $unreadCount');
+      return unreadCount;
     } catch (e) {
       print('Error getting unread count: $e');
       return 0;

@@ -4,6 +4,7 @@ import '../models/conversation.dart';
 import '../models/user.dart';
 import '../services/chat_service.dart';
 import '../services/supabase_auth_service.dart';
+import '../utils/user_colors.dart';
 import 'chat_conversation_screen.dart';
 import 'new_chat_screen.dart';
 
@@ -267,6 +268,13 @@ class _ChatListScreenState extends State<ChatListScreen> {
     final hasUnread = conversation.unreadCount > 0;
     final currentUser = SupabaseAuthService.currentUser;
     final isLastMessageFromMe = conversation.lastMessageSenderId == currentUser?.id;
+    
+    // Get the other participant to determine their color
+    final otherParticipant = conversation.participants.firstWhere(
+      (p) => p.userId != currentUser?.id,
+      orElse: () => conversation.participants.first,
+    );
+    final otherUserColor = UserColors.getUserColor(otherParticipant.userId);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -278,11 +286,13 @@ class _ChatListScreenState extends State<ChatListScreen> {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
+              color: hasUnread 
+                  ? otherUserColor.withOpacity(0.05)
+                  : Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: hasUnread 
-                    ? const Color(0xFF8CE830).withOpacity(0.3)
+                    ? otherUserColor.withOpacity(0.3)
                     : Theme.of(context).colorScheme.outline.withOpacity(0.2),
                 width: hasUnread ? 2 : 1,
               ),
@@ -299,15 +309,15 @@ class _ChatListScreenState extends State<ChatListScreen> {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        const Color(0xFF8CE830),
-                        const Color(0xFF8CE830).withOpacity(0.8),
+                        otherUserColor,
+                        otherUserColor.withOpacity(0.8),
                       ],
                     ),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.person,
                     size: 25,
-                    color: Colors.white,
+                    color: UserColors.getTextColorForBackground(otherUserColor),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -335,7 +345,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                             style: TextStyle(
                               fontSize: 12,
                               color: hasUnread 
-                                  ? const Color(0xFF8CE830)
+                                  ? otherUserColor
                                   : Colors.grey.shade500,
                               fontWeight: hasUnread ? FontWeight.bold : FontWeight.normal,
                             ),
@@ -371,19 +381,19 @@ class _ChatListScreenState extends State<ChatListScreen> {
                   ),
                 ),
 
-                // Unread indicator
+                // Unread indicator - only show if there are actually unread messages
                 if (hasUnread) ...[
                   const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF8CE830),
+                      color: otherUserColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       conversation.unreadCount > 99 ? '99+' : '${conversation.unreadCount}',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: UserColors.getTextColorForBackground(otherUserColor),
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),

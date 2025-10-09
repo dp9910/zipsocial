@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart';
 import '../services/chat_service.dart';
+import '../utils/user_colors.dart';
 import 'chat_conversation_screen.dart';
 
 class NewChatScreen extends StatefulWidget {
@@ -269,6 +270,8 @@ class _NewChatScreenState extends State<NewChatScreen> {
   }
 
   Widget _buildUserItem(AppUser user) {
+    final userColor = UserColors.getUserColor(user.id);
+    
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       child: Material(
@@ -282,7 +285,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
               color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                color: userColor.withOpacity(0.2),
               ),
             ),
             child: Row(
@@ -297,15 +300,15 @@ class _NewChatScreenState extends State<NewChatScreen> {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        const Color(0xFF8CE830),
-                        const Color(0xFF8CE830).withOpacity(0.8),
+                        userColor,
+                        userColor.withOpacity(0.8),
                       ],
                     ),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.person,
                     size: 25,
-                    color: Colors.white,
+                    color: UserColors.getTextColorForBackground(userColor),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -327,7 +330,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                         '@${user.customUserId}',
                         style: TextStyle(
                           fontSize: 14,
-                          color: const Color(0xFF8CE830),
+                          color: userColor,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -359,13 +362,13 @@ class _NewChatScreenState extends State<NewChatScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF8CE830).withOpacity(0.1),
+                    color: userColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.chat_bubble_outline,
                     size: 20,
-                    color: Color(0xFF8CE830),
+                    color: userColor,
                   ),
                 ),
               ],

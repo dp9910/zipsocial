@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/message.dart';
 import '../services/chat_service.dart';
 import '../services/supabase_auth_service.dart';
+import '../utils/user_colors.dart';
 
 class ChatConversationScreen extends StatefulWidget {
   final String conversationId;
@@ -157,6 +158,8 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final otherUserColor = UserColors.getUserColor(widget.otherUserId);
+    
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -170,15 +173,15 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    const Color(0xFF8CE830),
-                    const Color(0xFF8CE830).withOpacity(0.8),
+                    otherUserColor,
+                    otherUserColor.withOpacity(0.8),
                   ],
                 ),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.person,
                 size: 20,
-                color: Colors.white,
+                color: UserColors.getTextColorForBackground(otherUserColor),
               ),
             ),
             const SizedBox(width: 12),
@@ -194,7 +197,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
             ),
           ],
         ),
-        backgroundColor: Colors.transparent,
+        backgroundColor: otherUserColor.withOpacity(0.1),
         elevation: 0,
       ),
       body: Column(
@@ -307,8 +310,8 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF8CE830),
+                  decoration: BoxDecoration(
+                    color: otherUserColor,
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
@@ -337,6 +340,11 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
   }
 
   Widget _buildMessageBubble(Message message, bool isMe) {
+    final currentUser = SupabaseAuthService.currentUser;
+    final currentUserColor = currentUser != null ? UserColors.getUserColor(currentUser.id) : const Color(0xFF8CE830);
+    final otherUserColor = UserColors.getUserColor(widget.otherUserId);
+    final messageColor = isMe ? currentUserColor : otherUserColor;
+    
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -352,15 +360,15 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    const Color(0xFF8CE830),
-                    const Color(0xFF8CE830).withOpacity(0.8),
+                    otherUserColor,
+                    otherUserColor.withOpacity(0.8),
                   ],
                 ),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.person,
                 size: 16,
-                color: Colors.white,
+                color: UserColors.getTextColorForBackground(otherUserColor),
               ),
             ),
             const SizedBox(width: 8),
@@ -370,8 +378,8 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 color: isMe 
-                    ? const Color(0xFF8CE830)
-                    : Theme.of(context).colorScheme.surface,
+                    ? currentUserColor
+                    : messageColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(18).copyWith(
                   bottomLeft: isMe ? const Radius.circular(18) : const Radius.circular(4),
                   bottomRight: isMe ? const Radius.circular(4) : const Radius.circular(18),
@@ -379,7 +387,8 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                 border: isMe 
                     ? null
                     : Border.all(
-                        color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                        color: messageColor.withOpacity(0.3),
+                        width: 1,
                       ),
               ),
               child: Text(
@@ -387,8 +396,9 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                 style: TextStyle(
                   fontSize: 16,
                   color: isMe 
-                      ? Colors.white
-                      : Theme.of(context).colorScheme.onSurface,
+                      ? UserColors.getTextColorForBackground(currentUserColor)
+                      : messageColor.withOpacity(0.9),
+                  fontWeight: isMe ? FontWeight.w500 : FontWeight.normal,
                 ),
               ),
             ),
@@ -404,15 +414,15 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    const Color(0xFF8CE830),
-                    const Color(0xFF8CE830).withOpacity(0.8),
+                    currentUserColor,
+                    currentUserColor.withOpacity(0.8),
                   ],
                 ),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.person,
                 size: 16,
-                color: Colors.white,
+                color: UserColors.getTextColorForBackground(currentUserColor),
               ),
             ),
           ],
