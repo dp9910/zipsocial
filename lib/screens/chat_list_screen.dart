@@ -144,42 +144,67 @@ class _ChatListScreenState extends State<ChatListScreen> {
     }
 
     if (_hasError) {
+      final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+      final iconColor = isDarkMode ? Colors.grey.shade600 : Colors.grey.shade400;
+      final primaryTextColor = isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700;
+      final secondaryTextColor = isDarkMode ? Colors.grey.shade500 : Colors.grey.shade500;
+      
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.grey.shade400,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Something went wrong',
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.grey.shade600,
-                fontWeight: FontWeight.w500,
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100,
+                ),
+                child: Icon(
+                  Icons.error_outline,
+                  size: 48,
+                  color: iconColor,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Unable to load your chats',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade500,
+              const SizedBox(height: 24),
+              Text(
+                'Something went wrong',
+                style: TextStyle(
+                  fontSize: 20,
+                  color: primaryTextColor,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _refreshConversations,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF8CE830),
-                foregroundColor: Colors.white,
+              const SizedBox(height: 12),
+              Text(
+                'Unable to load your chats',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: secondaryTextColor,
+                  height: 1.4,
+                ),
+                textAlign: TextAlign.center,
               ),
-              child: const Text('Try Again'),
-            ),
-          ],
+              const SizedBox(height: 32),
+              ElevatedButton.icon(
+                onPressed: _refreshConversations,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF8CE830),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.refresh),
+                label: const Text(
+                  'Try Again',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -197,28 +222,55 @@ class _ChatListScreenState extends State<ChatListScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.chat_bubble_outline,
-                          size: 64,
-                          color: Colors.grey.shade400,
+                        Container(
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Theme.of(context).brightness == Brightness.dark 
+                                ? Colors.grey.shade800 
+                                : Colors.grey.shade100,
+                            border: Border.all(
+                              color: const Color(0xFF8CE830).withOpacity(0.2),
+                              width: 2,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.chat_bubble_outline,
+                            size: 48,
+                            color: const Color(0xFF8CE830).withOpacity(0.7),
+                          ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 24),
                         Text(
                           'No chats yet',
                           style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey.shade600,
-                            fontWeight: FontWeight.w500,
+                            fontSize: 22,
+                            color: Theme.of(context).brightness == Brightness.dark 
+                                ? Colors.grey.shade300 
+                                : Colors.grey.shade700,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 12),
                         Text(
                           'Start a conversation with someone you follow!',
                           style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey.shade500,
+                            fontSize: 16,
+                            color: Theme.of(context).brightness == Brightness.dark 
+                                ? Colors.grey.shade500 
+                                : Colors.grey.shade500,
+                            height: 1.4,
                           ),
                           textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Pull down to refresh',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: const Color(0xFF8CE830).withOpacity(0.8),
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                         const SizedBox(height: 24),
                         ElevatedButton.icon(
@@ -230,9 +282,15 @@ class _ChatListScreenState extends State<ChatListScreen> {
                               horizontal: 24,
                               vertical: 12,
                             ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
-                          icon: const Icon(Icons.add),
-                          label: const Text('Start New Chat'),
+                          icon: const Icon(Icons.add, size: 20),
+                          label: const Text(
+                            'Start New Chat',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
                         ),
                       ],
                     ),

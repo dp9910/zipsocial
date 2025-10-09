@@ -121,8 +121,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+    return GestureDetector(
+      onTap: () {
+        // Dismiss keyboard when tapping outside
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.8),
         automaticallyImplyLeading: false,
@@ -150,6 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: TextField(
                         controller: _zipcodeController,
                         focusNode: _zipcodeFocusNode,
+                        textInputAction: TextInputAction.done,
                         decoration: InputDecoration(
                           labelText: 'Zip Code',
                           hintText: 'Enter zip code',
@@ -189,12 +195,19 @@ class _HomeScreenState extends State<HomeScreen> {
                           if (value.isNotEmpty) {
                             _loadFeed();
                           }
+                          FocusScope.of(context).unfocus();
+                        },
+                        onEditingComplete: () {
+                          FocusScope.of(context).unfocus();
                         },
                       ),
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton(
-                      onPressed: _loadFeed,
+                      onPressed: () {
+                        FocusScope.of(context).unfocus();
+                        _loadFeed();
+                      },
                       child: const Text('Search'),
                     ),
                   ],
@@ -281,6 +294,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
+    ),
     );
   }
 }

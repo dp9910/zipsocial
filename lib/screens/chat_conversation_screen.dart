@@ -202,6 +202,20 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
       ),
       body: Column(
         children: [
+          // Separator border between header and chat
+          Container(
+            height: 1,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  otherUserColor.withOpacity(0.1),
+                  otherUserColor.withOpacity(0.3),
+                  otherUserColor.withOpacity(0.1),
+                ],
+              ),
+            ),
+          ),
           // Messages list
           Expanded(
             child: _isLoading
@@ -212,32 +226,54 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                   )
                 : _messages.isEmpty
                     ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.chat_bubble_outline,
-                              size: 64,
-                              color: Colors.grey.shade400,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Start the conversation',
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.grey.shade600,
-                                fontWeight: FontWeight.w500,
+                        child: Padding(
+                          padding: const EdgeInsets.all(32),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(24),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Theme.of(context).brightness == Brightness.dark 
+                                      ? Colors.grey.shade800 
+                                      : Colors.grey.shade100,
+                                  border: Border.all(
+                                    color: otherUserColor.withOpacity(0.2),
+                                    width: 2,
+                                  ),
+                                ),
+                                child: Icon(
+                                  Icons.chat_bubble_outline,
+                                  size: 48,
+                                  color: otherUserColor.withOpacity(0.7),
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Send a message to ${widget.otherUserNickname}',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey.shade500,
+                              const SizedBox(height: 24),
+                              Text(
+                                'Start the conversation',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  color: Theme.of(context).brightness == Brightness.dark 
+                                      ? Colors.grey.shade300 
+                                      : Colors.grey.shade700,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 12),
+                              Text(
+                                'Send a message to ${widget.otherUserNickname}',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Theme.of(context).brightness == Brightness.dark 
+                                      ? Colors.grey.shade500 
+                                      : Colors.grey.shade500,
+                                  height: 1.4,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
                         ),
                       )
                     : ListView.builder(

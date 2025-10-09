@@ -80,36 +80,98 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      resizeToAvoidBottomInset: true,
-      appBar: AppBar(
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDarkMode ? Colors.grey.shade900 : Colors.white;
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final surfaceColor = isDarkMode ? Colors.grey.shade800 : Colors.grey.shade50;
+    final borderColor = isDarkMode ? Colors.grey.shade700 : AppTheme.primary.withOpacity(0.3);
+    
+    return GestureDetector(
+      onTap: () {
+        // Dismiss keyboard when tapping outside
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        automaticallyImplyLeading: false,
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text('Create Post'),
-        centerTitle: true,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: ElevatedButton(
-              onPressed: _isLoading ? null : _createPost,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+        resizeToAvoidBottomInset: true,
+        appBar: AppBar(
+          backgroundColor: backgroundColor,
+          elevation: 0,
+          shadowColor: Colors.transparent,
+          surfaceTintColor: Colors.transparent,
+          automaticallyImplyLeading: false,
+          leading: Container(
+            margin: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100,
+            ),
+            child: IconButton(
+              icon: Icon(
+                Icons.close,
+                color: textColor,
+                size: 22,
               ),
-              child: _isLoading
-                  ? const SizedBox(
-                      width: 16, height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('Post'),
+              onPressed: () => Navigator.pop(context),
             ),
           ),
-        ],
-      ),
+          title: Text(
+            'Create Post',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+              color: textColor,
+            ),
+          ),
+          centerTitle: true,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: ElevatedButton(
+                onPressed: _isLoading ? null : _createPost,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 16, height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Text(
+                        'Post',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      ),
+              ),
+            ),
+          ],
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(1),
+            child: Container(
+              height: 1,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppTheme.primary.withOpacity(0.1),
+                    AppTheme.primary.withOpacity(0.3),
+                    AppTheme.primary.withOpacity(0.1),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
       body: Column(
         children: [
           Expanded(
@@ -119,133 +181,271 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // User Avatar + Text Area
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CircleAvatar(
-                        radius: 24,
-                        backgroundColor: AppTheme.primary.withOpacity(0.2),
-                        child: const Icon(Icons.person, color: AppTheme.primary),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: TextField(
-                          controller: _contentController,
-                          maxLines: null,
-                          minLines: 4,
-                          decoration: const InputDecoration(
-                            hintText: "What's on your mind?",
-                            border: InputBorder.none,
-                            hintStyle: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w400,
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: surfaceColor,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: borderColor),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                AppTheme.primary,
+                                AppTheme.primary.withOpacity(0.8),
+                              ],
                             ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppTheme.primary.withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w400,
+                          child: const Icon(
+                            Icons.person,
+                            color: Colors.white,
+                            size: 24,
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: TextField(
+                            controller: _contentController,
+                            maxLines: null,
+                            minLines: 4,
+                            decoration: InputDecoration(
+                              hintText: "What's on your mind?",
+                              border: InputBorder.none,
+                              hintStyle: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w400,
+                                color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+                              ),
+                            ),
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w400,
+                              color: textColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   
                   const SizedBox(height: 24),
                   
                   // Zip Code
-                  TextField(
-                    controller: _zipcodeController,
-                    decoration: InputDecoration(
-                      labelText: 'Zip Code',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(
-                          color: AppTheme.primary.withOpacity(0.3),
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: isDarkMode ? Colors.black26 : Colors.grey.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
                         ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(
-                          color: AppTheme.primary.withOpacity(0.3),
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: AppTheme.primary),
-                      ),
+                      ],
                     ),
-                    keyboardType: TextInputType.number,
+                    child: TextField(
+                      controller: _zipcodeController,
+                      textInputAction: TextInputAction.done,
+                      decoration: InputDecoration(
+                        labelText: 'Zip Code *',
+                        labelStyle: TextStyle(
+                          color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.location_on,
+                          color: AppTheme.primary,
+                        ),
+                        filled: true,
+                        fillColor: surfaceColor,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: borderColor),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: borderColor),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(color: AppTheme.primary, width: 2),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      ),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: textColor,
+                      ),
+                      keyboardType: TextInputType.number,
+                      maxLength: 5,
+                    ),
                   ),
                   
                   const SizedBox(height: 16),
                   
                   // Tags
-                  const Text(
-                    'Category:',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    children: PostTag.values.map((tag) {
-                      final isSelected = _selectedTag == tag;
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() => _selectedTag = tag);
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: isSelected 
-                              ? AppTheme.primary.withOpacity(0.2)
-                              : Colors.transparent,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: isSelected 
-                                ? AppTheme.primary 
-                                : AppTheme.primary.withOpacity(0.3),
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: surfaceColor,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: borderColor),
+                      boxShadow: [
+                        BoxShadow(
+                          color: isDarkMode ? Colors.black26 : Colors.grey.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.category,
+                              color: AppTheme.primary,
+                              size: 20,
                             ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (isSelected) ...[
-                                Icon(
-                                  Icons.check_circle,
-                                  size: 16,
-                                  color: AppTheme.primary,
-                                ),
-                                const SizedBox(width: 4),
-                              ],
-                              Text(
-                                tag.name,
-                                style: TextStyle(
+                            const SizedBox(width: 8),
+                            Text(
+                              'Category *',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                                color: textColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Wrap(
+                          spacing: 12,
+                          runSpacing: 12,
+                          children: PostTag.values.map((tag) {
+                            final isSelected = _selectedTag == tag;
+                            return GestureDetector(
+                              onTap: () {
+                                setState(() => _selectedTag = tag);
+                              },
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                decoration: BoxDecoration(
                                   color: isSelected 
-                                    ? AppTheme.primary 
-                                    : Theme.of(context).textTheme.bodyMedium?.color,
-                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                    ? AppTheme.primary
+                                    : isDarkMode ? Colors.grey.shade700 : Colors.grey.shade100,
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: Border.all(
+                                    color: isSelected 
+                                      ? AppTheme.primary 
+                                      : borderColor,
+                                    width: isSelected ? 2 : 1,
+                                  ),
+                                  boxShadow: isSelected ? [
+                                    BoxShadow(
+                                      color: AppTheme.primary.withOpacity(0.3),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ] : [],
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (isSelected) ...[
+                                      const Icon(
+                                        Icons.check_circle,
+                                        size: 16,
+                                        color: Colors.white,
+                                      ),
+                                      const SizedBox(width: 6),
+                                    ],
+                                    Text(
+                                      tag.name,
+                                      style: TextStyle(
+                                        color: isSelected 
+                                          ? Colors.white
+                                          : textColor,
+                                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
+                            );
+                          }).toList(),
                         ),
-                      );
-                    }).toList(),
+                      ],
+                    ),
                   ),
                   
                   // Event Details (if events selected)
                   if (_selectedTag == PostTag.events) ...[
                     const SizedBox(height: 16),
-                    const Text(
-                      'Event Details:',
-                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primary.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppTheme.primary.withOpacity(0.2)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.primary.withOpacity(0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.event,
+                                color: AppTheme.primary,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Event Details',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                  color: textColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          _buildEventField('When *', _whenController, Icons.schedule, isDarkMode, surfaceColor, borderColor, textColor),
+                          _buildEventField('Cost', _costController, Icons.attach_money, isDarkMode, surfaceColor, borderColor, textColor),
+                          _buildEventField('Parking', _parkingController, Icons.local_parking, isDarkMode, surfaceColor, borderColor, textColor),
+                          _buildEventField('Link', _linkController, Icons.link, isDarkMode, surfaceColor, borderColor, textColor),
+                          _buildEventField('Contact', _contactController, Icons.contact_phone, isDarkMode, surfaceColor, borderColor, textColor),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 8),
-                    _buildEventField('When *', _whenController),
-                    _buildEventField('Cost', _costController),
-                    _buildEventField('Parking', _parkingController),
-                    _buildEventField('Link', _linkController),
-                    _buildEventField('Contact', _contactController),
                   ],
                   
                   // Add some bottom padding to ensure content is above keyboard
@@ -258,69 +458,120 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           // Bottom action bar (like in HTML design)
           Container(
             decoration: BoxDecoration(
+              color: backgroundColor,
               border: Border(
                 top: BorderSide(
-                  color: AppTheme.primary.withOpacity(0.2),
+                  color: borderColor,
                 ),
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: isDarkMode ? Colors.black26 : Colors.grey.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, -2),
+                ),
+              ],
             ),
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: Row(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.photo_camera),
-                  onPressed: () {
-                    // TODO: Image picker
-                  },
+                Text(
+                  'Add to your post',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+                  ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.videocam),
-                  onPressed: () {
-                    // TODO: Video picker
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.image),
-                  onPressed: () {
-                    // TODO: Gallery picker
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.alternate_email),
-                  onPressed: () {
-                    // TODO: Mention users
-                  },
-                ),
+                const Spacer(),
+                _buildActionButton(Icons.photo_camera, 'Camera', () {
+                  // TODO: Image picker
+                }, isDarkMode),
+                const SizedBox(width: 8),
+                _buildActionButton(Icons.videocam, 'Video', () {
+                  // TODO: Video picker
+                }, isDarkMode),
+                const SizedBox(width: 8),
+                _buildActionButton(Icons.image, 'Gallery', () {
+                  // TODO: Gallery picker
+                }, isDarkMode),
+                const SizedBox(width: 8),
+                _buildActionButton(Icons.alternate_email, 'Mention', () {
+                  // TODO: Mention users
+                }, isDarkMode),
               ],
             ),
           ),
         ],
       ),
+    ),
     );
   }
 
-  Widget _buildEventField(String label, TextEditingController controller) {
+  Widget _buildEventField(String label, TextEditingController controller, IconData icon, bool isDarkMode, Color surfaceColor, Color borderColor, Color textColor) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 12),
       child: TextField(
         controller: controller,
+        textInputAction: TextInputAction.next,
         decoration: InputDecoration(
           labelText: label,
+          labelStyle: TextStyle(
+            color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+            fontWeight: FontWeight.w500,
+          ),
+          prefixIcon: Icon(
+            icon,
+            color: AppTheme.primary,
+            size: 20,
+          ),
+          filled: true,
+          fillColor: surfaceColor,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: AppTheme.primary.withOpacity(0.3),
-            ),
+            borderSide: BorderSide(color: borderColor),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: AppTheme.primary.withOpacity(0.3),
-            ),
+            borderSide: BorderSide(color: borderColor),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: AppTheme.primary),
+            borderSide: const BorderSide(color: AppTheme.primary, width: 2),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        ),
+        style: TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w500,
+          color: textColor,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton(IconData icon, String tooltip, VoidCallback onPressed, bool isDarkMode) {
+    return Tooltip(
+      message: tooltip,
+      child: Container(
+        decoration: BoxDecoration(
+          color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
+          ),
+        ),
+        child: IconButton(
+          icon: Icon(
+            icon,
+            color: AppTheme.primary,
+            size: 20,
+          ),
+          onPressed: onPressed,
+          padding: const EdgeInsets.all(8),
+          constraints: const BoxConstraints(
+            minWidth: 40,
+            minHeight: 40,
           ),
         ),
       ),

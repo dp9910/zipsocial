@@ -74,40 +74,69 @@ class _LoopScreenState extends State<LoopScreen> with TickerProviderStateMixin, 
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDarkMode ? Colors.grey.shade900 : Colors.white;
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final unselectedTextColor = isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600;
+    
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Loop',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 24,
+            color: textColor,
           ),
         ),
-        backgroundColor: Colors.transparent,
+        backgroundColor: backgroundColor,
         elevation: 0,
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: const Color(0xFF8CE830),
-          unselectedLabelColor: Colors.grey,
-          indicatorColor: const Color(0xFF8CE830),
-          labelStyle: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
-          unselectedLabelStyle: const TextStyle(
-            fontWeight: FontWeight.w500,
-            fontSize: 16,
-          ),
-          tabs: const [
-            Tab(
-              icon: Icon(Icons.dynamic_feed),
-              text: 'Posts',
+        shadowColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(60),
+          child: Container(
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              border: Border(
+                bottom: BorderSide(
+                  color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200,
+                  width: 1,
+                ),
+              ),
             ),
-            Tab(
-              icon: Icon(Icons.chat_bubble_outline),
-              text: 'Chat',
+            child: TabBar(
+              controller: _tabController,
+              labelColor: const Color(0xFF8CE830),
+              unselectedLabelColor: unselectedTextColor,
+              indicatorColor: const Color(0xFF8CE830),
+              indicatorWeight: 3,
+              indicatorSize: TabBarIndicatorSize.tab,
+              labelStyle: const TextStyle(
+                fontWeight: FontWeight.w800,
+                fontSize: 17,
+                letterSpacing: 0.5,
+              ),
+              unselectedLabelStyle: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+                color: unselectedTextColor,
+              ),
+              tabs: const [
+                Tab(
+                  icon: Icon(Icons.dynamic_feed, size: 24),
+                  text: 'Posts',
+                  height: 60,
+                ),
+                Tab(
+                  icon: Icon(Icons.chat_bubble_outline, size: 24),
+                  text: 'Chat',
+                  height: 60,
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
       body: TabBarView(
@@ -121,52 +150,77 @@ class _LoopScreenState extends State<LoopScreen> with TickerProviderStateMixin, 
   }
 
   Widget _buildPostsTab() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final iconColor = isDarkMode ? Colors.grey.shade600 : Colors.grey.shade400;
+    final primaryTextColor = isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700;
+    final secondaryTextColor = isDarkMode ? Colors.grey.shade500 : Colors.grey.shade500;
+    
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(
           valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8CE830)),
+          strokeWidth: 3,
         ),
       );
     }
 
     if (_hasError) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.grey.shade400,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Something went wrong',
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.grey.shade600,
-                fontWeight: FontWeight.w500,
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100,
+                ),
+                child: Icon(
+                  Icons.error_outline,
+                  size: 48,
+                  color: iconColor,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Unable to load posts from people you follow',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade500,
+              const SizedBox(height: 24),
+              Text(
+                'Something went wrong',
+                style: TextStyle(
+                  fontSize: 20,
+                  color: primaryTextColor,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _refreshPosts,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF8CE830),
-                foregroundColor: Colors.white,
+              const SizedBox(height: 12),
+              Text(
+                'Unable to load posts from people you follow',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: secondaryTextColor,
+                  height: 1.4,
+                ),
+                textAlign: TextAlign.center,
               ),
-              child: const Text('Try Again'),
-            ),
-          ],
+              const SizedBox(height: 32),
+              ElevatedButton.icon(
+                onPressed: _refreshPosts,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF8CE830),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.refresh),
+                label: const Text(
+                  'Try Again',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -180,33 +234,57 @@ class _LoopScreenState extends State<LoopScreen> with TickerProviderStateMixin, 
           child: Container(
             height: MediaQuery.of(context).size.height * 0.6,
             child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.people_outline,
-                    size: 64,
-                    color: Colors.grey.shade400,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No posts yet',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey.shade600,
-                      fontWeight: FontWeight.w500,
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100,
+                        border: Border.all(
+                          color: const Color(0xFF8CE830).withOpacity(0.2),
+                          width: 2,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.people_outline,
+                        size: 48,
+                        color: const Color(0xFF8CE830).withOpacity(0.7),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Follow some users to see their posts here!',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade500,
+                    const SizedBox(height: 24),
+                    Text(
+                      'No posts yet',
+                      style: TextStyle(
+                        fontSize: 22,
+                        color: primaryTextColor,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    Text(
+                      'Follow some users to see their posts in your Loop!',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: secondaryTextColor,
+                        height: 1.4,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Pull down to refresh',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: const Color(0xFF8CE830).withOpacity(0.8),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
