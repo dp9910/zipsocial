@@ -4,6 +4,9 @@ import '../models/user.dart';
 import 'edit_profile_screen.dart';
 import 'settings_screen.dart';
 import 'saved_posts_screen.dart';
+import 'user_posts_screen.dart';
+import 'followers_screen.dart';
+import 'following_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -165,16 +168,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   'Posts',
                                   _user!.postCount.toString(),
                                   Icons.edit_note,
+                                  onTap: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => UserPostsScreen(user: _user!),
+                                      ),
+                                    );
+                                  },
                                 ),
                                 _buildStatCard(
                                   'Followers',
                                   _user!.followerCount.toString(),
                                   Icons.people,
+                                  onTap: () async {
+                                    await Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => FollowersScreen(
+                                          user: _user!,
+                                          onFollowerCountChanged: _loadUserProfile,
+                                        ),
+                                      ),
+                                    );
+                                    // Refresh profile when returning from followers screen
+                                    _loadUserProfile();
+                                  },
                                 ),
                                 _buildStatCard(
                                   'Following',
                                   _user!.followingCount.toString(),
                                   Icons.person_add,
+                                  onTap: () async {
+                                    await Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => FollowingScreen(
+                                          user: _user!,
+                                          onFollowingCountChanged: _loadUserProfile,
+                                        ),
+                                      ),
+                                    );
+                                    // Refresh profile when returning from following screen
+                                    _loadUserProfile();
+                                  },
                                 ),
                               ],
                             ),
@@ -267,39 +301,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildStatCard(String label, String value, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.2)),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            icon,
-            color: const Color(0xFF8CE830),
-            size: 20,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
+  Widget _buildStatCard(String label, String value, IconData icon, {VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.2)),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              color: const Color(0xFF8CE830),
+              size: 20,
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

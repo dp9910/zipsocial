@@ -37,41 +37,61 @@ CREATE POLICY "Users can delete own follows" ON followers
 
 -- Function to increment follower count
 CREATE OR REPLACE FUNCTION increment_follower_count(user_id UUID)
-RETURNS void AS $$
+RETURNS void AS $
 BEGIN
   UPDATE users 
   SET follower_count = follower_count + 1 
   WHERE id = user_id;
 END;
-$$ LANGUAGE plpgsql;
+$ LANGUAGE plpgsql;
 
 -- Function to decrement follower count
 CREATE OR REPLACE FUNCTION decrement_follower_count(user_id UUID)
-RETURNS void AS $$
+RETURNS void AS $
 BEGIN
   UPDATE users 
   SET follower_count = GREATEST(follower_count - 1, 0) 
   WHERE id = user_id;
 END;
-$$ LANGUAGE plpgsql;
+$ LANGUAGE plpgsql;
 
 -- Function to increment following count
 CREATE OR REPLACE FUNCTION increment_following_count(user_id UUID)
-RETURNS void AS $$
+RETURNS void AS $
 BEGIN
   UPDATE users 
   SET following_count = following_count + 1 
   WHERE id = user_id;
 END;
-$$ LANGUAGE plpgsql;
+$ LANGUAGE plpgsql;
 
 -- Function to decrement following count
 CREATE OR REPLACE FUNCTION decrement_following_count(user_id UUID)
-RETURNS void AS $$
+RETURNS void AS $
 BEGIN
   UPDATE users 
   SET following_count = GREATEST(following_count - 1, 0) 
   WHERE id = user_id;
+END;
+$ LANGUAGE plpgsql;
+
+-- Function to unfollow a user and decrement counts
+CREATE OR REPLACE FUNCTION unfollow_and_decrement_counts(p_follower_id TEXT, p_following_id TEXT)
+RETURNS void AS $$
+BEGIN
+  -- Remove the follow relationship
+  DELETE FROM followers
+  WHERE follower_id = p_follower_id AND following_id = p_following_id;
+
+  -- Decrement the follower count for the current user
+  UPDATE users
+  SET follower_count = GREATEST(follower_count - 1, 0)
+  WHERE id = p_following_id;
+
+  -- Decrement the following count for the blocked user
+  UPDATE users
+  SET following_count = GREATEST(following_count - 1, 0)
+  WHERE id = p_follower_id;
 END;
 $$ LANGUAGE plpgsql;
 

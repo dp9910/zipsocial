@@ -84,6 +84,30 @@ class PostService {
     return rawResponse.map<Post>((json) => Post.fromJson(json)).toList();
   }
 
+  static Future<List<Post>> getUserPosts({
+    required String userId,
+    int limit = 50,
+    int offset = 0,
+  }) async {
+    try {
+      final response = await _client
+          .from('posts')
+          .select('''
+            *,
+            post_interactions!left(user_id, vote, is_saved)
+          ''')
+          .eq('user_id', userId)
+          .eq('is_active', true)
+          .order('created_at', ascending: false)
+          .range(offset, offset + limit - 1);
+
+      return response.map<Post>((json) => Post.fromJson(json)).toList();
+    } catch (e) {
+      print('Error fetching user posts: $e');
+      return [];
+    }
+  }
+
   static String _tagToString(PostTag tag) {
     switch (tag) {
       case PostTag.news: return 'news';

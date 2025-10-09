@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart';
 import '../services/supabase_auth_service.dart'; // Changed import
+import 'followers_screen.dart';
+import 'following_screen.dart';
 
 class UserProfileScreen extends StatefulWidget {
   final String userId;
@@ -84,6 +86,19 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         setState(() => _isFollowLoading = false);
       }
     }
+  }
+
+  void _navigateToFollowers() async {
+    if (_user == null) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => FollowersScreen(
+          user: _user!,
+          onFollowerCountChanged: _loadUserProfile,
+        ),
+      ),
+    );
+    _loadUserProfile();
   }
 
   @override
@@ -217,6 +232,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         'Followers',
                         _user!.followerCount.toString(),
                         Icons.people,
+                        onTap: _navigateToFollowers,
                       ),
                       _buildStatCard(
                         'Following',
@@ -361,45 +377,48 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
-  Widget _buildStatCard(String label, String value, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.shade100,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Icon(
-            icon,
-            color: const Color(0xFF8CE830),
-            size: 22,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+  Widget _buildStatCard(String label, String value, IconData icon, {VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade200),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.shade100,
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey.shade600,
+          ],
+        ),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              color: const Color(0xFF8CE830),
+              size: 22,
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

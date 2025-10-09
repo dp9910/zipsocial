@@ -322,4 +322,166 @@ class SupabaseAuthService {
       return false;
     }
   }
+
+  // Get followers list with user details
+  static Future<List<AppUser>> getFollowers({String? userId}) async {
+    final user = currentUser;
+    final targetUserId = userId ?? user?.id;
+    if (targetUserId == null) return [];
+
+    try {
+      print('Fetching followers for user: $targetUserId');
+      
+      // Get follower IDs first
+      final followersResponse = await _supabase
+          .from('followers')
+          .select('follower_id')
+          .eq('following_id', targetUserId);
+      
+      print('Followers IDs response: $followersResponse');
+      
+      if (followersResponse.isEmpty) {
+        print('No followers found');
+        return [];
+      }
+      
+      // Extract follower IDs
+      final followerIds = followersResponse
+          .map((item) => item['follower_id'] as String)
+          .toList();
+      
+      print('Follower IDs: $followerIds');
+      
+      // Get user details for these follower IDs
+      final usersResponse = await _supabase
+          .from('users')
+          .select('''
+            id,
+            custom_user_id,
+            nickname,
+            bio,
+            preferred_zipcode,
+            post_count,
+            follower_count,
+            following_count,
+            created_at,
+            is_profile_complete
+          ''')
+          .inFilter('id', followerIds);
+      
+      print('Users response: $usersResponse');
+
+      List<AppUser> users = [];
+      for (var userData in usersResponse) {
+        print('Processing user data: $userData');
+        
+        // Add safety checks for required fields
+        if (userData['id'] == null || userData['custom_user_id'] == null) {
+          print('Warning: missing required fields in user data: $userData');
+          continue;
+        }
+        
+        try {
+          users.add(AppUser.fromJson(userData));
+        } catch (e) {
+          print('Error parsing user data: $e for data: $userData');
+        }
+      }
+      
+      return users;
+    } catch (e) {
+      print('Error fetching followers: $e');
+      print('Stack trace: ${StackTrace.current}');
+      return [];
+    }
+  }
+
+  // Get following list with user details
+  static Future<List<AppUser>> getFollowing({String? userId}) async {
+    final user = currentUser;
+    final targetUserId = userId ?? user?.id;
+    if (targetUserId == null) return [];
+
+    try {
+      print('Fetching following for user: $targetUserId');
+      
+      // Get following IDs first
+      final followingResponse = await _supabase
+          .from('followers')
+          .select('following_id')
+          .eq('follower_id', targetUserId);
+      
+      print('Following IDs response: $followingResponse');
+      
+      if (followingResponse.isEmpty) {
+        print('No following found');
+        return [];
+      }
+      
+      // Extract following IDs
+      final followingIds = followingResponse
+          .map((item) => item['following_id'] as String)
+          .toList();
+      
+      print('Following IDs: $followingIds');
+      
+      // Get user details for these following IDs
+      final usersResponse = await _supabase
+          .from('users')
+          .select('''
+            id,
+            custom_user_id,
+            nickname,
+            bio,
+            preferred_zipcode,
+            post_count,
+            follower_count,
+            following_count,
+            created_at,
+            is_profile_complete
+          ''')
+          .inFilter('id', followingIds);
+      
+      print('Users response: $usersResponse');
+
+      List<AppUser> users = [];
+      for (var userData in usersResponse) {
+        print('Processing user data: $userData');
+        
+        // Add safety checks for required fields
+        if (userData['id'] == null || userData['custom_user_id'] == null) {
+          print('Warning: missing required fields in user data: $userData');
+          continue;
+        }
+        
+        try {
+          users.add(AppUser.fromJson(userData));
+        } catch (e) {
+          print('Error parsing user data: $e for data: $userData');
+        }
+      }
+      
+      return users;
+    } catch (e) {
+      print('Error fetching following: $e');
+      print('Stack trace: ${StackTrace.current}');
+      return [];
+    }
+  }
+
+  // Block a user (remove them as follower)
+  static Future<void> blockUser(String userIdToBlock) async {
+    final user = currentUser;
+    if (user == null) throw Exception('Not authenticated');
+
+    try {
+      await _supabase.rpc('unfollow_and_decrement_counts', params: {
+        'p_follower_id': userIdToBlock,
+        'p_following_id': user.id,
+      });
+    } catch (e) {
+      print('Error blocking user: $e');
+      throw Exception('Failed to block user: $e');
+    }
+  }
 }
