@@ -12,6 +12,7 @@ class ProfileSetupScreen extends StatefulWidget {
 class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   final _nicknameController = TextEditingController();
   final _bioController = TextEditingController();
+  final _zipcodeController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   AppUser? _currentUser;
@@ -26,6 +27,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   void dispose() {
     _nicknameController.dispose();
     _bioController.dispose();
+    _zipcodeController.dispose();
     super.dispose();
   }
 
@@ -41,6 +43,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           }
           if (user.bio != null) {
             _bioController.text = user.bio!;
+          }
+          if (user.preferredZipcode != null) {
+            _zipcodeController.text = user.preferredZipcode!;
           }
         });
       }
@@ -66,6 +71,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       await SupabaseAuthService.updateUserProfile(
         nickname: _nicknameController.text.trim(),
         bio: _bioController.text.trim().isEmpty ? null : _bioController.text.trim(),
+        preferredZipcode: _zipcodeController.text.trim().isEmpty ? null : _zipcodeController.text.trim(),
         isProfileComplete: true,
       );
       
@@ -92,27 +98,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _isLoading ? null : _completeProfile,
-        backgroundColor: const Color(0xFF8CE830),
-        foregroundColor: Colors.white,
-        icon: _isLoading 
-          ? const SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              ),
-            )
-          : const Icon(Icons.check, size: 20),
-        label: Text(
-          _isLoading ? 'Saving...' : 'Complete',
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: SafeArea(
@@ -351,6 +336,72 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                     const SizedBox(height: 8),
                     Text(
                       'Share a little about yourself, your interests, or what brings you to the community',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 24),
+                
+                // Preferred Zip Code Input
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.location_on_outlined,
+                          color: Color(0xFF8CE830),
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Preferred Zip Code (Optional)',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _zipcodeController,
+                      decoration: InputDecoration(
+                        hintText: 'Enter your zip code',
+                        prefixIcon: const Icon(Icons.location_city),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Color(0xFF8CE830), width: 2),
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                      ),
+                      validator: (value) {
+                        if (value != null && value.trim().isNotEmpty) {
+                          if (!RegExp(r'^\d{5}$').hasMatch(value.trim())) {
+                            return 'Please enter a valid 5-digit zip code';
+                          }
+                        }
+                        return null;
+                      },
+                      keyboardType: TextInputType.number,
+                      maxLength: 5,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'This will help you discover local posts and connect with your community',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey.shade500,

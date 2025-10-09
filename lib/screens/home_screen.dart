@@ -19,6 +19,8 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Post> _posts = [];
   final List<PostTag> _selectedTags = [];
   bool _isLoading = false;
+  bool _hasInitialized = false;
+  String? _lastKnownZipcode;
 
   @override
   void initState() {
@@ -28,24 +30,40 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _initializeFeed() async {
     final userProfile = await SupabaseAuthService.getUserProfile();
-    if (userProfile?.preferredZipcode != null && userProfile!.preferredZipcode!.isNotEmpty) {
-      _zipcodeController.text = userProfile.preferredZipcode!;
+    final newZipcode = userProfile?.preferredZipcode ?? '';
+    
+    if (newZipcode.isNotEmpty) {
+      setState(() {
+        _zipcodeController.text = newZipcode;
+      });
       _loadFeed();
     } else {
       // For new users, don't set a default zipcode, let them input their own
-      _zipcodeController.text = '';
       setState(() {
+        _zipcodeController.text = '';
         _posts = []; // Clear posts for new users
       });
     }
+    
+    _lastKnownZipcode = newZipcode;
+    _hasInitialized = true;
   }
 
   @override
-  void didChangeDependencies() {
+  void didChangeDependencies() async {
     super.didChangeDependencies();
-    // Only re-initialize if zipcode is empty to avoid overriding user input
-    if (_zipcodeController.text.isEmpty) {
+    // Re-initialize if we haven't done so yet
+    if (!_hasInitialized) {
       _initializeFeed();
+    } else {
+      // Check if the user's preferred zipcode has changed (e.g., after profile setup)
+      final userProfile = await SupabaseAuthService.getUserProfile();
+      final currentZipcode = userProfile?.preferredZipcode ?? '';
+      
+      if (currentZipcode != _lastKnownZipcode) {
+        print('Zipcode changed from $_lastKnownZipcode to $currentZipcode, refreshing feed');
+        _initializeFeed();
+      }
     }
   }
 
@@ -93,6 +111,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void refreshFeed() {
     _loadFeed();
+  }
+
+  // Method to refresh the entire feed including user profile
+  void refreshFromProfile() {
+    _hasInitialized = false;
+    _initializeFeed();
   }
 
   @override
@@ -218,22 +242,22 @@ class _HomeScreenState extends State<HomeScreen> {
                               Text(
                                 _zipcodeController.text.isEmpty 
                                   ? 'Enter your zip code to see local posts'
-                                  : 'No posts found in this area',
+                                  : 'Be the first one to post for this zip code',
                                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                   color: Colors.grey.shade600,
                                 ),
                                 textAlign: TextAlign.center,
                               ),
-                              if (_zipcodeController.text.isEmpty) ...[
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Connect with your local community',
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Colors.grey.shade500,
-                                  ),
-                                  textAlign: TextAlign.center,
+                              const SizedBox(height: 8),
+                              Text(
+                                _zipcodeController.text.isEmpty 
+                                  ? 'Connect with your local community'
+                                  : 'Share what\'s happening in your area!',
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: Colors.grey.shade500,
                                 ),
-                              ],
+                                textAlign: TextAlign.center,
+                              ),
                             ],
                           ),
                         ),
