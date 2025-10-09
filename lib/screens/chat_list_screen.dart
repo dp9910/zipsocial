@@ -1,0 +1,381 @@
+import 'package:flutter/material.dart';
+import '../models/conversation.dart';
+import '../models/user.dart';
+import '../services/chat_service.dart';
+import '../services/supabase_auth_service.dart';
+import 'chat_conversation_screen.dart';
+import 'new_chat_screen.dart';
+
+class ChatListScreen extends StatefulWidget {
+  const ChatListScreen({super.key});
+
+  @override
+  State<ChatListScreen> createState() => _ChatListScreenState();
+}
+
+class _ChatListScreenState extends State<ChatListScreen> {
+  List<Conversation> _conversations = [];
+  bool _isLoading = true;
+  bool _hasError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadConversations();
+  }
+
+  Future<void> _loadConversations() async {
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
+
+    try {
+      final conversations = await ChatService.getConversations();
+      if (mounted) {
+        setState(() {
+          _conversations = conversations;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading conversations: $e');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _hasError = true;
+        });
+      }
+    }
+  }
+
+  Future<void> _refreshConversations() async {
+    await _loadConversations();
+  }
+
+  void _navigateToNewChat() async {
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const NewChatScreen(),
+      ),
+    );
+
+    if (result == true) {
+      _refreshConversations();
+    }
+  }
+
+  void _navigateToConversation(Conversation conversation) async {
+    // Find the other participant (not the current user)
+    final currentUser = SupabaseAuthService.currentUser;
+    final otherParticipant = conversation.participants.firstWhere(
+      (p) => p.userId != currentUser?.id,
+      orElse: () => conversation.participants.first,
+    );
+
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => ChatConversationScreen(
+          conversationId: conversation.id,
+          otherUserNickname: otherParticipant.nickname ?? otherParticipant.customUserId ?? 'Unknown',
+          otherUserId: otherParticipant.userId,
+        ),
+      ),
+    );
+
+    if (result == true) {
+      _refreshConversations();
+    }
+  }
+
+  String _getOtherParticipantName(Conversation conversation) {
+    final currentUser = SupabaseAuthService.currentUser;
+    final otherParticipant = conversation.participants.firstWhere(
+      (p) => p.userId != currentUser?.id,
+      orElse: () => conversation.participants.first,
+    );
+
+    return otherParticipant.nickname ?? otherParticipant.customUserId ?? 'Unknown User';
+  }
+
+  String _formatLastMessageTime(DateTime lastMessageAt) {
+    final now = DateTime.now();
+    final difference = now.difference(lastMessageAt);
+
+    if (difference.inDays > 0) {
+      return '${difference.inDays}d';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}h';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}m';
+    } else {
+      return 'now';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8CE830)),
+        ),
+      );
+    }
+
+    if (_hasError) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Colors.grey.shade400,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Something went wrong',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Unable to load your chats',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade500,
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _refreshConversations,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF8CE830),
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Try Again'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Scaffold(
+      body: _conversations.isEmpty
+          ? RefreshIndicator(
+              onRefresh: _refreshConversations,
+              color: const Color(0xFF8CE830),
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Container(
+                  height: MediaQuery.of(context).size.height * 0.6,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.chat_bubble_outline,
+                          size: 64,
+                          color: Colors.grey.shade400,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No chats yet',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.grey.shade600,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Start a conversation with someone you follow!',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade500,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton.icon(
+                          onPressed: _navigateToNewChat,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF8CE830),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                          ),
+                          icon: const Icon(Icons.add),
+                          label: const Text('Start New Chat'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: _refreshConversations,
+              color: const Color(0xFF8CE830),
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: _conversations.length,
+                itemBuilder: (context, index) {
+                  final conversation = _conversations[index];
+                  return _buildConversationItem(conversation);
+                },
+              ),
+            ),
+      floatingActionButton: _conversations.isNotEmpty
+          ? FloatingActionButton(
+              onPressed: _navigateToNewChat,
+              backgroundColor: const Color(0xFF8CE830),
+              foregroundColor: Colors.white,
+              child: const Icon(Icons.add),
+            )
+          : null,
+    );
+  }
+
+  Widget _buildConversationItem(Conversation conversation) {
+    final otherParticipantName = _getOtherParticipantName(conversation);
+    final hasUnread = conversation.unreadCount > 0;
+    final currentUser = SupabaseAuthService.currentUser;
+    final isLastMessageFromMe = conversation.lastMessageSenderId == currentUser?.id;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _navigateToConversation(conversation),
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: hasUnread 
+                    ? const Color(0xFF8CE830).withOpacity(0.3)
+                    : Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                width: hasUnread ? 2 : 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                // Avatar
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        const Color(0xFF8CE830),
+                        const Color(0xFF8CE830).withOpacity(0.8),
+                      ],
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.person,
+                    size: 25,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 12),
+
+                // Conversation details
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              otherParticipantName,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: hasUnread ? FontWeight.bold : FontWeight.w600,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Text(
+                            _formatLastMessageTime(conversation.lastMessageAt),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: hasUnread 
+                                  ? const Color(0xFF8CE830)
+                                  : Colors.grey.shade500,
+                              fontWeight: hasUnread ? FontWeight.bold : FontWeight.normal,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          if (isLastMessageFromMe)
+                            Icon(
+                              Icons.reply,
+                              size: 16,
+                              color: Colors.grey.shade500,
+                            ),
+                          if (isLastMessageFromMe) const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              conversation.lastMessage ?? 'No messages yet',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: hasUnread 
+                                    ? Theme.of(context).colorScheme.onSurface
+                                    : Colors.grey.shade600,
+                                fontWeight: hasUnread ? FontWeight.w500 : FontWeight.normal,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Unread indicator
+                if (hasUnread) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF8CE830),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      conversation.unreadCount > 99 ? '99+' : '${conversation.unreadCount}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

@@ -3,6 +3,7 @@ import '../models/post.dart';
 import '../services/post_service.dart';
 import '../services/supabase_auth_service.dart';
 import '../widgets/post_card.dart';
+import 'chat_list_screen.dart';
 
 class LoopScreen extends StatefulWidget {
   const LoopScreen({super.key});
@@ -236,85 +237,6 @@ class _LoopScreenState extends State<LoopScreen> with TickerProviderStateMixin, 
   }
 
   Widget _buildChatTab() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: const Color(0xFF8CE830).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: const Color(0xFF8CE830).withOpacity(0.3),
-                ),
-              ),
-              child: Icon(
-                Icons.chat_bubble_outline,
-                size: 64,
-                color: const Color(0xFF8CE830),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Chat Feature',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey.shade800,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Coming Soon!',
-              style: TextStyle(
-                fontSize: 18,
-                color: const Color(0xFF8CE830),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Chat with people you follow and share your thoughts in real-time. This feature will be available in the next update.',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey.shade600,
-                height: 1.5,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.construction,
-                    size: 16,
-                    color: Colors.grey.shade600,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Under Development',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    return const ChatListScreen();
   }
 }
