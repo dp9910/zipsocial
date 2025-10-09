@@ -199,7 +199,7 @@ class ChatService {
 
       await _client.rpc('mark_conversation_as_read', params: {
         'conv_id': conversationId,
-        'user_id': currentUser.id,
+        'p_user_id': currentUser.id,  // Changed from 'user_id' to 'p_user_id'
       });
     } catch (e) {
       print('Error marking conversation as read: $e');
@@ -237,9 +237,10 @@ class ChatService {
   // Subscribe to real-time messages for a conversation
   static RealtimeChannel subscribeToMessages(String conversationId, Function(Message) onMessage) {
     final currentUser = SupabaseAuthService.currentUser;
+    print('ChatService: Subscribing to messages for conversation $conversationId');
     
-    return _client
-        .channel('messages:$conversationId')
+    final channel = _client
+        .channel('messages_$conversationId')
         .onPostgresChanges(
           event: PostgresChangeEvent.insert,
           schema: 'public',
@@ -251,56 +252,77 @@ class ChatService {
           ),
           callback: (payload) {
             try {
+              print('ChatService: Received real-time message: ${payload.newRecord}');
               final messageData = payload.newRecord;
+              
+              // Process all new messages, including our own for consistency
+              final message = Message(
+                id: messageData['id'] as String,
+                conversationId: messageData['conversation_id'] as String,
+                senderId: messageData['sender_id'] as String,
+                content: messageData['content'] as String,
+                messageType: MessageType.fromString(messageData['message_type'] as String? ?? 'text'),
+                createdAt: DateTime.parse(messageData['created_at'] as String),
+                updatedAt: DateTime.parse(messageData['updated_at'] as String),
+                isEdited: messageData['is_edited'] as bool? ?? false,
+                isDeleted: messageData['is_deleted'] as bool? ?? false,
+              );
+              
+              // Only notify for messages from other users to avoid duplicates
               if (messageData['sender_id'] != currentUser?.id) {
-                // Only notify for messages from other users
-                final message = Message(
-                  id: messageData['id'] as String,
-                  conversationId: messageData['conversation_id'] as String,
-                  senderId: messageData['sender_id'] as String,
-                  content: messageData['content'] as String,
-                  messageType: MessageType.fromString(messageData['message_type'] as String? ?? 'text'),
-                  createdAt: DateTime.parse(messageData['created_at'] as String),
-                  updatedAt: DateTime.parse(messageData['updated_at'] as String),
-                  isEdited: messageData['is_edited'] as bool? ?? false,
-                  isDeleted: messageData['is_deleted'] as bool? ?? false,
-                );
+                print('ChatService: Processing message from other user');
                 onMessage(message);
+              } else {
+                print('ChatService: Ignoring own message to avoid duplicates');
               }
             } catch (e) {
               print('Error processing real-time message: $e');
             }
           },
-        )
-        .subscribe();
+        );
+    
+    // Subscribe and handle the subscription status
+    channel.subscribe((status, [error]) {
+      print('ChatService: Subscription status: $status');
+      if (error != null) {
+        print('ChatService: Subscription error: $error');
+      }
+    });
+    
+    return channel;
   }
 
   // Subscribe to real-time conversation updates
-  static RealtimeChannel subscribeToConversations(Function(Conversation) onConversationUpdate) {
-    return _client
-        .channel('conversations')
+  static RealtimeChannel subscribeToConversations(Function() onConversationUpdate) {
+    print('ChatService: Subscribing to conversation updates');
+    
+    final channel = _client
+        .channel('conversations_updates')
         .onPostgresChanges(
           event: PostgresChangeEvent.update,
           schema: 'public',
           table: 'conversations',
           callback: (payload) {
             try {
-              final convData = payload.newRecord;
-              final conversation = Conversation(
-                id: convData['id'] as String,
-                createdAt: DateTime.parse(convData['created_at'] as String),
-                updatedAt: DateTime.parse(convData['updated_at'] as String),
-                lastMessageAt: DateTime.parse(convData['last_message_at'] as String),
-                lastMessage: convData['last_message'] as String?,
-                lastMessageSenderId: convData['last_message_sender_id'] as String?,
-              );
-              onConversationUpdate(conversation);
+              print('ChatService: Received conversation update: ${payload.newRecord}');
+              // Instead of parsing the conversation here, just trigger a refresh
+              // This is simpler and more reliable
+              onConversationUpdate();
             } catch (e) {
               print('Error processing real-time conversation update: $e');
             }
           },
-        )
-        .subscribe();
+        );
+    
+    // Subscribe and handle the subscription status
+    channel.subscribe((status, [error]) {
+      print('ChatService: Conversation subscription status: $status');
+      if (error != null) {
+        print('ChatService: Conversation subscription error: $error');
+      }
+    });
+    
+    return channel;
   }
 
   // Get users that the current user can chat with (following users)

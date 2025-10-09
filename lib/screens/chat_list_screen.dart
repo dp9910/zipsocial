@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/conversation.dart';
 import '../models/user.dart';
 import '../services/chat_service.dart';
@@ -17,11 +18,19 @@ class _ChatListScreenState extends State<ChatListScreen> {
   List<Conversation> _conversations = [];
   bool _isLoading = true;
   bool _hasError = false;
+  RealtimeChannel? _conversationSubscription;
 
   @override
   void initState() {
     super.initState();
     _loadConversations();
+    _subscribeToConversationUpdates();
+  }
+
+  @override
+  void dispose() {
+    _conversationSubscription?.unsubscribe();
+    super.dispose();
   }
 
   Future<void> _loadConversations() async {
@@ -51,6 +60,16 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
   Future<void> _refreshConversations() async {
     await _loadConversations();
+  }
+
+  void _subscribeToConversationUpdates() {
+    print('ChatList: Setting up real-time conversation subscription');
+    _conversationSubscription = ChatService.subscribeToConversations(() {
+      print('ChatList: Received conversation update, refreshing list');
+      if (mounted) {
+        _loadConversations();
+      }
+    });
   }
 
   void _navigateToNewChat() async {
