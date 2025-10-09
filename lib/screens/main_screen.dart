@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
+import 'loop_screen.dart';
 import 'create_post_screen.dart';
 import 'profile_screen.dart';
 import '../config/theme.dart';
@@ -14,6 +15,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
   final GlobalKey<State<HomeScreen>> _homeKey = GlobalKey<State<HomeScreen>>();
+  final GlobalKey<State<LoopScreen>> _loopKey = GlobalKey<State<LoopScreen>>();
   final GlobalKey<State<ProfileScreen>> _profileKey = GlobalKey<State<ProfileScreen>>();
   
   late final List<Widget> _screens;
@@ -23,13 +25,14 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
     _screens = [
       HomeScreen(key: _homeKey),
+      LoopScreen(key: _loopKey),
       const CreatePostScreen(),
       ProfileScreen(key: _profileKey),
     ];
   }
 
   Future<void> _onTabTap(int index) async {
-    if (index == 1) {
+    if (index == 2) {
       // Navigate to create post as a modal
       final result = await Navigator.of(context).push(
         MaterialPageRoute(
@@ -38,9 +41,10 @@ class _MainScreenState extends State<MainScreen> {
         ),
       );
       
-      // If post was created, refresh home feed and profile
+      // If post was created, refresh home feed, loop feed, and profile
       if (result == true) {
         (_homeKey.currentState as dynamic)?.refreshFeed();
+        (_loopKey.currentState as dynamic)?.refreshPosts();
         (_profileKey.currentState as dynamic)?.refreshProfile();
       }
     } else {
@@ -52,10 +56,11 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
-        index: _currentIndex == 2 ? 1 : 0,
+        index: _currentIndex == 3 ? 2 : (_currentIndex == 1 ? 1 : 0),
         children: [
           _screens[0], // Home
-          _screens[2], // Profile
+          _screens[1], // Loop
+          _screens[3], // Profile
         ],
       ),
       bottomNavigationBar: Container(
@@ -87,6 +92,10 @@ class _MainScreenState extends State<MainScreen> {
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.loop),
+              label: 'Loop',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.add_box_outlined),

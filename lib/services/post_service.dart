@@ -108,6 +108,48 @@ class PostService {
     }
   }
 
+  static Future<List<Post>> getFollowingPosts({
+    int limit = 50,
+    int offset = 0,
+  }) async {
+    try {
+      final currentUser = SupabaseAuthService.currentUser;
+      if (currentUser == null) return [];
+
+      // First get the list of users the current user is following
+      final followingResponse = await _client
+          .from('followers')
+          .select('following_id')
+          .eq('follower_id', currentUser.id);
+
+      if (followingResponse.isEmpty) {
+        return [];
+      }
+
+      // Extract the user IDs that the current user is following
+      final followingIds = followingResponse
+          .map((item) => item['following_id'] as String)
+          .toList();
+
+      // Fetch posts from these users
+      final response = await _client
+          .from('posts')
+          .select('''
+            *,
+            post_interactions!left(user_id, vote, is_saved)
+          ''')
+          .inFilter('user_id', followingIds)
+          .eq('is_active', true)
+          .order('created_at', ascending: false)
+          .range(offset, offset + limit - 1);
+
+      return response.map<Post>((json) => Post.fromJson(json)).toList();
+    } catch (e) {
+      print('Error fetching following posts: $e');
+      return [];
+    }
+  }
+
   static String _tagToString(PostTag tag) {
     switch (tag) {
       case PostTag.news: return 'news';
