@@ -65,7 +65,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Profile updated successfully!'),
-            backgroundColor: Color(0xFF8CE830),
+            backgroundColor: Color(0xFF4ECDC4),
           ),
         );
         Navigator.of(context).pop(true); // Return true to indicate changes were saved
@@ -132,7 +132,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   : Text(
                       'Save',
                       style: TextStyle(
-                        color: _hasChanges ? const Color(0xFF8CE830) : Colors.grey,
+                        color: _hasChanges ? const Color(0xFF4ECDC4) : Colors.grey,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -159,13 +159,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              const Color(0xFF8CE830),
-                              const Color(0xFF8CE830).withOpacity(0.8),
+                              const Color(0xFF4ECDC4),
+                              const Color(0xFF4ECDC4).withOpacity(0.8),
                             ],
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF8CE830).withOpacity(0.3),
+                              color: const Color(0xFF4ECDC4).withOpacity(0.3),
                               blurRadius: 20,
                               offset: const Offset(0, 10),
                             ),
@@ -210,7 +210,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       children: [
                         const Icon(
                           Icons.emoji_emotions,
-                          color: Color(0xFF8CE830),
+                          color: Color(0xFF4ECDC4),
                           size: 20,
                         ),
                         const SizedBox(width: 8),
@@ -239,7 +239,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFF8CE830), width: 2),
+                          borderSide: const BorderSide(color: Color(0xFF4ECDC4), width: 2),
                         ),
                         filled: true,
                         fillColor: Theme.of(context).colorScheme.surface,
@@ -272,7 +272,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       children: [
                         const Icon(
                           Icons.description_outlined,
-                          color: Color(0xFF8CE830),
+                          color: Color(0xFF4ECDC4),
                           size: 20,
                         ),
                         const SizedBox(width: 8),
@@ -301,7 +301,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFF8CE830), width: 2),
+                          borderSide: const BorderSide(color: Color(0xFF4ECDC4), width: 2),
                         ),
                         filled: true,
                         fillColor: Theme.of(context).colorScheme.surface,
@@ -333,7 +333,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       children: [
                         const Icon(
                           Icons.location_on_outlined,
-                          color: Color(0xFF8CE830),
+                          color: Color(0xFF4ECDC4),
                           size: 20,
                         ),
                         const SizedBox(width: 8),
@@ -363,7 +363,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFF8CE830), width: 2),
+                          borderSide: const BorderSide(color: Color(0xFF4ECDC4), width: 2),
                         ),
                         filled: true,
                         fillColor: Theme.of(context).colorScheme.surface,
@@ -385,17 +385,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF8CE830).withOpacity(0.1),
+                    color: const Color(0xFF4ECDC4).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: const Color(0xFF8CE830).withOpacity(0.3),
+                      color: const Color(0xFF4ECDC4).withOpacity(0.3),
                     ),
                   ),
                   child: Row(
                     children: [
                       Icon(
                         Icons.info_outline,
-                        color: const Color(0xFF8CE830),
+                        color: const Color(0xFF4ECDC4),
                         size: 20,
                       ),
                       const SizedBox(width: 12),

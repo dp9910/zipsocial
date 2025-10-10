@@ -144,13 +144,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    const Color(0xFF8CE830).withOpacity(0.1),
-                    const Color(0xFF8CE830).withOpacity(0.05),
+                    const Color(0xFF4ECDC4).withOpacity(0.1),
+                    const Color(0xFF4ECDC4).withOpacity(0.05),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: const Color(0xFF8CE830).withOpacity(0.2),
+                  color: const Color(0xFF4ECDC4).withOpacity(0.2),
                 ),
               ),
               child: Column(
@@ -165,13 +165,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          const Color(0xFF8CE830),
-                          const Color(0xFF8CE830).withOpacity(0.8),
+                          const Color(0xFF4ECDC4),
+                          const Color(0xFF4ECDC4).withOpacity(0.8),
                         ],
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF8CE830).withOpacity(0.3),
+                          color: const Color(0xFF4ECDC4).withOpacity(0.3),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -273,7 +273,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _isFollowing 
                               ? Colors.grey.shade600 
-                              : const Color(0xFF8CE830),
+                              : const Color(0xFF4ECDC4),
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -398,7 +398,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           children: [
             Icon(
               icon,
-              color: const Color(0xFF8CE830),
+              color: const Color(0xFF4ECDC4),
               size: 22,
             ),
             const SizedBox(height: 8),

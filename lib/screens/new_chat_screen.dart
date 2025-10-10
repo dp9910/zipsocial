@@ -80,7 +80,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
         barrierDismissible: false,
         builder: (context) => const Center(
           child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8CE830)),
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4ECDC4)),
           ),
         ),
       );
@@ -157,7 +157,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFF8CE830)),
+                  borderSide: const BorderSide(color: Color(0xFF4ECDC4)),
                 ),
                 filled: true,
                 fillColor: Theme.of(context).colorScheme.surface,
@@ -178,7 +178,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8CE830)),
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4ECDC4)),
         ),
       );
     }
@@ -214,7 +214,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
             ElevatedButton(
               onPressed: _loadChatableUsers,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF8CE830),
+                backgroundColor: const Color(0xFF4ECDC4),
                 foregroundColor: Colors.white,
               ),
               child: const Text('Try Again'),

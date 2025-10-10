@@ -86,8 +86,8 @@ class _UserPostsScreenState extends State<UserPostsScreen> {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        const Color(0xFF8CE830),
-                        const Color(0xFF8CE830).withOpacity(0.8),
+                        const Color(0xFF4ECDC4),
+                        const Color(0xFF4ECDC4).withOpacity(0.8),
                       ],
                     ),
                   ),
@@ -123,7 +123,7 @@ class _UserPostsScreenState extends State<UserPostsScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF8CE830).withOpacity(0.1),
+                    color: const Color(0xFF4ECDC4).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -131,7 +131,7 @@ class _UserPostsScreenState extends State<UserPostsScreen> {
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF8CE830),
+                      color: Color(0xFF4ECDC4),
                     ),
                   ),
                 ),

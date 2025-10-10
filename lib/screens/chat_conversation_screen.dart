@@ -221,7 +221,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
             child: _isLoading
                 ? const Center(
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8CE830)),
+                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4ECDC4)),
                     ),
                   )
                 : _messages.isEmpty
@@ -330,7 +330,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(24),
-                        borderSide: const BorderSide(color: Color(0xFF8CE830)),
+                        borderSide: const BorderSide(color: Color(0xFF4ECDC4)),
                       ),
                       filled: true,
                       fillColor: Theme.of(context).scaffoldBackgroundColor,
@@ -377,7 +377,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
 
   Widget _buildMessageBubble(Message message, bool isMe) {
     final currentUser = SupabaseAuthService.currentUser;
-    final currentUserColor = currentUser != null ? UserColors.getUserColor(currentUser.id) : const Color(0xFF8CE830);
+    final currentUserColor = currentUser != null ? UserColors.getUserColor(currentUser.id) : const Color(0xFF4ECDC4);
     final otherUserColor = UserColors.getUserColor(widget.otherUserId);
     final messageColor = isMe ? currentUserColor : otherUserColor;
     

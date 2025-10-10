@@ -128,7 +128,7 @@ class _FollowersScreenState extends State<FollowersScreen> {
               children: [
                 Icon(
                   Icons.people,
-                  color: const Color(0xFF8CE830),
+                  color: const Color(0xFF4ECDC4),
                   size: 20,
                 ),
                 const SizedBox(width: 8),
@@ -220,8 +220,8 @@ class _FollowersScreenState extends State<FollowersScreen> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  const Color(0xFF8CE830),
-                  const Color(0xFF8CE830).withOpacity(0.8),
+                  const Color(0xFF4ECDC4),
+                  const Color(0xFF4ECDC4).withOpacity(0.8),
                 ],
               ),
             ),
@@ -261,7 +261,7 @@ class _FollowersScreenState extends State<FollowersScreen> {
                     '@${follower.customUserId}',
                     style: TextStyle(
                       fontSize: 14,
-                      color: const Color(0xFF8CE830),
+                      color: const Color(0xFF4ECDC4),
                       fontWeight: FontWeight.w500,
                     ),
                   ),

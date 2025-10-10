@@ -138,7 +138,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8CE830)),
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4ECDC4)),
         ),
       );
     }
@@ -190,7 +190,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
               ElevatedButton.icon(
                 onPressed: _refreshConversations,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF8CE830),
+                  backgroundColor: const Color(0xFF4ECDC4),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   shape: RoundedRectangleBorder(
@@ -213,7 +213,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
       body: _conversations.isEmpty
           ? RefreshIndicator(
               onRefresh: _refreshConversations,
-              color: const Color(0xFF8CE830),
+              color: const Color(0xFF4ECDC4),
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: Container(
@@ -230,14 +230,14 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                 ? Colors.grey.shade800 
                                 : Colors.grey.shade100,
                             border: Border.all(
-                              color: const Color(0xFF8CE830).withOpacity(0.2),
+                              color: const Color(0xFF4ECDC4).withOpacity(0.2),
                               width: 2,
                             ),
                           ),
                           child: Icon(
                             Icons.chat_bubble_outline,
                             size: 48,
-                            color: const Color(0xFF8CE830).withOpacity(0.7),
+                            color: const Color(0xFF4ECDC4).withOpacity(0.7),
                           ),
                         ),
                         const SizedBox(height: 24),
@@ -268,7 +268,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                           'Pull down to refresh',
                           style: TextStyle(
                             fontSize: 14,
-                            color: const Color(0xFF8CE830).withOpacity(0.8),
+                            color: const Color(0xFF4ECDC4).withOpacity(0.8),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -276,7 +276,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                         ElevatedButton.icon(
                           onPressed: _navigateToNewChat,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF8CE830),
+                            backgroundColor: const Color(0xFF4ECDC4),
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(
                               horizontal: 24,
@@ -300,7 +300,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
             )
           : RefreshIndicator(
               onRefresh: _refreshConversations,
-              color: const Color(0xFF8CE830),
+              color: const Color(0xFF4ECDC4),
               child: ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: _conversations.length,
@@ -313,7 +313,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
       floatingActionButton: _conversations.isNotEmpty
           ? FloatingActionButton(
               onPressed: _navigateToNewChat,
-              backgroundColor: const Color(0xFF8CE830),
+              backgroundColor: const Color(0xFF4ECDC4),
               foregroundColor: Colors.white,
               child: const Icon(Icons.add),
             )

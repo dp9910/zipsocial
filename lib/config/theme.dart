@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static const Color primary = Color(0xFF8CE830);
-  static const Color backgroundLight = Color(0xFFF7F8F6);
-  static const Color backgroundDark = Color(0xFF192111);
-  static const Color contentLight = Color(0xFF192111);
-  static const Color contentDark = Color(0xFFF7F8F6);
-  static const Color subtleLight = Color(0xFF3B4D28);
-  static const Color subtleDark = Color(0xFFC0EEA7);
+  // Soft Teal color scheme - eye-friendly and relaxing
+  static const Color primary = Color(0xFF4ECDC4);
+  static const Color primaryDark = Color(0xFF44A08D);
+  static const Color primaryLight = Color(0xFF7FDBDA);
+  
+  // Updated neutral colors to complement teal
+  static const Color backgroundLight = Color(0xFFF8FFFE);
+  static const Color backgroundDark = Color(0xFF0F1419);
+  static const Color contentLight = Color(0xFF1A1F24);
+  static const Color contentDark = Color(0xFFF1F5F4);
+  static const Color subtleLight = Color(0xFF2A4A47);
+  static const Color subtleDark = Color(0xFFA7E8E3);
 
   static ThemeData get lightTheme {
     return ThemeData(

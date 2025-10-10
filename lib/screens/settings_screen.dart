@@ -73,7 +73,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               children: [
                                 Icon(
                                   Icons.account_circle_outlined,
-                                  color: const Color(0xFF8CE830),
+                                  color: const Color(0xFF4ECDC4),
                                   size: 24,
                                 ),
                                 const SizedBox(width: 12),
@@ -145,7 +145,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               children: [
                                 Icon(
                                   Icons.security_outlined,
-                                  color: const Color(0xFF8CE830),
+                                  color: const Color(0xFF4ECDC4),
                                   size: 24,
                                 ),
                                 const SizedBox(width: 12),

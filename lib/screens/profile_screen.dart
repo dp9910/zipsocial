@@ -84,13 +84,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              const Color(0xFF8CE830).withOpacity(0.1),
-                              const Color(0xFF8CE830).withOpacity(0.05),
+                              const Color(0xFF4ECDC4).withOpacity(0.1),
+                              const Color(0xFF4ECDC4).withOpacity(0.05),
                             ],
                           ),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: const Color(0xFF8CE830).withOpacity(0.2),
+                            color: const Color(0xFF4ECDC4).withOpacity(0.2),
                           ),
                         ),
                         child: Column(
@@ -105,13 +105,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                   colors: [
-                                    const Color(0xFF8CE830),
-                                    const Color(0xFF8CE830).withOpacity(0.8),
+                                    const Color(0xFF4ECDC4),
+                                    const Color(0xFF4ECDC4).withOpacity(0.8),
                                   ],
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF8CE830).withOpacity(0.3),
+                                    color: const Color(0xFF4ECDC4).withOpacity(0.3),
                                     blurRadius: 20,
                                     offset: const Offset(0, 10),
                                   ),
@@ -316,7 +316,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             Icon(
               icon,
-              color: const Color(0xFF8CE830),
+              color: const Color(0xFF4ECDC4),
               size: 20,
             ),
             const SizedBox(height: 8),

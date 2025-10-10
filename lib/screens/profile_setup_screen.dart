@@ -119,12 +119,12 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                       width: 60,
                       height: 60,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF8CE830).withOpacity(0.1),
+                        color: const Color(0xFF4ECDC4).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(30),
                       ),
                       child: const Icon(
                         Icons.person_add,
-                        color: Color(0xFF8CE830),
+                        color: Color(0xFF4ECDC4),
                         size: 30,
                       ),
                     ),
@@ -217,7 +217,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                       children: [
                         const Icon(
                           Icons.emoji_emotions,
-                          color: Color(0xFF8CE830),
+                          color: Color(0xFF4ECDC4),
                           size: 20,
                         ),
                         const SizedBox(width: 8),
@@ -246,7 +246,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFF8CE830), width: 2),
+                          borderSide: const BorderSide(color: Color(0xFF4ECDC4), width: 2),
                         ),
                         filled: true,
                         fillColor: Colors.white,
@@ -287,7 +287,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                       children: [
                         const Icon(
                           Icons.description_outlined,
-                          color: Color(0xFF8CE830),
+                          color: Color(0xFF4ECDC4),
                           size: 20,
                         ),
                         const SizedBox(width: 8),
@@ -316,7 +316,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFF8CE830), width: 2),
+                          borderSide: const BorderSide(color: Color(0xFF4ECDC4), width: 2),
                         ),
                         filled: true,
                         fillColor: Colors.white,
@@ -354,7 +354,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                       children: [
                         const Icon(
                           Icons.location_on_outlined,
-                          color: Color(0xFF8CE830),
+                          color: Color(0xFF4ECDC4),
                           size: 20,
                         ),
                         const SizedBox(width: 8),
@@ -383,7 +383,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFF8CE830), width: 2),
+                          borderSide: const BorderSide(color: Color(0xFF4ECDC4), width: 2),
                         ),
                         filled: true,
                         fillColor: Colors.white,
@@ -419,7 +419,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _completeProfile,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF8CE830),
+                      backgroundColor: const Color(0xFF4ECDC4),
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),

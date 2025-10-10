@@ -121,46 +121,164 @@ class _PostCardState extends State<PostCard> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark 
+        ? Theme.of(context).colorScheme.surface
+        : Colors.white;
+    final borderColor = isDark 
+        ? Theme.of(context).colorScheme.outline.withOpacity(0.3)
+        : Colors.grey.shade900;
     
     return Container(
       decoration: BoxDecoration(
-        color: isDark 
-          ? Theme.of(context).colorScheme.surface.withOpacity(0.7)
-          : Colors.grey.shade900,
-        borderRadius: BorderRadius.circular(16),
-        border: isDark 
-          ? Border.all(
-              color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
-              width: 1,
-            )
-          : null,
-        boxShadow: isDark 
-          ? null 
-          : [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+        color: cardColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: borderColor,
+          width: isDark ? 1.5 : 2.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isDark 
+                ? Colors.black.withOpacity(0.3)
+                : Colors.grey.withOpacity(0.15),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header with user info and metadata
             Row(
               children: [
-                // Category chip (small and subtle)
+                // User Avatar
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppTheme.primary,
+                        AppTheme.primary.withOpacity(0.8),
+                      ],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppTheme.primary.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.person,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                
+                // User info and metadata
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // User name and handle
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => UserProfileScreen(
+                                userId: widget.post.userId,
+                                customUserId: widget.post.username,
+                              ),
+                            ),
+                          );
+                        },
+                        child: RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: widget.post.nickname ?? 'Anonymous',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16,
+                                  color: isDark 
+                                      ? Theme.of(context).colorScheme.onSurface
+                                      : Colors.grey.shade900,
+                                ),
+                              ),
+                              TextSpan(
+                                text: ' @${widget.post.username}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                  color: AppTheme.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      
+                      // Time and location
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.access_time,
+                            size: 14,
+                            color: isDark 
+                                ? Theme.of(context).colorScheme.onSurface.withOpacity(0.6)
+                                : Colors.grey.shade600,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            TimeFormatter.formatRelativeTime(widget.post.createdAt),
+                            style: TextStyle(
+                              color: isDark 
+                                  ? Theme.of(context).colorScheme.onSurface.withOpacity(0.6)
+                                  : Colors.grey.shade600,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Icon(
+                            Icons.location_on,
+                            size: 14,
+                            color: AppTheme.primary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            widget.post.zipcode,
+                            style: TextStyle(
+                              color: AppTheme.primary,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Category chip (moved to the right)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: _getTagColor(widget.post.tag).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: _getTagColor(widget.post.tag).withOpacity(0.3),
-                      width: 1,
+                      color: _getTagColor(widget.post.tag).withOpacity(0.4),
+                      width: 2,
                     ),
                   ),
                   child: Row(
@@ -168,73 +286,51 @@ class _PostCardState extends State<PostCard> {
                     children: [
                       Icon(
                         _getTagIcon(widget.post.tag),
-                        size: 12,
+                        size: 14,
                         color: _getTagColor(widget.post.tag),
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: 6),
                       Text(
                         widget.post.tagDisplay,
                         style: TextStyle(
                           color: _getTagColor(widget.post.tag),
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 12),
-                // User info
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => UserProfileScreen(
-                            userId: widget.post.userId,
-                            customUserId: widget.post.username,
-                          ),
-                        ),
-                      );
-                    },
-                    child: Row(
-                      children: [
-                        Text(
-                          '@${widget.post.username}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: isDark 
-                              ? Theme.of(context).colorScheme.primary
-                              : const Color(0xFF8CE830),
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '${TimeFormatter.formatRelativeTime(widget.post.createdAt)} · ${widget.post.zipcode}',
-                          style: TextStyle(
-                            color: isDark 
-                              ? Theme.of(context).colorScheme.onSurface.withOpacity(0.6)
-                              : Colors.grey.shade300,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
+            
             // Post content
-            Text(
-              widget.post.content,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                fontSize: 16,
-                height: 1.4,
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
                 color: isDark 
-                  ? Theme.of(context).colorScheme.onSurface
-                  : Colors.white,
+                    ? Theme.of(context).colorScheme.surface.withOpacity(0.5)
+                    : Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isDark 
+                      ? Theme.of(context).colorScheme.outline.withOpacity(0.2)
+                      : Colors.grey.shade400,
+                  width: isDark ? 1 : 1.5,
+                ),
+              ),
+              child: Text(
+                widget.post.content,
+                style: TextStyle(
+                  fontSize: 16,
+                  height: 1.5,
+                  fontWeight: FontWeight.w400,
+                  color: isDark 
+                      ? Theme.of(context).colorScheme.onSurface
+                      : Colors.grey.shade800,
+                ),
               ),
             ),
                 if (widget.post.tag == PostTag.events && widget.post.eventDetails != null) ...[
@@ -273,50 +369,70 @@ class _PostCardState extends State<PostCard> {
             const SizedBox(height: 16),
             
             // Action buttons
-            Row(
-              children: [
-                _ActionButton(
-                  icon: _userVote == true ? Icons.favorite : Icons.favorite_border,
-                  count: _upvotes,
-                  isActive: _userVote == true,
-                  activeColor: Colors.red,
-                  onPressed: () => _onVote(true),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+              decoration: BoxDecoration(
+                color: isDark 
+                    ? Theme.of(context).colorScheme.surface.withOpacity(0.3)
+                    : Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isDark 
+                      ? Theme.of(context).colorScheme.outline.withOpacity(0.2)
+                      : Colors.grey.shade400,
+                  width: isDark ? 1 : 1.5,
                 ),
-                const SizedBox(width: 16),
-                _ActionButton(
-                  icon: _userVote == false ? Icons.thumb_down : Icons.thumb_down_outlined,
-                  count: _downvotes,
-                  isActive: _userVote == false,
-                  activeColor: Colors.amber,
-                  onPressed: () => _onVote(false),
-                ),
-                const SizedBox(width: 16),
-                _ActionButton(
-                  icon: Icons.chat_bubble_outline,
-                  count: widget.post.commentCount,
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => CommentsScreen(postId: widget.post.id),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(width: 16),
-                _ActionButton(
-                  icon: Icons.flag_outlined,
-                  count: _reportCount > 0 ? _reportCount : null,
-                  activeColor: Colors.orange,
-                  onPressed: _onReport,
-                ),
-                const Spacer(),
-                _ActionButton(
-                  icon: _isSaved ? Icons.bookmark : Icons.bookmark_border,
-                  isActive: _isSaved,
-                  activeColor: Colors.blue,
-                  onPressed: _onSave,
-                ),
-              ],
+              ),
+              child: Row(
+                children: [
+                  _ActionButton(
+                    icon: _userVote == true ? Icons.favorite : Icons.favorite_border,
+                    count: _upvotes,
+                    isActive: _userVote == true,
+                    activeColor: Colors.red,
+                    onPressed: () => _onVote(true),
+                    isDark: isDark,
+                  ),
+                  const SizedBox(width: 8),
+                  _ActionButton(
+                    icon: _userVote == false ? Icons.thumb_down : Icons.thumb_down_outlined,
+                    count: _downvotes,
+                    isActive: _userVote == false,
+                    activeColor: Colors.amber,
+                    onPressed: () => _onVote(false),
+                    isDark: isDark,
+                  ),
+                  const SizedBox(width: 8),
+                  _ActionButton(
+                    icon: Icons.chat_bubble_outline,
+                    count: widget.post.commentCount,
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => CommentsScreen(postId: widget.post.id),
+                        ),
+                      );
+                    },
+                    isDark: isDark,
+                  ),
+                  const SizedBox(width: 8),
+                  _ActionButton(
+                    icon: Icons.flag_outlined,
+                    count: _reportCount > 0 ? _reportCount : null,
+                    activeColor: Colors.orange,
+                    onPressed: _onReport,
+                    isDark: isDark,
+                  ),
+                  const Spacer(),
+                  _ActionButton(
+                    icon: _isSaved ? Icons.bookmark : Icons.bookmark_border,
+                    isActive: _isSaved,
+                    activeColor: AppTheme.primary,
+                    onPressed: _onSave,
+                    isDark: isDark,
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -364,6 +480,7 @@ class _ActionButton extends StatelessWidget {
   final bool isActive;
   final VoidCallback onPressed;
   final Color? activeColor;
+  final bool isDark;
 
   const _ActionButton({
     required this.icon,
@@ -371,42 +488,58 @@ class _ActionButton extends StatelessWidget {
     this.isActive = false,
     required this.onPressed,
     this.activeColor,
+    this.isDark = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final color = isActive 
-      ? (activeColor ?? AppTheme.primary) 
-      : (isDark 
-          ? Theme.of(context).colorScheme.secondary
-          : Colors.grey.shade400);
+        ? (activeColor ?? AppTheme.primary) 
+        : (isDark 
+            ? Theme.of(context).colorScheme.onSurface.withOpacity(0.6)
+            : Colors.grey.shade600);
 
-    return InkWell(
-      onTap: onPressed,
-      borderRadius: BorderRadius.circular(20),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 18,
-              color: color,
-            ),
-            if (count != null && count! > 0) ...[
-              const SizedBox(width: 4),
-              Text(
-                '$count',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: color,
-                ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: isActive 
+                ? (activeColor ?? AppTheme.primary).withOpacity(0.1)
+                : Colors.transparent,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 20,
+                color: color,
               ),
+              if (count != null && count! > 0) ...[
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    '$count',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: color,
+                    ),
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

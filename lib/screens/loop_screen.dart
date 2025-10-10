@@ -108,9 +108,9 @@ class _LoopScreenState extends State<LoopScreen> with TickerProviderStateMixin, 
             ),
             child: TabBar(
               controller: _tabController,
-              labelColor: const Color(0xFF8CE830),
+              labelColor: const Color(0xFF4ECDC4),
               unselectedLabelColor: unselectedTextColor,
-              indicatorColor: const Color(0xFF8CE830),
+              indicatorColor: const Color(0xFF4ECDC4),
               indicatorWeight: 3,
               indicatorSize: TabBarIndicatorSize.tab,
               labelStyle: const TextStyle(
@@ -158,7 +158,7 @@ class _LoopScreenState extends State<LoopScreen> with TickerProviderStateMixin, 
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8CE830)),
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4ECDC4)),
           strokeWidth: 3,
         ),
       );
@@ -206,7 +206,7 @@ class _LoopScreenState extends State<LoopScreen> with TickerProviderStateMixin, 
               ElevatedButton.icon(
                 onPressed: _refreshPosts,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF8CE830),
+                  backgroundColor: const Color(0xFF4ECDC4),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   shape: RoundedRectangleBorder(
@@ -228,7 +228,7 @@ class _LoopScreenState extends State<LoopScreen> with TickerProviderStateMixin, 
     if (_followingPosts.isEmpty) {
       return RefreshIndicator(
         onRefresh: _refreshPosts,
-        color: const Color(0xFF8CE830),
+        color: const Color(0xFF4ECDC4),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Container(
@@ -245,14 +245,14 @@ class _LoopScreenState extends State<LoopScreen> with TickerProviderStateMixin, 
                         shape: BoxShape.circle,
                         color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100,
                         border: Border.all(
-                          color: const Color(0xFF8CE830).withOpacity(0.2),
+                          color: const Color(0xFF4ECDC4).withOpacity(0.2),
                           width: 2,
                         ),
                       ),
                       child: Icon(
                         Icons.people_outline,
                         size: 48,
-                        color: const Color(0xFF8CE830).withOpacity(0.7),
+                        color: const Color(0xFF4ECDC4).withOpacity(0.7),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -279,7 +279,7 @@ class _LoopScreenState extends State<LoopScreen> with TickerProviderStateMixin, 
                       'Pull down to refresh',
                       style: TextStyle(
                         fontSize: 14,
-                        color: const Color(0xFF8CE830).withOpacity(0.8),
+                        color: const Color(0xFF4ECDC4).withOpacity(0.8),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -294,7 +294,7 @@ class _LoopScreenState extends State<LoopScreen> with TickerProviderStateMixin, 
 
     return RefreshIndicator(
       onRefresh: _refreshPosts,
-      color: const Color(0xFF8CE830),
+      color: const Color(0xFF4ECDC4),
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: _followingPosts.length,

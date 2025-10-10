@@ -92,7 +92,7 @@ class _AuthScreenState extends State<AuthScreen> {
               const Icon(
                 Icons.location_city,
                 size: 80,
-                color: Color(0xFF8CE830),
+                color: Color(0xFF4ECDC4),
               ),
               const SizedBox(height: 16),
               const Text(

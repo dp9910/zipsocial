@@ -62,7 +62,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Post created successfully!'),
-            backgroundColor: Color(0xFF8CE830),
+            backgroundColor: Color(0xFF4ECDC4),
           ),
         );
         Navigator.pop(context, true); // Return true to indicate post was created
