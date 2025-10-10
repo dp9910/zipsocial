@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/message.dart';
 import '../services/chat_service.dart';
@@ -162,6 +163,11 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
     
     return Scaffold(
       appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Theme.of(context).brightness == Brightness.dark ? Brightness.light : Brightness.dark,
+          statusBarBrightness: Theme.of(context).brightness,
+        ),
         title: Row(
           children: [
             Container(

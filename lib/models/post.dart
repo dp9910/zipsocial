@@ -6,6 +6,7 @@ class Post {
   final String id;
   final String userId;
   final String username;
+  final String? nickname;
   final String zipcode;
   final String content;
   final PostTag tag;
@@ -23,6 +24,7 @@ class Post {
     required this.id,
     required this.userId,
     required this.username,
+    this.nickname,
     required this.zipcode,
     required this.content,
     required this.tag,
@@ -60,10 +62,17 @@ class Post {
       }
     }
 
+    // Get nickname from joined users table
+    String? nickname;
+    if (json['users'] != null && json['users'] is Map) {
+      nickname = json['users']['nickname'];
+    }
+
     return Post(
       id: json['id'],
       userId: json['user_id'],
       username: json['username'],
+      nickname: nickname,
       zipcode: json['zipcode'],
       content: json['content'],
       tag: _stringToTag(json['tag']),
@@ -84,6 +93,7 @@ class Post {
     String? id,
     String? userId,
     String? username,
+    String? nickname,
     String? zipcode,
     String? content,
     PostTag? tag,
@@ -101,6 +111,7 @@ class Post {
       id: id ?? this.id,
       userId: userId ?? this.userId,
       username: username ?? this.username,
+      nickname: nickname ?? this.nickname,
       zipcode: zipcode ?? this.zipcode,
       content: content ?? this.content,
       tag: tag ?? this.tag,

@@ -57,6 +57,7 @@ class PostService {
         .from('posts')
         .select('''
           *,
+          users!posts_user_id_fkey(nickname),
           post_interactions!left(user_id, vote, is_saved)
         ''')
         .eq('zipcode', zipcode)
@@ -94,6 +95,7 @@ class PostService {
           .from('posts')
           .select('''
             *,
+            users!posts_user_id_fkey(nickname),
             post_interactions!left(user_id, vote, is_saved)
           ''')
           .eq('user_id', userId)
@@ -136,6 +138,7 @@ class PostService {
           .from('posts')
           .select('''
             *,
+            users!posts_user_id_fkey(nickname),
             post_interactions!left(user_id, vote, is_saved)
           ''')
           .inFilter('user_id', followingIds)

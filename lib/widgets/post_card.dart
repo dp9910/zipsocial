@@ -147,12 +147,13 @@ class _PostCardState extends State<PostCard> {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header with user info and metadata
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // User Avatar
                 Container(
@@ -186,6 +187,7 @@ class _PostCardState extends State<PostCard> {
                 
                 // User info and metadata
                 Expanded(
+                  flex: 2,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -202,6 +204,8 @@ class _PostCardState extends State<PostCard> {
                           );
                         },
                         child: RichText(
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                           text: TextSpan(
                             children: [
                               TextSpan(
@@ -230,6 +234,7 @@ class _PostCardState extends State<PostCard> {
                       
                       // Time and location
                       Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
                             Icons.access_time,
@@ -239,14 +244,17 @@ class _PostCardState extends State<PostCard> {
                                 : Colors.grey.shade600,
                           ),
                           const SizedBox(width: 4),
-                          Text(
-                            TimeFormatter.formatRelativeTime(widget.post.createdAt),
-                            style: TextStyle(
-                              color: isDark 
-                                  ? Theme.of(context).colorScheme.onSurface.withOpacity(0.6)
-                                  : Colors.grey.shade600,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
+                          Flexible(
+                            child: Text(
+                              TimeFormatter.formatRelativeTime(widget.post.createdAt),
+                              style: TextStyle(
+                                color: isDark 
+                                    ? Theme.of(context).colorScheme.onSurface.withOpacity(0.6)
+                                    : Colors.grey.shade600,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -256,12 +264,15 @@ class _PostCardState extends State<PostCard> {
                             color: AppTheme.primary,
                           ),
                           const SizedBox(width: 4),
-                          Text(
-                            widget.post.zipcode,
-                            style: TextStyle(
-                              color: AppTheme.primary,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
+                          Flexible(
+                            child: Text(
+                              widget.post.zipcode,
+                              style: TextStyle(
+                                color: AppTheme.primary,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
@@ -271,8 +282,12 @@ class _PostCardState extends State<PostCard> {
                 ),
                 
                 // Category chip (moved to the right)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                Flexible(
+                  flex: 0,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 100),
+                    child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: _getTagColor(widget.post.tag).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
@@ -286,20 +301,26 @@ class _PostCardState extends State<PostCard> {
                     children: [
                       Icon(
                         _getTagIcon(widget.post.tag),
-                        size: 14,
+                        size: 12,
                         color: _getTagColor(widget.post.tag),
                       ),
-                      const SizedBox(width: 6),
-                      Text(
-                        widget.post.tagDisplay,
-                        style: TextStyle(
-                          color: _getTagColor(widget.post.tag),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          widget.post.tagDisplay,
+                          style: TextStyle(
+                            color: _getTagColor(widget.post.tag),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                       ),
                     ],
                   ),
+                ),
+                ),
                 ),
               ],
             ),
@@ -370,7 +391,7 @@ class _PostCardState extends State<PostCard> {
             
             // Action buttons
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
               decoration: BoxDecoration(
                 color: isDark 
                     ? Theme.of(context).colorScheme.surface.withOpacity(0.3)
@@ -385,51 +406,57 @@ class _PostCardState extends State<PostCard> {
               ),
               child: Row(
                 children: [
-                  _ActionButton(
-                    icon: _userVote == true ? Icons.favorite : Icons.favorite_border,
-                    count: _upvotes,
-                    isActive: _userVote == true,
-                    activeColor: Colors.red,
-                    onPressed: () => _onVote(true),
-                    isDark: isDark,
+                  Expanded(
+                    child: _ActionButton(
+                      icon: _userVote == true ? Icons.favorite : Icons.favorite_border,
+                      count: _upvotes,
+                      isActive: _userVote == true,
+                      activeColor: Colors.red,
+                      onPressed: () => _onVote(true),
+                      isDark: isDark,
+                    ),
                   ),
-                  const SizedBox(width: 8),
-                  _ActionButton(
-                    icon: _userVote == false ? Icons.thumb_down : Icons.thumb_down_outlined,
-                    count: _downvotes,
-                    isActive: _userVote == false,
-                    activeColor: Colors.amber,
-                    onPressed: () => _onVote(false),
-                    isDark: isDark,
+                  Expanded(
+                    child: _ActionButton(
+                      icon: _userVote == false ? Icons.thumb_down : Icons.thumb_down_outlined,
+                      count: _downvotes,
+                      isActive: _userVote == false,
+                      activeColor: Colors.amber,
+                      onPressed: () => _onVote(false),
+                      isDark: isDark,
+                    ),
                   ),
-                  const SizedBox(width: 8),
-                  _ActionButton(
-                    icon: Icons.chat_bubble_outline,
-                    count: widget.post.commentCount,
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => CommentsScreen(postId: widget.post.id),
-                        ),
-                      );
-                    },
-                    isDark: isDark,
+                  Expanded(
+                    child: _ActionButton(
+                      icon: Icons.chat_bubble_outline,
+                      count: widget.post.commentCount,
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => CommentsScreen(postId: widget.post.id),
+                          ),
+                        );
+                      },
+                      isDark: isDark,
+                    ),
                   ),
-                  const SizedBox(width: 8),
-                  _ActionButton(
-                    icon: Icons.flag_outlined,
-                    count: _reportCount > 0 ? _reportCount : null,
-                    activeColor: Colors.orange,
-                    onPressed: _onReport,
-                    isDark: isDark,
+                  Expanded(
+                    child: _ActionButton(
+                      icon: Icons.flag_outlined,
+                      count: _reportCount > 0 ? _reportCount : null,
+                      activeColor: Colors.orange,
+                      onPressed: _onReport,
+                      isDark: isDark,
+                    ),
                   ),
-                  const Spacer(),
-                  _ActionButton(
-                    icon: _isSaved ? Icons.bookmark : Icons.bookmark_border,
-                    isActive: _isSaved,
-                    activeColor: AppTheme.primary,
-                    onPressed: _onSave,
-                    isDark: isDark,
+                  Expanded(
+                    child: _ActionButton(
+                      icon: _isSaved ? Icons.bookmark : Icons.bookmark_border,
+                      isActive: _isSaved,
+                      activeColor: AppTheme.primary,
+                      onPressed: _onSave,
+                      isDark: isDark,
+                    ),
                   ),
                 ],
               ),
@@ -505,7 +532,7 @@ class _ActionButton extends StatelessWidget {
         onTap: onPressed,
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             color: isActive 
@@ -514,16 +541,17 @@ class _ActionButton extends StatelessWidget {
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 icon,
-                size: 20,
+                size: 18,
                 color: color,
               ),
               if (count != null && count! > 0) ...[
-                const SizedBox(width: 6),
+                const SizedBox(width: 4),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                   decoration: BoxDecoration(
                     color: color.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(10),
