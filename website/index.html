@@ -206,6 +206,40 @@
 
         /* Dark mode support */
         @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+                color: #e2e8f0;
+            }
+            
+            header {
+                background: rgba(26, 32, 44, 0.95);
+            }
+            
+            .logo-text {
+                color: #4ECDC4;
+            }
+            
+            .hero h1 {
+                color: #e2e8f0;
+            }
+            
+            .hero .subtitle {
+                color: #cbd5e0;
+            }
+            
+            .privacy-badge {
+                background: rgba(78, 205, 196, 0.2);
+                border-color: rgba(78, 205, 196, 0.3);
+            }
+            
+            .features {
+                background: #2d3748;
+            }
+            
+            .section-title {
+                color: #e2e8f0;
+            }
+            
             .privacy-section {
                 background: linear-gradient(135deg, #1a202c, #2d3748);
             }
@@ -218,7 +252,28 @@
             .privacy-section p,
             .privacy-features li,
             .privacy-caption {
-                color: #cbd5e0;
+                color: #cbd5e0 !important;
+            }
+            
+            .screenshots {
+                background: #2d3748;
+            }
+            
+            footer {
+                background: #1a202c;
+                color: #e2e8f0;
+            }
+            
+            footer h3 {
+                color: #e2e8f0;
+            }
+            
+            footer p {
+                color: #a0aec0;
+            }
+            
+            footer a {
+                color: #4ECDC4;
             }
         }
 
@@ -695,9 +750,17 @@
                 <h3>Zip Social</h3>
                 <p>Connect without compromise.</p>
                 <br>
-                <p style="color: #a0aec0; font-size: 0.9rem;">
+                <p style="color: #a0aec0; font-size: 0.9rem; margin-bottom: 1rem;">
                     Privacy-first • Local connections
                 </p>
+                <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #4a5568;">
+                    <p style="color: #a0aec0; font-size: 0.9rem; margin-bottom: 0.5rem;">
+                        <strong>Contact:</strong> <a href="mailto:hellozipsocial@gmail.com" style="color: #4ECDC4; text-decoration: none;">hellozipsocial@gmail.com</a>
+                    </p>
+                    <p style="color: #a0aec0; font-size: 0.9rem;">
+                        <strong>Privacy Policy:</strong> Zip Social 2025
+                    </p>
+                </div>
             </div>
         </div>
     </footer>
