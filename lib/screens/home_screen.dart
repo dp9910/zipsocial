@@ -241,7 +241,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           textInputAction: TextInputAction.done,
                           decoration: InputDecoration(
                             labelText: 'Enter Zip Code',
-                            hintText: '90210',
+                            hintText: '',
                             prefixIcon: Icon(
                               Icons.location_on,
                               color: AppTheme.primary,
@@ -489,61 +489,68 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   )
                 : _posts.isEmpty
-                    ? Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(32),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(24),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Theme.of(context).brightness == Brightness.dark 
-                                      ? Colors.grey.shade800 
-                                      : Colors.grey.shade100,
-                                  border: Border.all(
-                                    color: AppTheme.primary.withOpacity(0.2),
-                                    width: 2,
+                    ? SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: Container(
+                          width: double.infinity,
+                          constraints: BoxConstraints(
+                            minHeight: MediaQuery.of(context).size.height * 0.4,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(32),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(24),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Theme.of(context).brightness == Brightness.dark 
+                                        ? Colors.grey.shade800 
+                                        : Colors.grey.shade100,
+                                    border: Border.all(
+                                      color: AppTheme.primary.withOpacity(0.2),
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    _zipcodeController.text.isEmpty 
+                                        ? Icons.search_outlined
+                                        : Icons.post_add_outlined,
+                                    size: 48,
+                                    color: AppTheme.primary.withOpacity(0.7),
                                   ),
                                 ),
-                                child: Icon(
+                                const SizedBox(height: 24),
+                                Text(
                                   _zipcodeController.text.isEmpty 
-                                      ? Icons.search_outlined
-                                      : Icons.post_add_outlined,
-                                  size: 48,
-                                  color: AppTheme.primary.withOpacity(0.7),
+                                    ? 'Discover Your Community'
+                                    : 'Be the First to Post!',
+                                  style: TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w600,
+                                    color: Theme.of(context).brightness == Brightness.dark 
+                                        ? Colors.grey.shade300 
+                                        : Colors.grey.shade700,
+                                  ),
+                                  textAlign: TextAlign.center,
                                 ),
-                              ),
-                              const SizedBox(height: 24),
-                              Text(
-                                _zipcodeController.text.isEmpty 
-                                  ? 'Discover Your Community'
-                                  : 'Be the First to Post!',
-                                style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w600,
-                                  color: Theme.of(context).brightness == Brightness.dark 
-                                      ? Colors.grey.shade300 
-                                      : Colors.grey.shade700,
+                                const SizedBox(height: 12),
+                                Text(
+                                  _zipcodeController.text.isEmpty 
+                                    ? 'Enter your zip code above to connect with people in your area and see what\'s happening locally'
+                                    : 'No posts yet for ${_zipcodeController.text}. Share what\'s happening in your area and start the conversation!',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Theme.of(context).brightness == Brightness.dark 
+                                        ? Colors.grey.shade500 
+                                        : Colors.grey.shade500,
+                                    height: 1.4,
+                                  ),
+                                  textAlign: TextAlign.center,
                                 ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                _zipcodeController.text.isEmpty 
-                                  ? 'Enter your zip code above to connect with people in your area and see what\'s happening locally'
-                                  : 'No posts yet for ${_zipcodeController.text}. Share what\'s happening in your area and start the conversation!',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Theme.of(context).brightness == Brightness.dark 
-                                      ? Colors.grey.shade500 
-                                      : Colors.grey.shade500,
-                                  height: 1.4,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       )
