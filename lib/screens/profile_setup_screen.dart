@@ -119,13 +119,23 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                       width: 60,
                       height: 60,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF4ECDC4).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(30),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF4ECDC4).withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                      child: const Icon(
-                        Icons.person_add,
-                        color: Color(0xFF4ECDC4),
-                        size: 30,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Image.asset(
+                          'assets/images/logo.jpg',
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 16),
