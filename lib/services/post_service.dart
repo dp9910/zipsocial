@@ -40,7 +40,6 @@ class PostService {
         'user_id': user.id, // Changed user.uid to user.id
       });
     } catch (e) {
-      print('Error updating post count: $e');
       // Don't throw here - post was created successfully
     }
 
@@ -105,7 +104,6 @@ class PostService {
 
       return response.map<Post>((json) => Post.fromJson(json)).toList();
     } catch (e) {
-      print('Error fetching user posts: $e');
       return [];
     }
   }
@@ -148,7 +146,6 @@ class PostService {
 
       return response.map<Post>((json) => Post.fromJson(json)).toList();
     } catch (e) {
-      print('Error fetching following posts: $e');
       return [];
     }
   }
@@ -207,7 +204,6 @@ class PostInteractionService {
           .eq('id', postId);
           
     } catch (e) {
-      print('Error in report operation: $e');
       rethrow;
     }
   }
@@ -246,7 +242,6 @@ class PostInteractionService {
         });
       }
     } catch (e) {
-      print('Error in save operation: $e');
       rethrow;
     }
   }

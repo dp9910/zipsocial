@@ -41,7 +41,6 @@ class _SavedPostsScreenState extends State<SavedPostsScreen> {
         _savedPosts = posts;
       });
     } catch (e) {
-      print('Error loading saved posts: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to load saved posts: $e')),

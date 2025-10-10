@@ -71,13 +71,11 @@ class ChatService {
 
           conversations.add(conversation);
         } catch (e) {
-          print('Error processing conversation: $e');
         }
       }
 
       return conversations;
     } catch (e) {
-      print('Error fetching conversations: $e');
       return [];
     }
   }
@@ -95,7 +93,6 @@ class ChatService {
 
       return response as String?;
     } catch (e) {
-      print('Error getting/creating conversation: $e');
       return null;
     }
   }
@@ -137,7 +134,6 @@ class ChatService {
         );
       }).toList().reversed.toList(); // Reverse to show oldest first
     } catch (e) {
-      print('Error fetching messages: $e');
       return [];
     }
   }
@@ -186,7 +182,6 @@ class ChatService {
         senderCustomUserId: userData?['custom_user_id'] as String?,
       );
     } catch (e) {
-      print('Error sending message: $e');
       return null;
     }
   }
@@ -202,7 +197,6 @@ class ChatService {
         'p_user_id': currentUser.id,  // Changed from 'user_id' to 'p_user_id'
       });
     } catch (e) {
-      print('Error marking conversation as read: $e');
     }
   }
 
@@ -229,10 +223,8 @@ class ChatService {
           .gt('created_at', lastReadAt.toIso8601String());
 
       final unreadCount = countResponse.length;
-      print('ChatService: Unread count for conversation $conversationId: $unreadCount');
       return unreadCount;
     } catch (e) {
-      print('Error getting unread count: $e');
       return 0;
     }
   }
@@ -240,7 +232,6 @@ class ChatService {
   // Subscribe to real-time messages for a conversation
   static RealtimeChannel subscribeToMessages(String conversationId, Function(Message) onMessage) {
     final currentUser = SupabaseAuthService.currentUser;
-    print('ChatService: Subscribing to messages for conversation $conversationId');
     
     final channel = _client
         .channel('messages_$conversationId')
@@ -255,7 +246,6 @@ class ChatService {
           ),
           callback: (payload) {
             try {
-              print('ChatService: Received real-time message: ${payload.newRecord}');
               final messageData = payload.newRecord;
               
               // Process all new messages, including our own for consistency
@@ -273,22 +263,17 @@ class ChatService {
               
               // Only notify for messages from other users to avoid duplicates
               if (messageData['sender_id'] != currentUser?.id) {
-                print('ChatService: Processing message from other user');
                 onMessage(message);
               } else {
-                print('ChatService: Ignoring own message to avoid duplicates');
               }
             } catch (e) {
-              print('Error processing real-time message: $e');
             }
           },
         );
     
     // Subscribe and handle the subscription status
     channel.subscribe((status, [error]) {
-      print('ChatService: Subscription status: $status');
       if (error != null) {
-        print('ChatService: Subscription error: $error');
       }
     });
     
@@ -297,7 +282,6 @@ class ChatService {
 
   // Subscribe to real-time conversation updates
   static RealtimeChannel subscribeToConversations(Function() onConversationUpdate) {
-    print('ChatService: Subscribing to conversation updates');
     
     final channel = _client
         .channel('conversations_updates')
@@ -307,21 +291,17 @@ class ChatService {
           table: 'conversations',
           callback: (payload) {
             try {
-              print('ChatService: Received conversation update: ${payload.newRecord}');
               // Instead of parsing the conversation here, just trigger a refresh
               // This is simpler and more reliable
               onConversationUpdate();
             } catch (e) {
-              print('Error processing real-time conversation update: $e');
             }
           },
         );
     
     // Subscribe and handle the subscription status
     channel.subscribe((status, [error]) {
-      print('ChatService: Conversation subscription status: $status');
       if (error != null) {
-        print('ChatService: Conversation subscription error: $error');
       }
     });
     
@@ -334,7 +314,6 @@ class ChatService {
       final following = await SupabaseAuthService.getFollowing();
       return following;
     } catch (e) {
-      print('Error fetching chatable users: $e');
       return [];
     }
   }

@@ -53,7 +53,6 @@ class _LoopScreenState extends State<LoopScreen> with TickerProviderStateMixin, 
         });
       }
     } catch (e) {
-      print('Error loading following posts: $e');
       if (mounted) {
         setState(() {
           _isLoading = false;

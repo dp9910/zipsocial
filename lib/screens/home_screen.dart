@@ -61,7 +61,6 @@ class _HomeScreenState extends State<HomeScreen> {
       final currentZipcode = userProfile?.preferredZipcode ?? '';
       
       if (currentZipcode != _lastKnownZipcode) {
-        print('Zipcode changed from $_lastKnownZipcode to $currentZipcode, refreshing feed');
         _initializeFeed();
       }
     }
@@ -84,7 +83,6 @@ class _HomeScreenState extends State<HomeScreen> {
         zipcode: _zipcodeController.text,
         tags: _selectedTags.isEmpty ? null : _selectedTags,
       );
-      print('Raw Supabase response for feed: $rawResponse'); // Add this line
       final posts = rawResponse.map<Post>((json) => Post.fromJson(json)).toList();
       setState(() => _posts = posts);
     } catch (e) {

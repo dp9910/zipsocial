@@ -61,7 +61,6 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
         _scrollToBottom();
       }
     } catch (e) {
-      print('Error loading messages: $e');
       if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -69,11 +68,9 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
   }
 
   void _subscribeToMessages() {
-    print('ChatConversation: Setting up real-time subscription for ${widget.conversationId}');
     _messageSubscription = ChatService.subscribeToMessages(
       widget.conversationId,
       (Message message) {
-        print('ChatConversation: Received real-time message: ${message.content}');
         if (mounted) {
           // Check if message already exists to avoid duplicates
           final messageExists = _messages.any((m) => m.id == message.id);
@@ -83,9 +80,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
             });
             _scrollToBottom();
             _markAsRead();
-            print('ChatConversation: Added message to UI, total messages: ${_messages.length}');
           } else {
-            print('ChatConversation: Message already exists, skipping');
           }
         }
       },
@@ -116,7 +111,6 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
         _scrollToBottom();
       }
     } catch (e) {
-      print('Error sending message: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

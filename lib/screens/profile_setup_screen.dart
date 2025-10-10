@@ -337,10 +337,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                       textCapitalization: TextCapitalization.sentences,
                       keyboardType: TextInputType.multiline,
                       onTap: () {
-                        print('Bio field tapped');
                       },
                       onChanged: (value) {
-                        print('Bio changed: $value');
                       },
                     ),
                     const SizedBox(height: 8),

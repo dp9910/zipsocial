@@ -19,11 +19,6 @@ class SupabaseAuthService {
 
   static Future<void> _createInitialUser(User user) async {
     final customUserId = _generateUserId();
-    print('Attempting to create initial user in public.users table...');
-    print('User ID: ${user.id}');
-    print('Custom User ID: $customUserId');
-    print('User Email: ${user.email}');
-    print('User Phone: ${user.phone}');
 
     try {
       await _supabase.from('users').insert({
@@ -32,12 +27,9 @@ class SupabaseAuthService {
         'email': user.email,
         'phone_number': user.phone,
       });
-      print('Initial user created successfully!');
     } catch (e) {
-      print('Error creating initial user: $e');
       // Ignore if user already exists
       if (e is PostgrestException && e.code == '23505') { // Unique violation
-        print('User already exists in public.users, ignoring.');
         return;
       }
       rethrow;
@@ -45,7 +37,6 @@ class SupabaseAuthService {
   }
 
   static Future<void> signInWithGoogle() async {
-    print('signInWithGoogle called.');
     try {
       const webClientId = '867310496279-cshu2jj10llk18ek68fh1bhdvec6kbov.apps.googleusercontent.com';
       const iosClientId = '867310496279-s4n7jhbrm5c3r74314nug67hdm04ch9n.apps.googleusercontent.com';
@@ -71,48 +62,37 @@ class SupabaseAuthService {
         accessToken: accessToken,
       );
 
-      print('Supabase signInWithIdToken response:');
-      print('  Session: ${response.session}');
-      print('  User: ${response.user}');
 
       if (response.user != null) {
-        print('Supabase signInWithIdToken successful. User ID: ${response.user!.id}');
         await _createInitialUser(response.user!);
       } else {
-        print('Supabase signInWithIdToken failed: response.user is null.');
       }
     } catch (e) {
-      print('Error signing in with Google: $e');
       rethrow;
     }
   }
 
   static Future<void> signInWithEmail(String email, String password) async {
-    print('signInWithEmail called.');
     try {
       await _supabase.auth.signInWithPassword(
         email: email,
         password: password,
       );
     } catch (e) {
-      print('Error signing in with email: $e');
       rethrow;
     }
   }
 
   static Future<void> signUpWithEmail(String email, String password) async {
-    print('signUpWithEmail called.');
     try {
       final response = await _supabase.auth.signUp(
         email: email,
         password: password,
       );
       if (response.user != null) {
-        print('Supabase signUp successful. User ID: ${response.user!.id}');
         await _createInitialUser(response.user!);
       }
     } catch (e) {
-      print('Error signing up with email: $e');
       rethrow;
     }
   }
@@ -126,10 +106,8 @@ class SupabaseAuthService {
   static Future<AppUser?> getUserProfile() async {
     final user = currentUser;
     if (user == null) {
-      print('getUserProfile: No current Supabase user.');
       return null;
     }
-    print('getUserProfile: Attempting to fetch profile for user ID: ${user.id}');
 
     try {
       final response = await _supabase
@@ -139,19 +117,15 @@ class SupabaseAuthService {
           .maybeSingle();
 
       if (response == null) {
-        print('getUserProfile: No profile found for user ID: ${user.id}');
         return null;
       }
-      print('getUserProfile: Profile fetched successfully: $response');
       return AppUser.fromJson(response);
     } catch (e) {
-      print('Error getting user profile: $e');
       return null;
     }
   }
 
   static Future<AppUser?> getUserProfileById(String userId) async {
-    print('getUserProfileById: Attempting to fetch profile for user ID: $userId');
     try {
       final response = await _supabase
           .from('users')
@@ -160,13 +134,10 @@ class SupabaseAuthService {
           .maybeSingle();
 
       if (response == null) {
-        print('getUserProfileById: No profile found for user ID: $userId');
         return null;
       }
-      print('getUserProfileById: Profile fetched successfully: $response');
       return AppUser.fromJson(response);
     } catch (e) {
-      print('Error getting user profile by ID: $e');
       return null;
     }
   }
@@ -179,7 +150,6 @@ class SupabaseAuthService {
   }) async {
     final user = currentUser;
     if (user == null) throw Exception('Not authenticated');
-    print('updateUserProfile: Updating profile for user ID: ${user.id}');
 
     final updates = {
       'nickname': nickname,
@@ -197,10 +167,8 @@ class SupabaseAuthService {
           .eq('id', user.id)
           .select()
           .single();
-      print('updateUserProfile: Profile updated successfully: $response');
       return AppUser.fromJson(response);
     } catch (e) {
-      print('Error updating user profile: $e');
       rethrow;
     }
   }
@@ -213,7 +181,6 @@ class SupabaseAuthService {
       throw Exception('Cannot follow yourself');
     }
     
-    print('followUser: User ${user.id} attempting to follow $targetUserId');
 
     try {
       // Check if already following to prevent duplicates
@@ -225,7 +192,6 @@ class SupabaseAuthService {
           .maybeSingle();
       
       if (existingFollow != null) {
-        print('followUser: Already following this user');
         return; // Already following
       }
 
@@ -237,17 +203,13 @@ class SupabaseAuthService {
             'following_id': targetUserId,
             'created_at': DateTime.now().toUtc().toIso8601String(),
           });
-      print('followUser: Follow relationship inserted.');
 
       // Update follower count for target user
       await _updateUserCount(targetUserId, 'follower_count', 1);
-      print('followUser: Target user follower count incremented.');
 
       // Update following count for current user
       await _updateUserCount(user.id, 'following_count', 1);
-      print('followUser: Current user following count incremented.');
     } catch (e) {
-      print('Error following user: $e');
       throw Exception('Failed to follow user: $e');
     }
   }
@@ -255,7 +217,6 @@ class SupabaseAuthService {
   static Future<void> unfollowUser(String targetUserId) async {
     final user = currentUser;
     if (user == null) throw Exception('Not authenticated');
-    print('unfollowUser: User ${user.id} attempting to unfollow $targetUserId');
 
     try {
       // Delete follow relationship
@@ -264,17 +225,13 @@ class SupabaseAuthService {
           .delete()
           .eq('follower_id', user.id)
           .eq('following_id', targetUserId);
-      print('unfollowUser: Follow relationship deleted.');
 
       // Update follower count for target user
       await _updateUserCount(targetUserId, 'follower_count', -1);
-      print('unfollowUser: Target user follower count decremented.');
 
       // Update following count for current user
       await _updateUserCount(user.id, 'following_count', -1);
-      print('unfollowUser: Current user following count decremented.');
     } catch (e) {
-      print('Error unfollowing user: $e');
       throw Exception('Failed to unfollow user: $e');
     }
   }
@@ -298,7 +255,6 @@ class SupabaseAuthService {
           .update({countField: newCount})
           .eq('id', userId);
     } catch (e) {
-      print('Error updating $countField for user $userId: $e');
       throw e;
     }
   }
@@ -306,7 +262,6 @@ class SupabaseAuthService {
   static Future<bool> isFollowing(String targetUserId) async {
     final user = currentUser;
     if (user == null) return false;
-    print('isFollowing: Checking follow status for user ${user.id} and target $targetUserId');
 
     try {
       final response = await _supabase
@@ -315,10 +270,8 @@ class SupabaseAuthService {
           .eq('follower_id', user.id)
           .eq('following_id', targetUserId)
           .maybeSingle();
-      print('isFollowing: Follow status response: $response');
       return response != null;
     } catch (e) {
-      print('Error checking follow status: $e');
       return false;
     }
   }
@@ -330,7 +283,6 @@ class SupabaseAuthService {
     if (targetUserId == null) return [];
 
     try {
-      print('Fetching followers for user: $targetUserId');
       
       // Get follower IDs first
       final followersResponse = await _supabase
@@ -338,10 +290,8 @@ class SupabaseAuthService {
           .select('follower_id')
           .eq('following_id', targetUserId);
       
-      print('Followers IDs response: $followersResponse');
       
       if (followersResponse.isEmpty) {
-        print('No followers found');
         return [];
       }
       
@@ -350,7 +300,6 @@ class SupabaseAuthService {
           .map((item) => item['follower_id'] as String)
           .toList();
       
-      print('Follower IDs: $followerIds');
       
       // Get user details for these follower IDs
       final usersResponse = await _supabase
@@ -369,29 +318,23 @@ class SupabaseAuthService {
           ''')
           .inFilter('id', followerIds);
       
-      print('Users response: $usersResponse');
 
       List<AppUser> users = [];
       for (var userData in usersResponse) {
-        print('Processing user data: $userData');
         
         // Add safety checks for required fields
         if (userData['id'] == null || userData['custom_user_id'] == null) {
-          print('Warning: missing required fields in user data: $userData');
           continue;
         }
         
         try {
           users.add(AppUser.fromJson(userData));
         } catch (e) {
-          print('Error parsing user data: $e for data: $userData');
         }
       }
       
       return users;
     } catch (e) {
-      print('Error fetching followers: $e');
-      print('Stack trace: ${StackTrace.current}');
       return [];
     }
   }
@@ -403,7 +346,6 @@ class SupabaseAuthService {
     if (targetUserId == null) return [];
 
     try {
-      print('Fetching following for user: $targetUserId');
       
       // Get following IDs first
       final followingResponse = await _supabase
@@ -411,10 +353,8 @@ class SupabaseAuthService {
           .select('following_id')
           .eq('follower_id', targetUserId);
       
-      print('Following IDs response: $followingResponse');
       
       if (followingResponse.isEmpty) {
-        print('No following found');
         return [];
       }
       
@@ -423,7 +363,6 @@ class SupabaseAuthService {
           .map((item) => item['following_id'] as String)
           .toList();
       
-      print('Following IDs: $followingIds');
       
       // Get user details for these following IDs
       final usersResponse = await _supabase
@@ -442,29 +381,23 @@ class SupabaseAuthService {
           ''')
           .inFilter('id', followingIds);
       
-      print('Users response: $usersResponse');
 
       List<AppUser> users = [];
       for (var userData in usersResponse) {
-        print('Processing user data: $userData');
         
         // Add safety checks for required fields
         if (userData['id'] == null || userData['custom_user_id'] == null) {
-          print('Warning: missing required fields in user data: $userData');
           continue;
         }
         
         try {
           users.add(AppUser.fromJson(userData));
         } catch (e) {
-          print('Error parsing user data: $e for data: $userData');
         }
       }
       
       return users;
     } catch (e) {
-      print('Error fetching following: $e');
-      print('Stack trace: ${StackTrace.current}');
       return [];
     }
   }
@@ -480,7 +413,6 @@ class SupabaseAuthService {
         'p_following_id': user.id,
       });
     } catch (e) {
-      print('Error blocking user: $e');
       throw Exception('Failed to block user: $e');
     }
   }

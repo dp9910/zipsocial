@@ -43,7 +43,6 @@ class _CommentsScreenState extends State<CommentsScreen> {
         _comments = comments;
       });
     } catch (e) {
-      print('Error loading comments: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to load comments: $e')),

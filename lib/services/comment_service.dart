@@ -8,18 +8,15 @@ class CommentService {
   /// Get threaded comments for a post using recursive query
   static Future<List<Comment>> getThreadedComments(String postId) async {
     try {
-      print('getThreadedComments: Fetching comments for post $postId');
       
       // Use the database function for recursive comment fetching
       final response = await _supabase
           .rpc('get_threaded_comments', params: {'post_uuid': postId});
 
       if (response == null || response.isEmpty) {
-        print('getThreadedComments: No comments found');
         return [];
       }
 
-      print('getThreadedComments: Found ${response.length} comments');
       
       // Convert to Comment objects
       final flatComments = response
@@ -29,7 +26,6 @@ class CommentService {
       // Build the threaded structure
       return CommentThreadBuilder.buildThreads(flatComments);
     } catch (e) {
-      print('Error fetching threaded comments: $e');
       return [];
     }
   }
@@ -53,7 +49,6 @@ class CommentService {
 
       return response.map((data) => Comment.fromJson(data)).toList();
     } catch (e) {
-      print('Error fetching comments: $e');
       return [];
     }
   }
@@ -84,7 +79,6 @@ class CommentService {
         }
       }
 
-      print('addComment: Creating comment with depth $depth');
 
       final response = await _supabase
           .from('comments')
@@ -102,12 +96,10 @@ class CommentService {
           ''')
           .single();
 
-      print('addComment: Comment created successfully');
       
       // The comment count will be automatically updated by the database trigger
       return Comment.fromJson(response);
     } catch (e) {
-      print('Error adding comment: $e');
       rethrow;
     }
   }
@@ -126,7 +118,6 @@ class CommentService {
 
       return Comment.fromJson(response);
     } catch (e) {
-      print('Error fetching comment by ID: $e');
       return null;
     }
   }
@@ -147,9 +138,7 @@ class CommentService {
           .update({'is_deleted': true, 'content': '[deleted]'})
           .eq('id', commentId);
 
-      print('deleteComment: Comment deleted successfully');
     } catch (e) {
-      print('Error deleting comment: $e');
       rethrow;
     }
   }
@@ -181,10 +170,8 @@ class CommentService {
           ''')
           .single();
 
-      print('updateComment: Comment updated successfully');
       return Comment.fromJson(response);
     } catch (e) {
-      print('Error updating comment: $e');
       rethrow;
     }
   }
@@ -200,7 +187,6 @@ class CommentInteractionService {
       final user = SupabaseAuthService.currentUser;
       if (user == null) throw Exception('User not authenticated');
 
-      print('voteComment: ${isUpvote ? 'Upvoting' : 'Downvoting'} comment $commentId');
 
       final newVote = isUpvote ? 'up' : 'down';
 
@@ -212,9 +198,7 @@ class CommentInteractionService {
         'previous_vote': null, // Let the function determine current vote
       });
 
-      print('voteComment: Vote registered successfully');
     } catch (e) {
-      print('Error voting on comment: $e');
       rethrow;
     }
   }
@@ -225,7 +209,6 @@ class CommentInteractionService {
       final user = SupabaseAuthService.currentUser;
       if (user == null) throw Exception('User not authenticated');
 
-      print('removeVote: Removing vote from comment $commentId');
 
       // Use the same vote function with null vote type to remove vote
       await _supabase.rpc('vote_comment', params: {
@@ -235,9 +218,7 @@ class CommentInteractionService {
         'previous_vote': null,
       });
 
-      print('removeVote: Vote removed successfully');
     } catch (e) {
-      print('Error removing vote: $e');
       rethrow;
     }
   }
@@ -253,9 +234,7 @@ class CommentInteractionService {
         'user_uuid': user.id,
       });
 
-      print('reportComment: Comment reported successfully');
     } catch (e) {
-      print('Error reporting comment: $e');
       rethrow;
     }
   }

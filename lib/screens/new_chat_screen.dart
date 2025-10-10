@@ -47,7 +47,6 @@ class _NewChatScreenState extends State<NewChatScreen> {
         });
       }
     } catch (e) {
-      print('Error loading chatable users: $e');
       if (mounted) {
         setState(() {
           _isLoading = false;
