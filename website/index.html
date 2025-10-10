@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zip Social - Connect Safely with Your Local Community</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #2d3748;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 20px rgba(78, 205, 196, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+        }
+
+        .logo-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #4ECDC4;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 120px 0 80px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #2d3748;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero .subtitle {
+            font-size: 1.3rem;
+            color: #4a5568;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .privacy-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(78, 205, 196, 0.1);
+            color: #4ECDC4;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            margin-bottom: 3rem;
+            border: 2px solid rgba(78, 205, 196, 0.2);
+        }
+
+        .download-section {
+            margin-top: 3rem;
+        }
+
+        .download-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #4ECDC4, #44B5B5);
+            color: white;
+            text-decoration: none;
+            padding: 18px 40px;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(78, 205, 196, 0.3);
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(78, 205, 196, 0.4);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 80px 0;
+            background: white;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 3rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .feature-card {
+            background: #f7fafc;
+            padding: 2rem;
+            border-radius: 16px;
+            text-align: center;
+            border: 2px solid rgba(78, 205, 196, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(78, 205, 196, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card p {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        /* Privacy Section */
+        .privacy-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, #f8fffe, #e6f7f6);
+            border-top: 1px solid rgba(78, 205, 196, 0.2);
+            border-bottom: 1px solid rgba(78, 205, 196, 0.2);
+        }
+
+        .privacy-content {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .privacy-text h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 1.5rem;
+        }
+
+        .privacy-section h3 {
+            color: #2d3748;
+            font-weight: 700;
+        }
+
+        .privacy-section p {
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        .privacy-caption {
+            color: #4a5568;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            .privacy-section {
+                background: linear-gradient(135deg, #1a202c, #2d3748);
+            }
+            
+            .privacy-section h2,
+            .privacy-section h3 {
+                color: #e2e8f0;
+            }
+            
+            .privacy-section p,
+            .privacy-features li,
+            .privacy-caption {
+                color: #cbd5e0;
+            }
+        }
+
+        .privacy-features {
+            list-style: none;
+            margin-top: 2rem;
+        }
+
+        .privacy-features li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            color: #2d3748;
+            font-weight: 500;
+        }
+
+        .privacy-features li::before {
+            content: '🛡️';
+            margin-right: 12px;
+            font-size: 1.2rem;
+        }
+
+        /* Screenshot Section */
+        .screenshots {
+            padding: 80px 0;
+            background: white;
+        }
+
+        .screenshot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .screenshot {
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .screenshot:hover {
+            transform: scale(1.05);
+        }
+
+        .screenshot img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Footer */
+        footer {
+            background: #2d3748;
+            color: white;
+            text-align: center;
+            padding: 3rem 0;
+        }
+
+        .footer-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            margin: 0 auto 1rem;
+            display: block;
+        }
+
+        /* Animation Keyframes */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+            }
+            50% {
+                box-shadow: 0 8px 25px rgba(78, 205, 196, 0.5);
+            }
+        }
+
+        /* Animation Classes */
+        .animate-fade-in {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .animate-pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        /* Enhanced Features */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+            margin-bottom: 4rem;
+        }
+
+        .feature-card {
+            background: #f7fafc;
+            padding: 2.5rem;
+            border-radius: 20px;
+            text-align: center;
+            border: 2px solid rgba(78, 205, 196, 0.1);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(78, 205, 196, 0.1), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .feature-card:hover::before {
+            left: 100%;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(78, 205, 196, 0.25);
+            border-color: rgba(78, 205, 196, 0.3);
+        }
+
+        /* Enhanced Download Button */
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, #4ECDC4, #44B5B5, #3aa6a6);
+            color: white;
+            text-decoration: none;
+            padding: 20px 48px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 30px rgba(78, 205, 196, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .download-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .download-btn:hover::before {
+            left: 100%;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(78, 205, 196, 0.5);
+        }
+
+        /* Enhanced Screenshots */
+        .screenshot {
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            transition: all 0.4s ease;
+            position: relative;
+        }
+
+        .screenshot::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(78, 205, 196, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .screenshot:hover::after {
+            opacity: 1;
+        }
+
+        .screenshot:hover {
+            transform: scale(1.08) rotateY(5deg);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Stats Section */
+        .stats-section {
+            padding: 60px 0;
+            background: linear-gradient(135deg, #4ECDC4, #44B5B5);
+            color: white;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .stat-item h3 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-item p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Scroll Animation */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease;
+        }
+
+        .scroll-reveal.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-content {
+                grid-template-columns: 1fr !important;
+                gap: 2rem !important;
+                text-align: center !important;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem !important;
+            }
+
+            .hero .subtitle {
+                font-size: 1.2rem !important;
+            }
+
+            .hero-screenshot img {
+                max-width: 280px !important;
+            }
+
+            .privacy-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .privacy-images {
+                grid-template-columns: 1fr !important;
+                gap: 1rem !important;
+            }
+
+            .screenshot-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .feature-card {
+                padding: 1.5rem;
+            }
+
+            .feature-showcase {
+                position: relative !important;
+                padding: 2rem !important;
+            }
+
+            .feature-showcase > div {
+                position: static !important;
+                transform: none !important;
+                text-align: center !important;
+                margin: 1rem 0 !important;
+                font-size: 0.9rem !important;
+            }
+
+            .download-btn {
+                padding: 16px 32px;
+                font-size: 1.1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stat-item h3 {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .screenshot-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <img src="Gemini_Generated_Image_a2o3xwa2o3xwa2o3.png" alt="Zip Social Logo" class="logo animate-pulse">
+                <div class="logo-text">Zip Social</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; min-height: 80vh;">
+                <!-- Left Side - Text Content -->
+                <div class="hero-text">
+                    <div class="privacy-badge animate-fade-in">
+                        🔒 Your neighborhood. Your privacy. Your choice.
+                    </div>
+                    <h1 class="animate-fade-in" style="font-size: 3.5rem; line-height: 1.1; margin: 2rem 0;">Social Media for the Neighbourhood</h1>
+                    <p class="subtitle animate-fade-in" style="font-size: 1.5rem; margin-bottom: 3rem; color: #4a5568; font-weight: 500;">
+                        Who needs influencers when you have neighbours?
+                    </p>
+                    <div class="download-section animate-fade-in">
+                        <a href="#" class="download-btn">
+                            <span>📱</span>
+                            Download on App Store
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Right Side - Home Page Screenshot -->
+                <div class="hero-screenshot" style="text-align: center;">
+                    <img src="screenshot/home_page.png" alt="Zip Social Home Page - Local neighborhood posts" 
+                         style="max-width: 350px; width: 100%; height: auto; border-radius: 25px; box-shadow: 0 25px 60px rgba(0,0,0,0.15);">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">Simple. Safe. Social.</h2>
+            <div class="feature-showcase" style="position: relative; text-align: center; margin: 6rem 0; padding: 4rem; min-height: 70vh;">
+                <!-- Top Features -->
+                <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); font-weight: 800; font-size: 1.3rem; color: #4ECDC4;">
+                    Free to use
+                </div>
+                
+                <!-- Left Features -->
+                <div style="position: absolute; left: 5%; top: 50%; transform: translateY(-50%); font-weight: 800; font-size: 1.1rem; color: #2d3748; text-align: left; z-index: 10;">
+                    <div style="margin-bottom: 2rem;">• Easy Google/Email Signup</div>
+                    <div>• No Personal Info Required</div>
+                </div>
+                
+                <!-- Right Features -->
+                <div style="position: absolute; right: 5%; top: 50%; transform: translateY(-50%); font-weight: 800; font-size: 1.1rem; color: #2d3748; text-align: right; z-index: 10;">
+                    <div style="margin-bottom: 2rem;">• Local Community Posts</div>
+                    <div>• Follow/Unfollow Anyone</div>
+                </div>
+                
+                <!-- Bottom Features -->
+                <div style="position: absolute; bottom: -5%; left: 50%; transform: translateX(-50%); font-weight: 800; font-size: 1.1rem; color: #2d3748; z-index: 10;">
+                    <div style="margin-bottom: 1.5rem;">• Report Bad Posts</div>
+                    <div>• Chat with Your Network</div>
+                </div>
+                
+                <!-- Center Logo -->
+                <img src="Gemini_Generated_Image_a2o3xwa2o3xwa2o3.png" alt="Zip Social Logo" style="max-width: 500px; width: 100%; height: auto; border-radius: 24px; box-shadow: 0 20px 50px rgba(78, 205, 196, 0.3); position: relative; z-index: 1;">
+            </div>
+        </div>
+    </section>
+
+    <!-- Privacy Focus Section -->
+    <section class="privacy-section">
+        <div class="container">
+            <h2 class="section-title" style="margin-bottom: 3rem;">Privacy First, Always</h2>
+            <div class="privacy-content">
+                <div class="privacy-text">
+                    <h3 style="font-size: 1.8rem; margin-bottom: 1rem;">🔐 Loop Protection</h3>
+                    <p style="font-size: 1.2rem; margin-bottom: 2rem;">Only people you follow can message you or see your posts.</p>
+                    
+                    <ul class="privacy-features">
+                        <li>No random messages from strangers</li>
+                        <li>Only see posts from people you choose to follow</li>
+                        <li>Complete control over your social circle</li>
+                        <li>Block or unfollow anyone instantly</li>
+                    </ul>
+                </div>
+                <div class="privacy-images" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div style="text-align: center;">
+                        <img src="screenshot/loop_post_page.png" alt="Loop Posts - Only see posts from people you follow" style="max-width: 100%; border-radius: 15px; box-shadow: 0 15px 30px rgba(0,0,0,0.2);">
+                        <p class="privacy-caption">Posts from your followers only</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <img src="screenshot/chat_page.png" alt="Protected Chat - Only followers can message you" style="max-width: 100%; border-radius: 15px; box-shadow: 0 15px 30px rgba(0,0,0,0.2);">
+                        <p class="privacy-caption">Chat with your network only</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Screenshots Section -->
+    <section class="screenshots">
+        <div class="container">
+            <h2 class="section-title">See It In Action</h2>
+            <div class="screenshot-grid">
+                <div class="screenshot">
+                    <h3 style="text-align: center; margin-bottom: 1rem; font-size: 1.2rem; font-weight: 600; color: #2d3748;">1. Sign Up</h3>
+                    <img src="screenshot/sign_up_sign_in_page.png" alt="Easy Signup">
+                </div>
+                <div class="screenshot">
+                    <h3 style="text-align: center; margin-bottom: 1rem; font-size: 1.2rem; font-weight: 600; color: #2d3748;">2. Create Post</h3>
+                    <img src="screenshot/create_post_page.png" alt="Create Post">
+                </div>
+                <div class="screenshot">
+                    <h3 style="text-align: center; margin-bottom: 1rem; font-size: 1.2rem; font-weight: 600; color: #2d3748;">3. View Friend's Profile</h3>
+                    <img src="screenshot/user_page_display.png" alt="User Profile">
+                </div>
+                <div class="screenshot">
+                    <h3 style="text-align: center; margin-bottom: 1rem; font-size: 1.2rem; font-weight: 600; color: #2d3748;">4. View Your Profile</h3>
+                    <img src="screenshot/self_profile_page.png" alt="Your Profile">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <img src="Gemini_Generated_Image_a2o3xwa2o3xwa2o3.png" alt="Zip Social Logo" class="footer-logo">
+                <h3>Zip Social</h3>
+                <p>Connect without compromise.</p>
+                <br>
+                <p style="color: #a0aec0; font-size: 0.9rem;">
+                    Privacy-first • Local connections
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Scroll animation
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all scroll-reveal elements
+        document.querySelectorAll('.scroll-reveal').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Add floating animation to logo
+        document.addEventListener('DOMContentLoaded', function() {
+            const logo = document.querySelector('.logo');
+            if (logo) {
+                logo.classList.add('animate-float');
+            }
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add scroll reveal to additional elements
+        window.addEventListener('load', function() {
+            document.querySelectorAll('.feature-card, .screenshot, .privacy-content').forEach(el => {
+                el.classList.add('scroll-reveal');
+                observer.observe(el);
+            });
+        });
+    </script>
+</body>
+</html>

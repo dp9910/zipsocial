@@ -36,6 +36,11 @@ class SupabaseAuthService {
     }
   }
 
+  // Public method to recreate user profile if deleted
+  static Future<void> createInitialUserProfile(User user) async {
+    await _createInitialUser(user);
+  }
+
   static Future<void> signInWithGoogle() async {
     try {
       const webClientId = '867310496279-cshu2jj10llk18ek68fh1bhdvec6kbov.apps.googleusercontent.com';

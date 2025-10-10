@@ -448,58 +448,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     ),
                   ],
                   
-                  // Add some bottom padding to ensure content is above keyboard
-                  const SizedBox(height: 100),
+                  // Add some bottom padding for better UX
+                  const SizedBox(height: 32),
                 ],
               ),
-            ),
-          ),
-          
-          // Bottom action bar (like in HTML design)
-          Container(
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              border: Border(
-                top: BorderSide(
-                  color: borderColor,
-                ),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: isDarkMode ? Colors.black26 : Colors.grey.withOpacity(0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, -2),
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            child: Row(
-              children: [
-                Text(
-                  'Add to your post',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
-                  ),
-                ),
-                const Spacer(),
-                _buildActionButton(Icons.photo_camera, 'Camera', () {
-                  // TODO: Image picker
-                }, isDarkMode),
-                const SizedBox(width: 8),
-                _buildActionButton(Icons.videocam, 'Video', () {
-                  // TODO: Video picker
-                }, isDarkMode),
-                const SizedBox(width: 8),
-                _buildActionButton(Icons.image, 'Gallery', () {
-                  // TODO: Gallery picker
-                }, isDarkMode),
-                const SizedBox(width: 8),
-                _buildActionButton(Icons.alternate_email, 'Mention', () {
-                  // TODO: Mention users
-                }, isDarkMode),
-              ],
             ),
           ),
         ],
@@ -550,31 +502,4 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     );
   }
 
-  Widget _buildActionButton(IconData icon, String tooltip, VoidCallback onPressed, bool isDarkMode) {
-    return Tooltip(
-      message: tooltip,
-      child: Container(
-        decoration: BoxDecoration(
-          color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
-          ),
-        ),
-        child: IconButton(
-          icon: Icon(
-            icon,
-            color: AppTheme.primary,
-            size: 20,
-          ),
-          onPressed: onPressed,
-          padding: const EdgeInsets.all(8),
-          constraints: const BoxConstraints(
-            minWidth: 40,
-            minHeight: 40,
-          ),
-        ),
-      ),
-    );
-  }
 }

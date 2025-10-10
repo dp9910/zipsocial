@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/supabase_auth_service.dart';
 import '../models/user.dart';
 
@@ -48,6 +49,12 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             _zipcodeController.text = user.preferredZipcode!;
           }
         });
+      } else {
+        // If user data doesn't exist but auth user exists, create initial user
+        final authUser = SupabaseAuthService.currentUser;
+        if (authUser != null) {
+          await _recreateUserProfile(authUser);
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -59,6 +66,23 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       if (mounted) {
         setState(() => _isLoading = false);
       }
+    }
+  }
+
+  Future<void> _recreateUserProfile(User authUser) async {
+    try {
+      // Call the same method used during initial user creation
+      await SupabaseAuthService.createInitialUserProfile(authUser);
+      
+      // Reload user data
+      final user = await SupabaseAuthService.getUserProfile();
+      if (user != null && mounted) {
+        setState(() {
+          _currentUser = user;
+        });
+      }
+    } catch (e) {
+      // Ignore errors, user can still complete profile
     }
   }
 
