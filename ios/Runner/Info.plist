@@ -54,8 +54,6 @@
 			</array>
 		</dict>
 	</array>
-	<key>NSUserTrackingUsageDescription</key>
-	<string>This app does not track users across other apps or websites.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app uses your location to show posts from your local community based on your zip code.</string>
 	<key>NSCameraUsageDescription</key>

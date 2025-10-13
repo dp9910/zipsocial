@@ -103,7 +103,7 @@ class SupabaseAuthService {
   }
 
   static Future<void> signOut() async {
-    await _supabase.auth.signOut();
+    await _supabase.auth.signOut(scope: SignOutScope.global);
   }
 
   static Stream<AuthState> get authStateChanges => _supabase.auth.onAuthStateChange;

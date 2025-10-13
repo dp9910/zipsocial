@@ -82,12 +82,14 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              SizedBox(height: MediaQuery.of(context).size.height * 0.05),
               // Logo/Title Section
               Container(
                 width: 80,
@@ -242,6 +244,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 ),
                 textAlign: TextAlign.center,
               ),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.05),
             ],
           ),
         ),
