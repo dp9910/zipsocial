@@ -12,6 +12,12 @@
 .swiftpm/
 migrate_working_dir/
 
+# Apple Sign In security files
+*.p8
+AuthKey_*.p8
+generate_apple_jwt*.js
+node_modules/
+
 # IntelliJ related
 *.iml
 *.ipr
