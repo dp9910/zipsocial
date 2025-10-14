@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'dart:math';
+import 'package:crypto/crypto.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user.dart';
 
@@ -71,6 +74,39 @@ class SupabaseAuthService {
       if (response.user != null) {
         await _createInitialUser(response.user!);
       } else {
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future<void> signInWithApple() async {
+    try {
+      // Generate nonce for Apple Sign In
+      final rawNonce = _supabase.auth.generateRawNonce();
+      final hashedNonce = sha256.convert(utf8.encode(rawNonce)).toString();
+
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        nonce: hashedNonce,
+      );
+
+      final idToken = credential.identityToken;
+      if (idToken == null) {
+        throw 'No ID Token received.';
+      }
+
+      final response = await _supabase.auth.signInWithIdToken(
+        provider: OAuthProvider.apple,
+        idToken: idToken,
+        nonce: rawNonce,
+      );
+
+      if (response.user != null) {
+        await _createInitialUser(response.user!);
       }
     } catch (e) {
       rethrow;

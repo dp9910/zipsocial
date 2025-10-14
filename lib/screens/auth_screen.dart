@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'dart:io';
 import '../services/supabase_auth_service.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -14,6 +16,7 @@ class _AuthScreenState extends State<AuthScreen> {
   bool _isSignUp = false;
   bool _isLoading = false;
   bool _isGoogleLoading = false;
+  bool _isAppleLoading = false;
 
   Future<void> _signInWithEmail() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) return;
@@ -79,6 +82,24 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
+  Future<void> _signInWithApple() async {
+    setState(() => _isAppleLoading = true);
+    
+    try {
+      await SupabaseAuthService.signInWithApple();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isAppleLoading = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -133,6 +154,21 @@ class _AuthScreenState extends State<AuthScreen> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 48),
+              
+              // Apple Sign-In Button (iOS only)
+              if (Platform.isIOS) ...[
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: SignInWithAppleButton(
+                    onPressed: () => _signInWithApple(),
+                    style: Theme.of(context).brightness == Brightness.dark 
+                      ? SignInWithAppleButtonStyle.white 
+                      : SignInWithAppleButtonStyle.black,
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
               
               // Google Sign-In Button
               SizedBox(
