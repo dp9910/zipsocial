@@ -18,6 +18,9 @@ AuthKey_*.p8
 generate_apple_jwt*.js
 node_modules/
 
+# iOS build artifacts
+ios/build/
+
 # IntelliJ related
 *.iml
 *.ipr
