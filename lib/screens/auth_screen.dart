@@ -27,12 +27,33 @@ class _AuthScreenState extends State<AuthScreen> {
       await SupabaseAuthService.signInWithEmail(_emailController.text, _passwordController.text);
     } catch (e) {
       if (mounted) {
+        String errorMessage;
+        String errorString = e.toString().toLowerCase();
+        
+        if (errorString.contains('invalid login credentials') || 
+            errorString.contains('email not confirmed') ||
+            errorString.contains('user not found')) {
+          errorMessage = 'Account not found. Please check your email or sign up for a new account.';
+        } else if (errorString.contains('invalid password') || 
+                   errorString.contains('wrong password')) {
+          errorMessage = 'Incorrect password. Please try again.';
+        } else if (errorString.contains('too many requests')) {
+          errorMessage = 'Too many attempts. Please try again later.';
+        } else {
+          errorMessage = 'Sign in failed. Please check your credentials and try again.';
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red.shade600,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
         );
       }
     } finally {
-      if (mounted) { // Added mounted check
+      if (mounted) {
         setState(() => _isLoading = false);
       }
     }
@@ -41,24 +62,78 @@ class _AuthScreenState extends State<AuthScreen> {
   Future<void> _signUpWithEmail() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) return;
     
+    // Basic validation
+    if (!_emailController.text.contains('@')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please enter a valid email address.'),
+          backgroundColor: Colors.orange.shade600,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      );
+      return;
+    }
+    
+    if (_passwordController.text.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Password must be at least 6 characters long.'),
+          backgroundColor: Colors.orange.shade600,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      );
+      return;
+    }
+    
     setState(() => _isLoading = true);
     
     try {
       await SupabaseAuthService.signUpWithEmail(_emailController.text, _passwordController.text);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Confirmation email sent! Please check your inbox.')),
+          SnackBar(
+            content: const Text('Confirmation email sent! Please check your inbox.'),
+            backgroundColor: Colors.green.shade600,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
         );
         setState(() => _isSignUp = false);
       }
     } catch (e) {
       if (mounted) {
+        String errorMessage;
+        String errorString = e.toString().toLowerCase();
+        
+        if (errorString.contains('user already registered') || 
+            errorString.contains('email address is already registered') ||
+            errorString.contains('already exists')) {
+          errorMessage = 'An account with this email already exists. Please sign in instead.';
+          // Automatically switch to sign in mode
+          setState(() => _isSignUp = false);
+        } else if (errorString.contains('invalid email')) {
+          errorMessage = 'Please enter a valid email address.';
+        } else if (errorString.contains('password') && errorString.contains('weak')) {
+          errorMessage = 'Password is too weak. Please use a stronger password.';
+        } else if (errorString.contains('too many requests')) {
+          errorMessage = 'Too many attempts. Please try again later.';
+        } else {
+          errorMessage = 'Sign up failed. Please check your information and try again.';
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red.shade600,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
         );
       }
     } finally {
-      if (mounted) { // Added mounted check
+      if (mounted) {
         setState(() => _isLoading = false);
       }
     }
@@ -153,46 +228,119 @@ class _AuthScreenState extends State<AuthScreen> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 48),
+              const SizedBox(height: 32),
               
-              // Apple Sign-In Button (iOS only)
-              if (Platform.isIOS) ...[
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: SignInWithAppleButton(
-                    onPressed: () => _signInWithApple(),
-                    style: Theme.of(context).brightness == Brightness.dark 
-                      ? SignInWithAppleButtonStyle.white 
-                      : SignInWithAppleButtonStyle.black,
-                  ),
+              // Sign In / Sign Up Tabs
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                const SizedBox(height: 16),
-              ],
-              
-              // Google Sign-In Button
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton.icon(
-                  onPressed: _isGoogleLoading ? null : _signInWithGoogle,
-                  icon: _isGoogleLoading 
-                    ? const SizedBox(
-                        width: 20, height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.g_mobiledata, size: 24),
-                  label: const Text('Continue with Google'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black87,
-                    elevation: 1,
-                    side: BorderSide(color: Colors.grey.shade300),
-                  ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _isSignUp = false),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: !_isSignUp ? const Color(0xFF4ECDC4) : Colors.transparent,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            'Sign In',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: !_isSignUp ? Colors.white : Colors.grey.shade600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _isSignUp = true),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: _isSignUp ? const Color(0xFF4ECDC4) : Colors.transparent,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            'Sign Up',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: _isSignUp ? Colors.white : Colors.grey.shade600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               
-              const SizedBox(height: 16),
+              const SizedBox(height: 32),
+              
+              // Quick Sign In Options
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Quick ${_isSignUp ? 'Sign Up' : 'Sign In'}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Apple Sign-In Button (iOS only)
+                  if (Platform.isIOS) ...[
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: SignInWithAppleButton(
+                        onPressed: () => _signInWithApple(),
+                        style: Theme.of(context).brightness == Brightness.dark 
+                          ? SignInWithAppleButtonStyle.white 
+                          : SignInWithAppleButtonStyle.black,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  
+                  // Google Sign-In Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton.icon(
+                      onPressed: _isGoogleLoading ? null : _signInWithGoogle,
+                      icon: _isGoogleLoading 
+                        ? const SizedBox(
+                            width: 20, height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.g_mobiledata, size: 24),
+                      label: Text('Continue with Google'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black87,
+                        elevation: 2,
+                        side: BorderSide(color: Colors.grey.shade300),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              
+              const SizedBox(height: 24),
               
               // Divider
               Row(
@@ -205,6 +353,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       style: TextStyle(
                         color: Colors.grey.shade600,
                         fontWeight: FontWeight.w500,
+                        fontSize: 12,
                       ),
                     ),
                   ),
@@ -212,61 +361,92 @@ class _AuthScreenState extends State<AuthScreen> {
                 ],
               ),
               
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
               
-              // Email Input
-              TextField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  prefixIcon: const Icon(Icons.email),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+              // Email/Password Section
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Use Email & Password',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
                   ),
-                ),
-                keyboardType: TextInputType.emailAddress,
-              ),
-              
-              const SizedBox(height: 16),
-
-              // Password Input
-              TextField(
-                controller: _passwordController,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  prefixIcon: const Icon(Icons.lock),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 16),
+                  
+                  // Email Input
+                  TextField(
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      prefixIcon: Icon(Icons.email, color: const Color(0xFF4ECDC4)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFF4ECDC4), width: 2),
+                      ),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
                   ),
-                ),
-                obscureText: true,
-              ),
-              
-              const SizedBox(height: 16),
-              
-              // Buttons
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : (_isSignUp ? _signUpWithEmail : _signInWithEmail),
-                  child: _isLoading 
-                    ? const CircularProgressIndicator()
-                    : Text(_isSignUp ? 'Sign Up' : 'Sign In'),
-                ),
-              ),
+                  
+                  const SizedBox(height: 16),
 
-              const SizedBox(height: 16),
-
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    _isSignUp = !_isSignUp;
-                  });
-                },
-                child: Text(_isSignUp 
-                  ? 'Already have an account? Sign In'
-                  : 'Don\'t have an account? Sign Up'),
+                  // Password Input
+                  TextField(
+                    controller: _passwordController,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      prefixIcon: Icon(Icons.lock, color: const Color(0xFF4ECDC4)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFF4ECDC4), width: 2),
+                      ),
+                    ),
+                    obscureText: true,
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Main Action Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : (_isSignUp ? _signUpWithEmail : _signInWithEmail),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _isSignUp ? const Color(0xFF4ECDC4) : const Color(0xFF4ECDC4),
+                        foregroundColor: Colors.white,
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: _isLoading 
+                        ? const SizedBox(
+                            width: 20, height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : Text(
+                            _isSignUp ? 'Create Account' : 'Sign In',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
+                          ),
+                    ),
+                  ),
+                ],
               ),
               
               const SizedBox(height: 32),
