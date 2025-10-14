@@ -115,10 +115,15 @@ class SupabaseAuthService {
 
   static Future<void> signInWithEmail(String email, String password) async {
     try {
-      await _supabase.auth.signInWithPassword(
+      final response = await _supabase.auth.signInWithPassword(
         email: email,
         password: password,
       );
+      
+      // Ensure user record exists for email sign-ins
+      if (response.user != null) {
+        await _createInitialUser(response.user!);
+      }
     } catch (e) {
       rethrow;
     }

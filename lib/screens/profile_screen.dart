@@ -282,7 +282,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         height: 50,
                         child: OutlinedButton.icon(
                           onPressed: () async {
-                            await SupabaseAuthService.signOut();
+                            try {
+                              await SupabaseAuthService.signOut();
+                              if (mounted) {
+                                // Navigate to auth screen and clear all routes
+                                Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+                              }
+                            } catch (e) {
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Error signing out: $e'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            }
                           },
                           icon: const Icon(Icons.logout), 
                           label: const Text('Sign Out'),

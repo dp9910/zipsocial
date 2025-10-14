@@ -179,7 +179,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                             'Let\'s set up your Zip Social identity',
                             style: TextStyle(
                               fontSize: 16,
-                              color: Colors.grey.shade600,
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                             ),
                           ),
                         ],
@@ -195,9 +195,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade200),
+                    border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.2)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -206,7 +206,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                         children: [
                           Icon(
                             Icons.tag,
-                            color: Colors.grey.shade600,
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                             size: 20,
                           ),
                           const SizedBox(width: 8),
@@ -215,7 +215,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
-                              color: Colors.grey.shade600,
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                             ),
                           ),
                         ],
@@ -234,7 +234,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                         'This is your permanent user ID that others can use to find you',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.grey.shade500,
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                         ),
                       ),
                     ],
@@ -272,18 +272,18 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                         prefixIcon: const Icon(Icons.person_outline),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
+                          borderSide: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity(0.3)),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
+                          borderSide: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity(0.3)),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(color: Color(0xFF4ECDC4), width: 2),
                         ),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: Theme.of(context).colorScheme.surface,
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
@@ -305,7 +305,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                       'This is how other users will see you in the community',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey.shade500,
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                       ),
                     ),
                   ],
@@ -342,18 +342,18 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                         hintText: 'Tell your community about yourself...', 
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
+                          borderSide: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity(0.3)),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
+                          borderSide: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity(0.3)),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(color: Color(0xFF4ECDC4), width: 2),
                         ),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: Theme.of(context).colorScheme.surface,
                         contentPadding: const EdgeInsets.all(16),
                       ),
                       maxLines: 3,
@@ -370,7 +370,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                       'Share a little about yourself, your interests, or what brings you to the community',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey.shade500,
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                       ),
                     ),
                   ],
@@ -407,18 +407,18 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                         prefixIcon: const Icon(Icons.location_city),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
+                          borderSide: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity(0.3)),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
+                          borderSide: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity(0.3)),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(color: Color(0xFF4ECDC4), width: 2),
                         ),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: Theme.of(context).colorScheme.surface,
                       ),
                       validator: (value) {
                         if (value != null && value.trim().isNotEmpty) {
@@ -436,7 +436,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                       'This will help you discover local posts and connect with your community',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey.shade500,
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                       ),
                     ),
                   ],
