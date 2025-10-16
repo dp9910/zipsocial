@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/comment.dart';
 import 'supabase_auth_service.dart';
+import 'content_filter_service.dart';
 
 class CommentService {
   static final _supabase = Supabase.instance.client;
@@ -66,6 +67,20 @@ class CommentService {
       final userProfile = await SupabaseAuthService.getUserProfile();
       if (userProfile == null) throw Exception('User profile not found');
 
+      // Check if user is spamming
+      final isSpamming = await ContentFilterService.isUserSpamming(user.id);
+      if (isSpamming) {
+        throw Exception('Please wait before commenting again. Your account has been flagged for potential spam.');
+      }
+
+      // Filter content before posting
+      final filterResult = ContentFilterService.filterContent(content, 'comment');
+      
+      // Reject content if it's too inappropriate
+      if (filterResult.action == FilterAction.rejected) {
+        throw Exception(filterResult.message ?? 'Comment cannot be posted due to inappropriate language.');
+      }
+
       // Calculate depth for replies
       int depth = 0;
       if (parentId != null) {
@@ -96,9 +111,27 @@ class CommentService {
           ''')
           .single();
 
-      
+      final commentId = response['id'];
+
+      // Log content filtering result
+      await ContentFilterService.logFilterResult(
+        contentType: 'comment',
+        contentId: commentId,
+        userId: user.id,
+        result: filterResult,
+      );
+
       // The comment count will be automatically updated by the database trigger
-      return Comment.fromJson(response);
+      final comment = Comment.fromJson(response);
+
+      // If content was flagged but not rejected, inform the user
+      if (filterResult.action == FilterAction.flagged) {
+        throw Exception('Comment posted but flagged for review: ${filterResult.message}');
+      } else if (filterResult.action == FilterAction.autoHidden) {
+        throw Exception('Comment posted but hidden due to inappropriate content. It will be reviewed by moderators.');
+      }
+
+      return comment;
     } catch (e) {
       rethrow;
     }

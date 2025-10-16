@@ -23,6 +23,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   bool _isLoading = true;
   bool _isFollowing = false;
   bool _isFollowLoading = false;
+  bool _isAccessDenied = false;
 
   @override
   void initState() {
@@ -38,14 +39,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         setState(() {
           _user = user;
           _isLoading = false;
+          _isAccessDenied = user == null; // If user is null, access might be denied
         });
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading profile: $e')),
-        );
+        setState(() {
+          _isLoading = false;
+          _isAccessDenied = true; // Access denied or error occurred
+        });
       }
     }
   }
@@ -117,8 +119,37 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         appBar: AppBar(
           title: const Text('Profile'),
         ),
-        body: const Center(
-          child: Text('User not found'),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                _isAccessDenied ? Icons.block : Icons.person_off,
+                size: 64,
+                color: Colors.grey,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                _isAccessDenied 
+                    ? 'Access Restricted'
+                    : 'User not found',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _isAccessDenied 
+                    ? 'This user has restricted access to their profile.'
+                    : 'The user you are looking for does not exist.',
+                style: const TextStyle(
+                  color: Colors.grey,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       );
     }

@@ -4,6 +4,8 @@ import '../config/theme.dart';
 import '../screens/user_profile_screen.dart';
 import '../screens/comments_screen.dart';
 import '../services/interaction_service.dart';
+import '../services/moderation_service.dart';
+import '../services/supabase_auth_service.dart';
 import '../utils/time_formatter.dart';
 
 class PostCard extends StatefulWidget {
@@ -114,6 +116,116 @@ class _PostCardState extends State<PostCard> {
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    }
+  }
+
+  Future<void> _handleMenuAction(String action) async {
+    try {
+      switch (action) {
+        case 'hide_post':
+          await ModerationService.hidePost(widget.post.id);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Post hidden from your feed')),
+            );
+            widget.onPostUpdated?.call();
+          }
+          break;
+        case 'block_user':
+          await _showBlockUserDialog();
+          break;
+        case 'delete_post':
+          await _showDeletePostDialog();
+          break;
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _showBlockUserDialog() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Block User'),
+        content: Text(
+          'Are you sure you want to block @${widget.post.username}? You will no longer see their posts and they cannot follow you.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Block'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await ModerationService.blockUser(widget.post.userId);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Blocked @${widget.post.username}')),
+          );
+          widget.onPostUpdated?.call();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to block user: $e')),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _showDeletePostDialog() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Post'),
+        content: const Text(
+          'Are you sure you want to delete this post? This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await ModerationService.deletePost(widget.post.id);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Post deleted successfully')),
+          );
+          widget.onPostUpdated?.call();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to delete post: $e')),
+          );
+        }
       }
     }
   }
@@ -281,46 +393,101 @@ class _PostCardState extends State<PostCard> {
                   ),
                 ),
                 
-                // Category chip (moved to the right)
-                Flexible(
-                  flex: 0,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 100),
-                    child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: _getTagColor(widget.post.tag).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: _getTagColor(widget.post.tag).withOpacity(0.4),
-                      width: 2,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        _getTagIcon(widget.post.tag),
-                        size: 12,
-                        color: _getTagColor(widget.post.tag),
-                      ),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Text(
-                          widget.post.tagDisplay,
-                          style: TextStyle(
-                            color: _getTagColor(widget.post.tag),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
+                // Category chip and menu
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Category chip
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 100),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: _getTagColor(widget.post.tag).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: _getTagColor(widget.post.tag).withOpacity(0.4),
+                            width: 2,
                           ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _getTagIcon(widget.post.tag),
+                              size: 12,
+                              color: _getTagColor(widget.post.tag),
+                            ),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                widget.post.tagDisplay,
+                                style: TextStyle(
+                                  color: _getTagColor(widget.post.tag),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Three-dot menu
+                    PopupMenuButton<String>(
+                      icon: Icon(
+                        Icons.more_vert,
+                        size: 20,
+                        color: isDark 
+                            ? Theme.of(context).colorScheme.onSurface.withOpacity(0.7)
+                            : Colors.grey.shade600,
+                      ),
+                      onSelected: (value) => _handleMenuAction(value),
+                      itemBuilder: (context) {
+                        final currentUser = SupabaseAuthService.currentUser;
+                        final isOwnPost = currentUser?.id == widget.post.userId;
+                        
+                        return [
+                          if (isOwnPost)
+                            PopupMenuItem(
+                              value: 'delete_post',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.delete, size: 16, color: Colors.red),
+                                  const SizedBox(width: 8),
+                                  const Text('Delete post'),
+                                ],
+                              ),
+                            ),
+                          if (!isOwnPost) ...[
+                            PopupMenuItem(
+                              value: 'hide_post',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.visibility_off, size: 16, color: Colors.orange),
+                                  const SizedBox(width: 8),
+                                  const Text('Hide this post'),
+                                ],
+                              ),
+                            ),
+                            PopupMenuItem(
+                              value: 'block_user',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.block, size: 16, color: Colors.red),
+                                  const SizedBox(width: 8),
+                                  const Text('Block user'),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ];
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -441,10 +608,8 @@ class _PostCardState extends State<PostCard> {
                     ),
                   ),
                   Expanded(
-                    child: _ActionButton(
-                      icon: Icons.flag_outlined,
-                      count: _reportCount > 0 ? _reportCount : null,
-                      activeColor: Colors.orange,
+                    child: _ReportButton(
+                      reportCount: _reportCount,
                       onPressed: _onReport,
                       isDark: isDark,
                     ),
@@ -498,6 +663,83 @@ class _PostCardState extends State<PostCard> {
     return text.split('_').map((word) => 
         word.isEmpty ? '' : word[0].toUpperCase() + word.substring(1)
     ).join(' ');
+  }
+}
+
+// Prominent report button component
+class _ReportButton extends StatelessWidget {
+  final int reportCount;
+  final VoidCallback onPressed;
+  final bool isDark;
+
+  const _ReportButton({
+    required this.reportCount,
+    required this.onPressed,
+    this.isDark = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final hasReports = reportCount > 0;
+    final color = hasReports ? Colors.red : (isDark 
+        ? Theme.of(context).colorScheme.onSurface.withOpacity(0.6)
+        : Colors.grey.shade600);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: hasReports 
+                ? Colors.red.withOpacity(0.1)
+                : Colors.transparent,
+            border: hasReports 
+                ? Border.all(color: Colors.red.withOpacity(0.3), width: 1)
+                : null,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                hasReports ? Icons.flag : Icons.flag_outlined,
+                size: 20, // Slightly larger than other buttons
+                color: color,
+              ),
+              if (hasReports) ...[
+                const SizedBox(width: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.red.withOpacity(0.3),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    '$reportCount',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

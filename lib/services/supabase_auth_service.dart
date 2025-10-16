@@ -53,7 +53,22 @@ class SupabaseAuthService {
         serverClientId: webClientId,
       );
       final googleUser = await googleSignIn.signIn();
-      final googleAuth = await googleUser!.authentication;
+      
+      // FIRST CHECK: Block deleted emails before any authentication
+      final email = googleUser!.email;
+      final deletedEmailCheck = await _supabase
+          .from('deleted_emails')
+          .select('email')
+          .eq('email', email)
+          .maybeSingle();
+      
+      if (deletedEmailCheck != null) {
+        // Sign out from Google to clear their session
+        await googleSignIn.signOut();
+        throw Exception('This email is associated with a deleted account. Please use a new email to sign up.');
+      }
+      
+      final googleAuth = await googleUser.authentication;
       final accessToken = googleAuth.accessToken;
       final idToken = googleAuth.idToken;
 
@@ -92,6 +107,20 @@ class SupabaseAuthService {
         nonce: hashedNonce,
       );
 
+      // FIRST CHECK: Block deleted emails before any authentication
+      final email = credential.email;
+      if (email != null) {
+        final deletedEmailCheck = await _supabase
+            .from('deleted_emails')
+            .select('email')
+            .eq('email', email)
+            .maybeSingle();
+        
+        if (deletedEmailCheck != null) {
+          throw Exception('This email is associated with a deleted account. Please use a new email to sign up.');
+        }
+      }
+
       final idToken = credential.identityToken;
       if (idToken == null) {
         throw 'No ID Token received.';
@@ -121,7 +150,7 @@ class SupabaseAuthService {
           .maybeSingle();
       
       if (deletedEmailCheck != null) {
-        throw Exception('This email address is associated with a deleted account. Please use a different email address.');
+        throw Exception('This email is associated with a deleted account. Please use a new email to sign up.');
       }
       
       final response = await _supabase.auth.signInWithPassword(
@@ -148,7 +177,7 @@ class SupabaseAuthService {
           .maybeSingle();
       
       if (deletedEmailCheck != null) {
-        throw Exception('This email address is associated with a deleted account. Please use a different email address.');
+        throw Exception('This email is associated with a deleted account. Please use a new email to sign up.');
       }
       
       final response = await _supabase.auth.signUp(
@@ -208,15 +237,18 @@ class SupabaseAuthService {
 
   static Future<AppUser?> getUserProfileById(String userId) async {
     try {
+      // Direct table query for now until SQL functions are deployed
       final response = await _supabase
           .from('users')
           .select()
           .eq('id', userId)
+          .eq('is_deleted', false)
           .maybeSingle();
 
       if (response == null) {
         return null;
       }
+      
       return AppUser.fromJson(response);
     } catch (e) {
       return null;
@@ -364,7 +396,6 @@ class SupabaseAuthService {
     if (targetUserId == null) return [];
 
     try {
-      
       // Get follower IDs first
       final followersResponse = await _supabase
           .from('followers')
@@ -397,7 +428,8 @@ class SupabaseAuthService {
             created_at,
             is_profile_complete
           ''')
-          .inFilter('id', followerIds);
+          .inFilter('id', followerIds)
+          .eq('is_deleted', false);
       
 
       List<AppUser> users = [];
@@ -427,7 +459,6 @@ class SupabaseAuthService {
     if (targetUserId == null) return [];
 
     try {
-      
       // Get following IDs first
       final followingResponse = await _supabase
           .from('followers')
@@ -460,7 +491,8 @@ class SupabaseAuthService {
             created_at,
             is_profile_complete
           ''')
-          .inFilter('id', followingIds);
+          .inFilter('id', followingIds)
+          .eq('is_deleted', false);
       
 
       List<AppUser> users = [];

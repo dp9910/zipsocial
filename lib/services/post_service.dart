@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/supabase_config.dart';
 import '../models/post.dart';
 import 'supabase_auth_service.dart'; // Changed import
+import 'content_filter_service.dart';
 
 class PostService {
   static final _client = Supabase.instance.client;
@@ -10,6 +11,7 @@ class PostService {
     required String content,
     required String zipcode,
     required PostTag tag,
+    List<String> contentTags = const [],
     Map<String, dynamic>? eventDetails,
   }) async {
     final user = SupabaseAuthService.currentUser; // Changed service call
@@ -18,6 +20,23 @@ class PostService {
     final userProfile = await SupabaseAuthService.getUserProfile(); // Changed service call
     if (userProfile == null) throw Exception('User profile not found');
 
+    // Check if user is spamming
+    final isSpamming = await ContentFilterService.isUserSpamming(user.id);
+    if (isSpamming) {
+      throw Exception('Please wait before posting again. Your account has been flagged for potential spam.');
+    }
+
+    // Filter content before posting
+    final filterResult = ContentFilterService.filterContent(content, 'post');
+    
+    // Reject content if it's too inappropriate
+    if (filterResult.action == FilterAction.rejected) {
+      throw Exception(filterResult.message ?? 'Content cannot be posted due to inappropriate language.');
+    }
+
+    // Determine if post should be auto-hidden
+    final isActive = filterResult.action != FilterAction.autoHidden;
+    
     // Create the post
     final response = await _client
         .from('posts')
@@ -27,12 +46,23 @@ class PostService {
           'zipcode': zipcode,
           'content': content,
           'tag': _tagToString(tag),
+          'content_tags': contentTags,
           'event_details': eventDetails,
           'created_at': DateTime.now().toUtc().toIso8601String(),
-          'is_active': true,
+          'is_active': isActive,
         })
         .select()
         .single();
+
+    final postId = response['id'];
+
+    // Log content filtering result
+    await ContentFilterService.logFilterResult(
+      contentType: 'post',
+      contentId: postId,
+      userId: user.id,
+      result: filterResult,
+    );
 
     // Update user's post count
     try {
@@ -43,7 +73,16 @@ class PostService {
       // Don't throw here - post was created successfully
     }
 
-    return Post.fromJson(response);
+    final post = Post.fromJson(response);
+    
+    // If content was flagged but not rejected, inform the user
+    if (filterResult.action == FilterAction.flagged) {
+      throw Exception('Post created but flagged for review: ${filterResult.message}');
+    } else if (filterResult.action == FilterAction.autoHidden) {
+      throw Exception('Post created but hidden due to inappropriate content. It will be reviewed by moderators.');
+    }
+
+    return post;
   }
 
   static Future<List<Map<String, dynamic>>> getFeedRaw({
@@ -52,6 +91,38 @@ class PostService {
     int limit = 50,
     int offset = 0,
   }) async {
+    final currentUser = SupabaseAuthService.currentUser;
+    
+    // Get hidden posts for current user
+    List<String> hiddenPostIds = [];
+    if (currentUser != null) {
+      try {
+        final hiddenPosts = await _client
+            .from('hidden_posts')
+            .select('post_id')
+            .eq('user_id', currentUser.id);
+        hiddenPostIds = hiddenPosts.map((item) => item['post_id'] as String).toList();
+      } catch (e) {
+        // If hidden_posts table doesn't exist yet, just continue
+      }
+    }
+
+    // Get blocked users for current user
+    List<String> blockedUserIds = [];
+    if (currentUser != null) {
+      try {
+        final blockedUsers = await _client
+            .from('user_blocks')
+            .select('blocked_id')
+            .eq('blocker_id', currentUser.id)
+            .eq('is_blocked', true);
+        blockedUserIds = blockedUsers.map((item) => item['blocked_id'] as String).toList();
+      } catch (e) {
+        // If user_blocks table doesn't exist yet, just continue
+      }
+    }
+
+    // Build the main query
     var query = _client
         .from('posts')
         .select('''
@@ -61,6 +132,16 @@ class PostService {
         ''')
         .eq('zipcode', zipcode)
         .eq('is_active', true);
+
+    // Exclude hidden posts
+    if (hiddenPostIds.isNotEmpty) {
+      query = query.not('id', 'in', hiddenPostIds);
+    }
+
+    // Exclude posts from blocked users
+    if (blockedUserIds.isNotEmpty) {
+      query = query.not('user_id', 'in', blockedUserIds);
+    }
 
     if (tags != null && tags.isNotEmpty) {
       final tagStrings = tags.map(_tagToString).toList();
@@ -90,6 +171,7 @@ class PostService {
     int offset = 0,
   }) async {
     try {
+      // Direct table query for now until SQL functions are deployed
       final response = await _client
           .from('posts')
           .select('''

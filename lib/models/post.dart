@@ -10,6 +10,7 @@ class Post {
   final String zipcode;
   final String content;
   final PostTag tag;
+  final List<String> contentTags;
   final Map<String, dynamic>? eventDetails;
   final DateTime createdAt;
   final int reportCount;
@@ -28,6 +29,7 @@ class Post {
     required this.zipcode,
     required this.content,
     required this.tag,
+    this.contentTags = const [],
     this.eventDetails,
     required this.createdAt,
     this.reportCount = 0,
@@ -68,6 +70,14 @@ class Post {
       nickname = json['users']['nickname'];
     }
 
+    // Parse content tags
+    List<String> contentTags = [];
+    if (json['content_tags'] != null) {
+      if (json['content_tags'] is List) {
+        contentTags = List<String>.from(json['content_tags']);
+      }
+    }
+
     return Post(
       id: json['id'],
       userId: json['user_id'],
@@ -76,6 +86,7 @@ class Post {
       zipcode: json['zipcode'],
       content: json['content'],
       tag: _stringToTag(json['tag']),
+      contentTags: contentTags,
       eventDetails: json['event_details'],
       createdAt: DateTime.parse(json['created_at']).toLocal(),
       reportCount: json['report_count'] ?? 0,
@@ -97,6 +108,7 @@ class Post {
     String? zipcode,
     String? content,
     PostTag? tag,
+    List<String>? contentTags,
     Map<String, dynamic>? eventDetails,
     DateTime? createdAt,
     int? reportCount,
@@ -115,6 +127,7 @@ class Post {
       zipcode: zipcode ?? this.zipcode,
       content: content ?? this.content,
       tag: tag ?? this.tag,
+      contentTags: contentTags ?? this.contentTags,
       eventDetails: eventDetails ?? this.eventDetails,
       createdAt: createdAt ?? this.createdAt,
       reportCount: reportCount ?? this.reportCount,
