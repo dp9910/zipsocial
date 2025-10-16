@@ -60,5 +60,11 @@
 	<string>This app would like to access your camera to take photos for posts.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app would like to access your photo library to select photos for posts.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>mailto</string>
+		<string>tel</string>
+		<string>sms</string>
+	</array>
 </dict>
 </plist>

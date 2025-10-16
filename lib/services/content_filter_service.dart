@@ -3,108 +3,147 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class ContentFilterService {
   static final _client = Supabase.instance.client;
   
-  // Basic profanity and inappropriate content words
+  // Enhanced content filtering word lists
   static const List<String> _profanityWords = [
     // Mild profanity
-    'damn', 'hell', 'crap', 'piss', 'ass', 'shit', 'fuck', 'bitch',
-    // Hate speech indicators
-    'nazi', 'terrorist', 'kill yourself', 'kys', 'die',
+    'damn', 'hell', 'crap', 'piss', 'ass', 'shit', 'fuck', 'bitch', 'bastard',
     // Inappropriate sexual content
-    'nude', 'naked', 'sex', 'porn', 'xxx', 'masturbat', 'orgasm',
-    // Drug references
-    'cocaine', 'heroin', 'meth', 'weed', 'marijuana', 'drugs',
-    // Spam indicators
-    'click here', 'free money', 'get rich', 'make money fast',
-    // Harassment
-    'stupid', 'idiot', 'retard', 'moron', 'loser', 'ugly', 'fat',
+    'nude', 'naked', 'porn', 'xxx', 'masturbat', 'orgasm', 'sexual', 'sexy',
+    // Drug references  
+    'cocaine', 'heroin', 'meth', 'weed', 'marijuana', 'drugs', 'smoking', 'alcohol',
+    // Harassment terms
+    'stupid', 'idiot', 'moron', 'loser', 'ugly', 'fat', 'dumb', 'pathetic',
   ];
   
-  // Severe words that should auto-reject content
-  static const List<String> _severeWords = [
-    'suicide', 'kill yourself', 'kys', 'die', 'murder', 'bomb', 'terrorist',
-    'nazi', 'rape', 'molest', 'abuse', 'violence', 'threat', 'attack'
+  // Threat and violence words
+  static const List<String> _threatWords = [
+    'kill', 'murder', 'bomb', 'attack', 'violence', 'hurt', 'harm', 'weapon',
+    'gun', 'knife', 'shoot', 'stab', 'beat', 'fight', 'punch', 'kick'
   ];
   
-  // Spam patterns
-  static const List<String> _spamPatterns = [
-    'http://', 'https://', 'www.', '.com', '.net', '.org',
-    'follow me', 'check out', 'click here', 'link in bio'
+  // Hate speech and discrimination
+  static const List<String> _hateWords = [
+    'nazi', 'terrorist', 'racist', 'bigot', 'supremacist', 'extremist',
+    // Religious/ethnic slurs (partial list for detection)
+    'jihad', 'infidel', 'kafir'
   ];
+  
+  // Self-harm indicators
+  static const List<String> _selfHarmWords = [
+    'suicide', 'kill yourself', 'kys', 'self harm', 'cut myself', 'end it all',
+    'want to die', 'life sucks', 'depressed', 'hopeless'
+  ];
+  
+  // Spam indicators
+  static const List<String> _spamWords = [
+    'click here', 'free money', 'get rich', 'make money fast', 'earn cash',
+    'follow me', 'check out', 'link in bio', 'dm me', 'subscribe'
+  ];
+  
 
-  /// Filter content and return result with severity and action
+  /// Enhanced content filtering with multiple severity levels
   static ContentFilterResult filterContent(String content, String contentType) {
     final lowerContent = content.toLowerCase();
-    final words = lowerContent.split(RegExp(r'\s+'));
     
-    List<String> foundProfanity = [];
-    List<String> foundSevere = [];
-    List<String> foundSpam = [];
+    List<String> violations = [];
+    int severityScore = 0;
     
-    // Check for severe words first
-    for (String word in _severeWords) {
+    // Check self-harm content (highest priority)
+    for (String word in _selfHarmWords) {
       if (lowerContent.contains(word)) {
-        foundSevere.add(word);
+        violations.add(word);
+        severityScore += 15; // Critical severity
       }
     }
     
-    // Check for profanity
+    // Check hate speech and threats
+    for (String word in _hateWords) {
+      if (lowerContent.contains(word)) {
+        violations.add(word);
+        severityScore += 12;
+      }
+    }
+    
+    for (String word in _threatWords) {
+      if (lowerContent.contains(word)) {
+        violations.add(word);
+        severityScore += 10;
+      }
+    }
+    
+    // Check profanity with higher severity for strong language
     for (String word in _profanityWords) {
       if (lowerContent.contains(word)) {
-        foundProfanity.add(word);
+        violations.add(word);
+        // Strong profanity gets higher scores
+        if (['fuck', 'shit', 'bitch', 'bastard', 'ass'].contains(word)) {
+          severityScore += 8; // Will trigger auto-hide at 8+
+        } else {
+          severityScore += 5; // Other profanity still gets significant penalty
+        }
       }
     }
     
-    // Check for spam patterns
-    for (String pattern in _spamPatterns) {
-      if (lowerContent.contains(pattern)) {
-        foundSpam.add(pattern);
+    // Check spam indicators
+    for (String word in _spamWords) {
+      if (lowerContent.contains(word)) {
+        violations.add(word);
+        severityScore += 2;
       }
     }
     
-    // Determine severity and action
-    if (foundSevere.isNotEmpty) {
-      return ContentFilterResult(
-        isClean: false,
-        severity: FilterSeverity.high,
-        action: FilterAction.rejected,
-        filteredWords: foundSevere,
-        message: 'Content contains inappropriate language and cannot be posted.',
-      );
-    }
-    
-    if (foundProfanity.length >= 3 || foundSpam.length >= 2) {
-      return ContentFilterResult(
-        isClean: false,
-        severity: FilterSeverity.high,
-        action: FilterAction.autoHidden,
-        filteredWords: [...foundProfanity, ...foundSpam],
-        message: 'Content has been flagged for review due to multiple inappropriate words.',
-      );
-    }
-    
-    if (foundProfanity.isNotEmpty || foundSpam.isNotEmpty) {
-      return ContentFilterResult(
-        isClean: false,
-        severity: FilterSeverity.medium,
-        action: FilterAction.flagged,
-        filteredWords: [...foundProfanity, ...foundSpam],
-        message: 'Content has been flagged for containing potentially inappropriate language.',
-      );
+    // Check for URL patterns (potential spam/phishing)
+    if (RegExp(r'https?://|www\.|\.com|\.net|\.org').hasMatch(lowerContent)) {
+      violations.add('external_link');
+      severityScore += 4;
     }
     
     // Check for excessive caps (potential shouting/spam)
     final capsCount = content.replaceAll(RegExp(r'[^A-Z]'), '').length;
     final totalLetters = content.replaceAll(RegExp(r'[^a-zA-Z]'), '').length;
-    if (totalLetters > 0 && (capsCount / totalLetters) > 0.6 && content.length > 20) {
+    if (totalLetters > 0 && (capsCount / totalLetters) > 0.7 && content.length > 15) {
+      violations.add('excessive_caps');
+      severityScore += 3;
+    }
+    
+    // Check for repeated characters (spam pattern)
+    if (RegExp(r'(.)\1{4,}').hasMatch(content)) {
+      violations.add('repeated_chars');
+      severityScore += 3;
+    }
+    
+    // Determine action based on severity score
+    if (severityScore >= 15) {
       return ContentFilterResult(
         isClean: false,
-        severity: FilterSeverity.low,
-        action: FilterAction.flagged,
-        filteredWords: ['excessive_caps'],
-        message: 'Content flagged for excessive capital letters.',
+        severity: FilterSeverity.high,
+        action: FilterAction.rejected,
+        filteredWords: violations,
+        message: 'Content contains harmful language and cannot be posted. If you believe this is an error, please contact support.',
       );
     }
     
+    if (severityScore >= 8) {
+      return ContentFilterResult(
+        isClean: false,
+        severity: FilterSeverity.high,
+        action: FilterAction.autoHidden,
+        filteredWords: violations,
+        message: 'Content has been automatically hidden due to inappropriate language. It will be reviewed by moderators.',
+      );
+    }
+    
+    if (severityScore >= 3) {
+      return ContentFilterResult(
+        isClean: false,
+        severity: FilterSeverity.medium,
+        action: FilterAction.flagged,
+        filteredWords: violations,
+        message: 'Content has been flagged for review due to potentially inappropriate language.',
+      );
+    }
+    
+    // Content is clean
     return ContentFilterResult(
       isClean: true,
       severity: FilterSeverity.low,

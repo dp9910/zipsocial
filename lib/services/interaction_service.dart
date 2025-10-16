@@ -74,6 +74,19 @@ class InteractionService {
           .update({'report_count': reportCount})
           .eq('id', postId);
 
+      // Also add to reported_posts table for admin tracking
+      try {
+        await _supabase.from('reported_posts').insert({
+          'post_id': postId,
+          'reporter_user_id': user.id,
+          'reported_at': DateTime.now().toUtc().toIso8601String(),
+          'status': 'pending', // pending, reviewed, resolved
+        });
+      } catch (e) {
+        // Don't fail the main report if this fails (table might not exist yet)
+        print('Failed to log to reported_posts table: $e');
+      }
+
     } catch (e) {
       rethrow;
     }
