@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user.dart';
@@ -194,6 +195,16 @@ class SupabaseAuthService {
 
   static Future<void> signOut() async {
     await _supabase.auth.signOut(scope: SignOutScope.global);
+    
+    // Clear terms acceptance so next user has to accept terms again
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('terms_accepted');
+      await prefs.remove('terms_accepted_date');
+    } catch (e) {
+      // Don't block sign out if SharedPreferences fails
+      print('Failed to clear terms acceptance: $e');
+    }
   }
 
   static Stream<AuthState> get authStateChanges => _supabase.auth.onAuthStateChange;

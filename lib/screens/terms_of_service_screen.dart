@@ -15,7 +15,7 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -55,20 +55,20 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    const Text(
+                    Text(
                       'Terms of Service',
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       'Please read and accept our terms before continuing',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.grey,
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -82,9 +82,9 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade200),
+                    border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.2)),
                   ),
                   child: SingleChildScrollView(
                     child: Column(
@@ -183,10 +183,14 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: _hasAgreed ? Colors.green.shade50 : Colors.grey.shade50,
+                  color: _hasAgreed 
+                      ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3)
+                      : Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: _hasAgreed ? Colors.green.shade200 : Colors.grey.shade200,
+                    color: _hasAgreed 
+                        ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
+                        : Theme.of(context).colorScheme.outline.withOpacity(0.2),
                   ),
                 ),
                 child: Row(
@@ -206,7 +210,9 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
-                          color: _hasAgreed ? Colors.green.shade700 : Colors.grey.shade700,
+                          color: _hasAgreed 
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                         ),
                       ),
                     ),
@@ -224,7 +230,7 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                   onPressed: _hasAgreed && !_isLoading ? _acceptTerms : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4ECDC4),
-                    disabledBackgroundColor: Colors.grey.shade300,
+                    disabledBackgroundColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -237,7 +243,9 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
-                            color: _hasAgreed ? Colors.white : Colors.grey.shade500,
+                            color: _hasAgreed 
+                                ? Colors.white 
+                                : Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
                           ),
                         ),
                 ),
@@ -284,9 +292,9 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                 const SizedBox(height: 4),
                 Text(
                   content,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
-                    color: Colors.black87,
+                    color: Theme.of(context).colorScheme.onSurface,
                     height: 1.4,
                   ),
                 ),
