@@ -4,6 +4,7 @@ import '../models/user.dart';
 import 'edit_profile_screen.dart';
 import 'settings_screen.dart';
 import 'saved_posts_screen.dart';
+import 'blocked_users_screen.dart';
 import 'user_posts_screen.dart';
 import 'followers_screen.dart';
 import 'following_screen.dart';
@@ -168,12 +169,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   'Posts',
                                   _user!.postCount.toString(),
                                   Icons.edit_note,
-                                  onTap: () {
-                                    Navigator.of(context).push(
+                                  onTap: () async {
+                                    await Navigator.of(context).push(
                                       MaterialPageRoute(
                                         builder: (context) => UserPostsScreen(user: _user!),
                                       ),
                                     );
+                                    // Refresh profile when returning from posts screen
+                                    _loadUserProfile();
                                   },
                                 ),
                                 _buildStatCard(
@@ -248,6 +251,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) => const SavedPostsScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      
+                      const SizedBox(height: 16),
+                      
+                      // Blocked Users Button
+                      _buildActionButton(
+                        'Blocked Users',
+                        Icons.block_outlined,
+                        () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const BlockedUsersScreen(),
                             ),
                           );
                         },
