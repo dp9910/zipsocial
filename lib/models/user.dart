@@ -12,6 +12,7 @@ class AppUser {
   final int followingCount;
   final int postCount;
   final bool isProfileComplete;
+  final bool isDeleted;
 
   AppUser({
     required this.id,
@@ -27,6 +28,7 @@ class AppUser {
     this.followingCount = 0,
     this.postCount = 0,
     this.isProfileComplete = false,
+    this.isDeleted = false,
   });
 
   factory AppUser.fromJson(Map<String, dynamic> json) {
@@ -44,6 +46,7 @@ class AppUser {
       followingCount: json['following_count'] ?? 0,
       postCount: json['post_count'] ?? 0,
       isProfileComplete: json['is_profile_complete'] ?? false,
+      isDeleted: json['is_deleted'] ?? false,
     );
   }
 
@@ -62,6 +65,7 @@ class AppUser {
       'following_count': followingCount,
       'post_count': postCount,
       'is_profile_complete': isProfileComplete,
+      'is_deleted': isDeleted,
     };
   }
 }

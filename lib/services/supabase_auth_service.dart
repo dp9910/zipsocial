@@ -70,10 +70,8 @@ class SupabaseAuthService {
         accessToken: accessToken,
       );
 
-
       if (response.user != null) {
         await _createInitialUser(response.user!);
-      } else {
       }
     } catch (e) {
       rethrow;
@@ -115,6 +113,17 @@ class SupabaseAuthService {
 
   static Future<void> signInWithEmail(String email, String password) async {
     try {
+      // Check if this email has been deleted first
+      final deletedEmailCheck = await _supabase
+          .from('deleted_emails')
+          .select('email')
+          .eq('email', email)
+          .maybeSingle();
+      
+      if (deletedEmailCheck != null) {
+        throw Exception('This email address is associated with a deleted account. Please use a different email address.');
+      }
+      
       final response = await _supabase.auth.signInWithPassword(
         email: email,
         password: password,
@@ -131,6 +140,17 @@ class SupabaseAuthService {
 
   static Future<void> signUpWithEmail(String email, String password) async {
     try {
+      // Check if this email has been deleted
+      final deletedEmailCheck = await _supabase
+          .from('deleted_emails')
+          .select('email')
+          .eq('email', email)
+          .maybeSingle();
+      
+      if (deletedEmailCheck != null) {
+        throw Exception('This email address is associated with a deleted account. Please use a different email address.');
+      }
+      
       final response = await _supabase.auth.signUp(
         email: email,
         password: password,
@@ -162,11 +182,26 @@ class SupabaseAuthService {
           .eq('id', user.id)
           .maybeSingle();
 
+      // If no user record found, the account was deleted
       if (response == null) {
+        // Sign out the user since their account no longer exists
+        await signOut();
         return null;
       }
-      return AppUser.fromJson(response);
+      
+      final appUser = AppUser.fromJson(response);
+      
+      // Check if user is marked as deleted (backup check)
+      if (response['is_deleted'] == true) {
+        // Sign out deleted users automatically
+        await signOut();
+        return null;
+      }
+      
+      return appUser;
     } catch (e) {
+      // If there's an error fetching user profile, sign them out
+      await signOut();
       return null;
     }
   }
@@ -460,6 +495,27 @@ class SupabaseAuthService {
       });
     } catch (e) {
       throw Exception('Failed to block user: $e');
+    }
+  }
+
+  // Delete user account completely
+  static Future<void> deleteUserAccount() async {
+    final user = currentUser;
+    if (user == null) throw Exception('Not authenticated');
+    
+    final email = user.email;
+    if (email == null) throw Exception('No email found for user');
+
+    try {
+      // Call the SQL function to completely delete user and all associated data
+      await _supabase.rpc('delete_user_completely_safe', params: {
+        'user_email': email,
+      });
+      
+      // User will be automatically signed out since their record is deleted
+      
+    } catch (e) {
+      throw Exception('Failed to delete account: $e');
     }
   }
 }
