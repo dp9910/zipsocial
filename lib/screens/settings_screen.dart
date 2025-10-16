@@ -63,9 +63,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         width: double.infinity,
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
+                          color: Theme.of(context).colorScheme.surface,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade200),
+                          border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.2)),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,11 +78,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   size: 24,
                                 ),
                                 const SizedBox(width: 12),
-                                const Text(
+                                Text(
                                   'Account Information',
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w600,
+                                    color: Theme.of(context).colorScheme.onSurface,
                                   ),
                                 ),
                               ],
@@ -135,9 +136,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         width: double.infinity,
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
+                          color: Theme.of(context).colorScheme.surface,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade200),
+                          border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.2)),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -150,11 +151,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   size: 24,
                                 ),
                                 const SizedBox(width: 12),
-                                const Text(
+                                Text(
                                   'Security',
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w600,
+                                    color: Theme.of(context).colorScheme.onSurface,
                                   ),
                                 ),
                               ],
@@ -196,9 +198,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         width: double.infinity,
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
+                          color: Theme.of(context).colorScheme.surface,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade200),
+                          border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.2)),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,11 +213,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   size: 24,
                                 ),
                                 const SizedBox(width: 12),
-                                const Text(
+                                Text(
                                   'Support & Contact',
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w600,
+                                    color: Theme.of(context).colorScheme.onSurface,
                                   ),
                                 ),
                               ],
@@ -308,7 +311,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     ],
                                   ),
                                   const SizedBox(height: 8),
-                                  SelectableText(
+                                  Text(
                                     'hellozipsocial@gmail.com',
                                     style: TextStyle(
                                       color: Colors.blue.shade600,
@@ -445,7 +448,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       children: [
         Icon(
           icon,
-          color: Colors.grey.shade600,
+          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
           size: 20,
         ),
         const SizedBox(width: 12),
@@ -457,16 +460,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 label,
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.grey.shade600,
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                   fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 value,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ],

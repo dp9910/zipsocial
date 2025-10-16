@@ -107,6 +107,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.background,
         appBar: AppBar(
           title: const Text('Profile'),
         ),
@@ -116,6 +117,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
     if (_user == null) {
       return Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.background,
         appBar: AppBar(
           title: const Text('Profile'),
         ),
@@ -126,16 +128,17 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               Icon(
                 _isAccessDenied ? Icons.block : Icons.person_off,
                 size: 64,
-                color: Colors.grey,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
               ),
               const SizedBox(height: 16),
               Text(
                 _isAccessDenied 
                     ? 'Access Restricted'
                     : 'User not found',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 8),
@@ -143,8 +146,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 _isAccessDenied 
                     ? 'This user has restricted access to their profile.'
                     : 'The user you are looking for does not exist.',
-                style: const TextStyle(
-                  color: Colors.grey,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -157,6 +160,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     final isOwnProfile = SupabaseAuthService.currentUser?.id == widget.userId; // Changed service call
 
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         title: Text(_user!.nickname ?? 'Profile'),
         backgroundColor: Colors.transparent,
@@ -220,9 +224,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   // Nickname
                   Text(
                     _user!.nickname ?? 'No nickname',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   
@@ -235,14 +240,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
+                      color: Theme.of(context).colorScheme.surface.withOpacity(0.7),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
                       '@${_user!.customUserId}',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.grey.shade600,
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -326,9 +331,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade200),
+                  border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.2)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -337,7 +342,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       children: [
                         Icon(
                           Icons.info_outline,
-                          color: Colors.grey.shade600,
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                           size: 20,
                         ),
                         const SizedBox(width: 8),
@@ -346,7 +351,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: Colors.grey.shade700,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                       ],
@@ -354,9 +359,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     const SizedBox(height: 12),
                     Text(
                       _user!.bio!,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         height: 1.5,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ],
@@ -364,44 +370,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               ),
               const SizedBox(height: 32),
             ],
-            
-            // Posts Section (placeholder)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(32),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.shade200),
-              ),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.article_outlined,
-                    size: 48,
-                    color: Colors.grey.shade400,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No posts yet',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey.shade600,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Posts will appear here when they start sharing',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade500,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
           ],
         ),
       ),
@@ -411,19 +379,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   Widget _buildStatCard(String label, String value, IconData icon, {VoidCallback? onTap}) {
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.shade100,
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.2)),
         ),
         child: Column(
           children: [
@@ -435,9 +397,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             const SizedBox(height: 8),
             Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 4),
@@ -445,7 +408,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               label,
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.grey.shade600,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
               ),
             ),
           ],

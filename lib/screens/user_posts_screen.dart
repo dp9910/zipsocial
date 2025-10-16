@@ -153,13 +153,13 @@ class _UserPostsScreenState extends State<UserPostsScreen> {
                               Icon(
                                 Icons.article_outlined,
                                 size: 64,
-                                color: Colors.grey.shade400,
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
                               ),
                               const SizedBox(height: 16),
                               Text(
                                 'No posts yet',
                                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: Colors.grey.shade600,
+                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
                                 ),
                               ),
                               const SizedBox(height: 8),
@@ -168,7 +168,7 @@ class _UserPostsScreenState extends State<UserPostsScreen> {
                                   ? '${widget.user.nickname} hasn\'t shared anything yet'
                                   : 'This user hasn\'t shared anything yet',
                                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Colors.grey.shade500,
+                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                                 ),
                                 textAlign: TextAlign.center,
                               ),
