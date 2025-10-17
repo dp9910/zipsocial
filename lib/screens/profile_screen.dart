@@ -341,7 +341,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildStatCard(String label, String value, IconData icon, {VoidCallback? onTap}) {
     return InkWell(
-      onTap: onTap,
+      onTap: () {
+        FocusScope.of(context).unfocus();
+        onTap?.call();
+      },
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -382,7 +385,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildActionButton(String label, IconData icon, VoidCallback onTap) {
     return InkWell(
-      onTap: onTap,
+      onTap: () {
+        FocusScope.of(context).unfocus();
+        onTap();
+      },
       borderRadius: BorderRadius.circular(12),
       child: Container(
         width: double.infinity,

@@ -145,7 +145,12 @@ class _FollowersScreenState extends State<FollowersScreen> {
           
           // Followers List
           Expanded(
-            child: _isLoading
+            child: GestureDetector(
+              onTap: () {
+                // Dismiss keyboard when tapping anywhere on the screen
+                FocusScope.of(context).unfocus();
+              },
+              child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _followers.isEmpty
                     ? Center(
@@ -191,6 +196,7 @@ class _FollowersScreenState extends State<FollowersScreen> {
                           },
                         ),
                       ),
+            ),
           ),
         ],
       ),

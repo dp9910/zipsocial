@@ -391,6 +391,29 @@ class SupabaseAuthService {
     }
   }
 
+  // Check if two users follow each other bidirectionally (for chat access)
+  static Future<bool> areUsersMutuallyFollowing(String userId1, String userId2) async {
+    try {
+      final follow1 = await _supabase
+          .from('followers')
+          .select()
+          .eq('follower_id', userId1)
+          .eq('following_id', userId2)
+          .maybeSingle();
+          
+      final follow2 = await _supabase
+          .from('followers')
+          .select()
+          .eq('follower_id', userId2)
+          .eq('following_id', userId1)
+          .maybeSingle();
+          
+      return follow1 != null && follow2 != null;
+    } catch (e) {
+      return false;
+    }
+  }
+
   // Get followers list with user details
   static Future<List<AppUser>> getFollowers({String? userId}) async {
     final user = currentUser;

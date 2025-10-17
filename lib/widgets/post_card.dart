@@ -320,6 +320,16 @@ class _PostCardState extends State<PostCard> {
                           maxLines: 1,
                           text: TextSpan(
                             children: [
+                              // Add "You:" prefix for current user's posts
+                              if (widget.post.userId == SupabaseAuthService.currentUser?.id) 
+                                TextSpan(
+                                  text: 'You: ',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 16,
+                                    color: AppTheme.primary,
+                                  ),
+                                ),
                               TextSpan(
                                 text: widget.post.nickname ?? 'Anonymous',
                                 style: TextStyle(

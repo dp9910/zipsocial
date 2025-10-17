@@ -180,7 +180,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
-        title: Text(_user!.nickname ?? 'Profile'),
+        title: Text(isOwnProfile ? 'Your Profile' : (_user!.nickname ?? 'Profile')),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),

@@ -50,7 +50,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _saveChanges() async {
-    if (!_formKey.currentState!.validate() || !_hasChanges) return;
+    if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
 
@@ -62,21 +62,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profile updated successfully!'),
-            backgroundColor: Color(0xFF4ECDC4),
-          ),
-        );
         Navigator.of(context).pop(true); // Return true to indicate changes were saved
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile updated successfully!')),
+        );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error updating profile: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Failed to update profile: $e')),
         );
       }
     } finally {
@@ -93,7 +87,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Discard Changes?'),
-        content: const Text('You have unsaved changes. Are you sure you want to leave without saving?'),
+        content: const Text('You have unsaved changes. Are you sure you want to go back?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -101,7 +95,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Discard'),
           ),
         ],
@@ -132,7 +125,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   : Text(
                       'Save',
                       style: TextStyle(
-                        color: _hasChanges ? const Color(0xFF4ECDC4) : Colors.grey,
+                        color: _hasChanges ? const Color(0xFF4ECDC4) : Colors.grey.shade400,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -141,7 +134,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
-          child: Form(
+          child: GestureDetector(
+            onTap: () {
+              // Dismiss keyboard when tapping anywhere on the screen
+              FocusScope.of(context).unfocus();
+            },
+            child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,52 +153,32 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         height: 100,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              const Color(0xFF4ECDC4),
-                              const Color(0xFF4ECDC4).withOpacity(0.8),
-                            ],
+                          color: const Color(0xFF4ECDC4).withOpacity(0.1),
+                          border: Border.all(
+                            color: const Color(0xFF4ECDC4).withOpacity(0.3),
+                            width: 2,
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF4ECDC4).withOpacity(0.3),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.person,
                           size: 50,
-                          color: Colors.white,
+                          color: const Color(0xFF4ECDC4).withOpacity(0.7),
                         ),
                       ),
                       const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surface.withOpacity(0.7),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          '@${widget.user.customUserId}',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                            fontWeight: FontWeight.w500,
-                          ),
+                      Text(
+                        '@${widget.user.customUserId}',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
                   ),
                 ),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: 32),
 
                 // Nickname Section
                 Column(
@@ -209,13 +187,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     Row(
                       children: [
                         const Icon(
-                          Icons.emoji_emotions,
+                          Icons.badge_outlined,
                           color: Color(0xFF4ECDC4),
                           size: 20,
                         ),
                         const SizedBox(width: 8),
                         const Text(
-                          'Nickname',
+                          'Display Name',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -228,7 +206,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       controller: _nicknameController,
                       decoration: InputDecoration(
                         hintText: 'Enter your display name',
-                        prefixIcon: const Icon(Icons.person_outline),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity(0.3)),
@@ -243,21 +220,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         ),
                         filled: true,
                         fillColor: Theme.of(context).colorScheme.surface,
+                        contentPadding: const EdgeInsets.all(16),
                       ),
+                      maxLength: 30,
+                      textCapitalization: TextCapitalization.words,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Please enter a nickname';
+                          return 'Please enter a display name';
                         }
                         if (value.trim().length < 2) {
-                          return 'Nickname must be at least 2 characters';
-                        }
-                        if (value.trim().length > 20) {
-                          return 'Nickname must be less than 20 characters';
+                          return 'Display name must be at least 2 characters';
                         }
                         return null;
                       },
-                      textCapitalization: TextCapitalization.words,
-                      maxLength: 20,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'This is how others will see your name in the community',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                      ),
                     ),
                   ],
                 ),
@@ -271,7 +254,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     Row(
                       children: [
                         const Icon(
-                          Icons.description_outlined,
+                          Icons.info_outline,
                           color: Color(0xFF4ECDC4),
                           size: 20,
                         ),
@@ -288,9 +271,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _bioController,
-                      enabled: true,
                       decoration: InputDecoration(
-                        hintText: 'Tell your community about yourself...',
+                        hintText: 'Tell us about yourself...',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity(0.3)),
@@ -349,10 +331,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _preferredZipcodeController,
-                      keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                        hintText: 'Enter your preferred zip code',
-                        prefixIcon: const Icon(Icons.location_on_outlined),
+                        hintText: '12345',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity(0.3)),
@@ -367,10 +347,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         ),
                         filled: true,
                         fillColor: Theme.of(context).colorScheme.surface,
+                        contentPadding: const EdgeInsets.all(16),
                       ),
+                      keyboardType: TextInputType.number,
+                      maxLength: 10,
                       validator: (value) {
-                        if (value != null && value.isNotEmpty && !RegExp(r'^\d{5}(-\d{4})?$').hasMatch(value)) {
-                          return 'Please enter a valid 5-digit zip code (e.g., 12345 or 12345-6789)';
+                        if (value != null && value.isNotEmpty && value.length < 5) {
+                          return 'Please enter a valid zipcode';
                         }
                         return null;
                       },
@@ -414,6 +397,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ],
             ),
           ),
+        ),
         ),
       ),
     );

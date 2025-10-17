@@ -340,6 +340,7 @@ class PostInteractionService {
         .from('posts')
         .select('''
           *,
+          users!posts_user_id_fkey(nickname),
           post_interactions!inner(user_id, vote, is_saved, updated_at)
         ''')
         .eq('post_interactions.user_id', user.id)

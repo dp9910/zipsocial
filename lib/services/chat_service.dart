@@ -59,18 +59,31 @@ class ChatService {
             );
           }).toList();
 
-          final conversation = Conversation(
-            id: convData['id'] as String,
-            createdAt: DateTime.parse(convData['created_at'] as String),
-            updatedAt: DateTime.parse(convData['updated_at'] as String),
-            lastMessageAt: DateTime.parse(convData['last_message_at'] as String),
-            lastMessage: convData['last_message'] as String?,
-            lastMessageSenderId: convData['last_message_sender_id'] as String?,
-            participants: participants,
-            unreadCount: unreadCount,
+          // Check if users follow each other bidirectionally (required for chat access)
+          final otherParticipant = participants.firstWhere(
+            (p) => p.userId != currentUser.id,
+            orElse: () => participants.first,
           );
-
-          conversations.add(conversation);
+          
+          final areMutuallyFollowing = await SupabaseAuthService.areUsersMutuallyFollowing(
+            currentUser.id,
+            otherParticipant.userId,
+          );
+          
+          // Only include conversations where users follow each other bidirectionally
+          if (areMutuallyFollowing) {
+            final conversation = Conversation(
+              id: convData['id'] as String,
+              createdAt: DateTime.parse(convData['created_at'] as String),
+              updatedAt: DateTime.parse(convData['updated_at'] as String),
+              lastMessageAt: DateTime.parse(convData['last_message_at'] as String),
+              lastMessage: convData['last_message'] as String?,
+              lastMessageSenderId: convData['last_message_sender_id'] as String?,
+              participants: participants,
+              unreadCount: unreadCount,
+            );
+            conversations.add(conversation);
+          }
         } catch (e) {
         }
       }
@@ -95,6 +108,16 @@ class ChatService {
       
       if (isBlocked) {
         throw Exception('Unable to start conversation. One of the users has blocked the other.');
+      }
+
+      // Check if users follow each other bidirectionally (required for chat access)
+      final areMutuallyFollowing = await SupabaseAuthService.areUsersMutuallyFollowing(
+        currentUser.id,
+        otherUserId,
+      );
+      
+      if (!areMutuallyFollowing) {
+        throw Exception('You need to follow each other to start a conversation.');
       }
 
       final response = await _client.rpc('get_or_create_conversation', params: {
@@ -160,7 +183,7 @@ class ChatService {
       final currentUser = SupabaseAuthService.currentUser;
       if (currentUser == null) return null;
 
-      // If otherUserId is provided, check if users are blocked
+      // If otherUserId is provided, check if users are blocked and follow each other
       if (otherUserId != null) {
         final isBlocked = await ModerationService.areUsersBlockedFromMessaging(
           currentUser.id, 
@@ -169,6 +192,16 @@ class ChatService {
         
         if (isBlocked) {
           throw Exception('Cannot send message. One of the users has blocked the other.');
+        }
+
+        // Check if users follow each other bidirectionally
+        final areMutuallyFollowing = await SupabaseAuthService.areUsersMutuallyFollowing(
+          currentUser.id,
+          otherUserId,
+        );
+        
+        if (!areMutuallyFollowing) {
+          throw Exception('You need to follow each other to send messages.');
         }
       }
 
