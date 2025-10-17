@@ -195,16 +195,7 @@ class SupabaseAuthService {
 
   static Future<void> signOut() async {
     await _supabase.auth.signOut(scope: SignOutScope.global);
-    
-    // Clear terms acceptance so next user has to accept terms again
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('terms_accepted');
-      await prefs.remove('terms_accepted_date');
-    } catch (e) {
-      // Don't block sign out if SharedPreferences fails
-      print('Failed to clear terms acceptance: $e');
-    }
+    // Note: Terms are now shown for new users only, so no SharedPreferences cleanup needed
   }
 
   static Stream<AuthState> get authStateChanges => _supabase.auth.onAuthStateChange;

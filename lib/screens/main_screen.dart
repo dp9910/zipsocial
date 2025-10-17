@@ -32,6 +32,9 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<void> _onTabTap(int index) async {
+    // Dismiss keyboard when changing tabs
+    FocusScope.of(context).unfocus();
+    
     if (index == 2) {
       // Navigate to create post as a modal
       final result = await Navigator.of(context).push(

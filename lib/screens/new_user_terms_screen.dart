@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'profile_setup_screen.dart';
 
-class TermsOfServiceScreen extends StatefulWidget {
-  const TermsOfServiceScreen({super.key});
+class NewUserTermsScreen extends StatefulWidget {
+  const NewUserTermsScreen({super.key});
 
   @override
-  State<TermsOfServiceScreen> createState() => _TermsOfServiceScreenState();
+  State<NewUserTermsScreen> createState() => _NewUserTermsScreenState();
 }
 
-class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
+class _NewUserTermsScreenState extends State<NewUserTermsScreen> {
   bool _hasAgreed = false;
   bool _isLoading = false;
 
@@ -56,7 +56,7 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      'Terms of Service',
+                      'Welcome to ZipSocial!',
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -65,7 +65,7 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Please read and accept our terms before continuing',
+                      'Please read our community guidelines before continuing',
                       style: TextStyle(
                         fontSize: 16,
                         color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
@@ -161,7 +161,7 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                'By accepting these terms, you acknowledge that you understand and agree to our zero tolerance policy for objectionable content and abusive behavior. This is a community-focused platform that prioritizes user safety and respectful communication.',
+                                'By continuing, you acknowledge that you understand and agree to our zero tolerance policy for objectionable content and abusive behavior. This is a community-focused platform that prioritizes user safety and respectful communication.',
                                 style: TextStyle(
                                   color: Colors.red.shade700,
                                   fontSize: 14,
@@ -227,7 +227,7 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _hasAgreed && !_isLoading ? _acceptTerms : null,
+                  onPressed: _hasAgreed && !_isLoading ? _acceptTermsAndContinue : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4ECDC4),
                     disabledBackgroundColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
@@ -239,7 +239,7 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : Text(
-                          'Accept Terms & Continue',
+                          'Accept & Continue to Profile Setup',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
@@ -306,28 +306,25 @@ class _TermsOfServiceScreenState extends State<TermsOfServiceScreen> {
     );
   }
 
-  Future<void> _acceptTerms() async {
+  Future<void> _acceptTermsAndContinue() async {
     setState(() => _isLoading = true);
     
     try {
-      print('🔵 Accepting terms of service...');
-      // Save acceptance to SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('terms_accepted', true);
-      await prefs.setString('terms_accepted_date', DateTime.now().toIso8601String());
-      print('🟢 Terms acceptance saved');
-      
+      // Just navigate to profile setup - no need to save acceptance
+      // since this is only for new users and they'll complete profile setup
       if (mounted) {
-        print('🔵 Navigating back to auth wrapper...');
-        // Navigate back to root to let AuthWrapper handle the authentication flow
-        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const ProfileSetupScreen(),
+          ),
+        );
       }
     } catch (e) {
-      print('🔴 Error accepting terms: $e');
+      print('Error navigating to profile setup: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error saving terms acceptance: $e'),
+            content: Text('Error: $e'),
             backgroundColor: Colors.red,
           ),
         );

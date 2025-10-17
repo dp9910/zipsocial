@@ -78,7 +78,12 @@ class _LoopScreenState extends State<LoopScreen> with TickerProviderStateMixin, 
     final textColor = isDarkMode ? Colors.white : Colors.black87;
     final unselectedTextColor = isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600;
     
-    return Scaffold(
+    return GestureDetector(
+      onTap: () {
+        // Dismiss keyboard when tapping anywhere on the screen
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
@@ -144,6 +149,7 @@ class _LoopScreenState extends State<LoopScreen> with TickerProviderStateMixin, 
           _buildPostsTab(),
           _buildChatTab(),
         ],
+      ),
       ),
     );
   }

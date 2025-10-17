@@ -240,7 +240,11 @@ class _AuthScreenState extends State<AuthScreen> {
                   children: [
                     Expanded(
                       child: GestureDetector(
-                        onTap: () => setState(() => _isSignUp = false),
+                        onTap: () {
+                          _emailController.clear();
+                          _passwordController.clear();
+                          setState(() => _isSignUp = false);
+                        },
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           decoration: BoxDecoration(
@@ -260,7 +264,11 @@ class _AuthScreenState extends State<AuthScreen> {
                     ),
                     Expanded(
                       child: GestureDetector(
-                        onTap: () => setState(() => _isSignUp = true),
+                        onTap: () {
+                          _emailController.clear();
+                          _passwordController.clear();
+                          setState(() => _isSignUp = true);
+                        },
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           decoration: BoxDecoration(
@@ -284,84 +292,88 @@ class _AuthScreenState extends State<AuthScreen> {
               
               const SizedBox(height: 32),
               
-              // Quick Sign In Options
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Quick ${_isSignUp ? 'Sign Up' : 'Sign In'}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+              // Quick Sign In Options (only show for sign in)
+              if (!_isSignUp)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Quick Sign In',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Apple Sign-In Button (iOS only)
-                  if (Platform.isIOS) ...[
+                    const SizedBox(height: 16),
+                    
+                    // Apple Sign-In Button (iOS only)
+                    if (Platform.isIOS) ...[
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: SignInWithAppleButton(
+                          onPressed: () => _signInWithApple(),
+                          style: Theme.of(context).brightness == Brightness.dark 
+                            ? SignInWithAppleButtonStyle.white 
+                            : SignInWithAppleButtonStyle.black,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    
+                    // Google Sign-In Button
                     SizedBox(
                       width: double.infinity,
                       height: 50,
-                      child: SignInWithAppleButton(
-                        onPressed: () => _signInWithApple(),
-                        style: Theme.of(context).brightness == Brightness.dark 
-                          ? SignInWithAppleButtonStyle.white 
-                          : SignInWithAppleButtonStyle.black,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                  ],
-                  
-                  // Google Sign-In Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton.icon(
-                      onPressed: _isGoogleLoading ? null : _signInWithGoogle,
-                      icon: _isGoogleLoading 
-                        ? const SizedBox(
-                            width: 20, height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.g_mobiledata, size: 24),
-                      label: Text('Continue with Google'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black87,
-                        elevation: 2,
-                        side: BorderSide(color: Colors.grey.shade300),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                      child: ElevatedButton.icon(
+                        onPressed: _isGoogleLoading ? null : _signInWithGoogle,
+                        icon: _isGoogleLoading 
+                          ? const SizedBox(
+                              width: 20, height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.g_mobiledata, size: 24),
+                        label: Text('Continue with Google'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black87,
+                          elevation: 2,
+                          side: BorderSide(color: Colors.grey.shade300),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
               
-              const SizedBox(height: 24),
-              
-              // Divider
-              Row(
-                children: [
-                  Expanded(child: Divider(color: Colors.grey.shade300)),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      'OR',
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 12,
+              // Only show divider and spacing when OAuth buttons are visible
+              if (!_isSignUp) ...[
+                const SizedBox(height: 24),
+                
+                // Divider
+                Row(
+                  children: [
+                    Expanded(child: Divider(color: Colors.grey.shade300)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'OR',
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
-                  ),
-                  Expanded(child: Divider(color: Colors.grey.shade300)),
-                ],
-              ),
-              
-              const SizedBox(height: 24),
+                    Expanded(child: Divider(color: Colors.grey.shade300)),
+                  ],
+                ),
+                
+                const SizedBox(height: 24),
+              ],
               
               // Email/Password Section
               Column(

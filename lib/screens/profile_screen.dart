@@ -271,6 +271,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         },
                       ),
                       
+                      const SizedBox(height: 16),
+                      
+                      // Terms of Service Section
+                      _buildTermsOfServiceSection(),
+                      
                       // Commented out for future implementation
                       // const SizedBox(height: 16),
                       // 
@@ -411,6 +416,180 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTermsOfServiceSection() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF4ECDC4).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.gavel,
+                  size: 18,
+                  color: Color(0xFF4ECDC4),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Terms of Service',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          
+          _buildTermsSection(
+            'Age Requirement',
+            'You must be 18 years or older to use ZipSocial.',
+            Icons.badge,
+            Colors.red,
+          ),
+          
+          _buildTermsSection(
+            'Zero Tolerance Policy',
+            'ZipSocial has ZERO TOLERANCE for hate speech, harassment, threats, explicit content, spam, or abuse. Violations result in immediate account suspension.',
+            Icons.block,
+            Colors.orange,
+          ),
+          
+          _buildTermsSection(
+            'Content Moderation',
+            'All content is subject to automated and manual moderation. We reserve the right to remove content and suspend users without prior notice.',
+            Icons.security,
+            Colors.blue,
+          ),
+          
+          _buildTermsSection(
+            'Reporting System',
+            'Report inappropriate content immediately. We respond to all reports within 24 hours and take swift action.',
+            Icons.report,
+            Colors.green,
+          ),
+          
+          _buildTermsSection(
+            'User Responsibilities',
+            'You are responsible for all content you post and interactions. Respect other users and follow community guidelines.',
+            Icons.person_outline,
+            Colors.purple,
+          ),
+          
+          _buildTermsSection(
+            'Enforcement',
+            'Violations may result in content removal, account suspension, or permanent ban. Appeals: hellozipsocial@gmail.com.',
+            Icons.gavel,
+            Colors.red.shade800,
+          ),
+          
+          const SizedBox(height: 16),
+          
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.red.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.red.shade200),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.warning, color: Colors.red.shade600, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Community Standards',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red.shade700,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'ZipSocial is a community-focused platform that prioritizes user safety and respectful communication. By using this app, you agree to our zero tolerance policy for objectionable content and abusive behavior.',
+                  style: TextStyle(
+                    color: Colors.red.shade700,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTermsSection(String title, String content, IconData icon, Color color) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Icon(
+              icon,
+              size: 14,
+              color: color,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: color,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  content,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                    height: 1.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

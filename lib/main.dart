@@ -7,6 +7,7 @@ import 'screens/auth_screen.dart';
 import 'screens/main_screen.dart';
 import 'screens/profile_setup_screen.dart';
 import 'screens/terms_of_service_screen.dart';
+import 'screens/new_user_terms_screen.dart';
 import 'services/supabase_auth_service.dart';
 
 void main() async {
@@ -42,57 +43,42 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: _checkTermsAcceptance(),
-      builder: (context, termsSnapshot) {
-        if (termsSnapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+    return StreamBuilder<AuthState>(
+      stream: SupabaseAuthService.authStateChanges,
+      builder: (context, snapshot) {
+        final session = snapshot.data?.session;
+        if (session != null) {
+          return FutureBuilder(
+            future: SupabaseAuthService.getUserProfile(),
+            builder: (context, userSnapshot) {
+              if (userSnapshot.connectionState == ConnectionState.waiting) {
+                return const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
+              }
+              
+              final user = userSnapshot.data;
+              if (user == null) {
+                // This shouldn't happen, but if it does, show terms
+                return const NewUserTermsScreen();
+              } else if (!user.isProfileComplete) {
+                // Check if this is a new user (no nickname yet) or returning user
+                if (user.nickname == null || user.nickname!.isEmpty) {
+                  // New user - show terms first
+                  return const NewUserTermsScreen();
+                } else {
+                  // Existing user with incomplete profile
+                  return const ProfileSetupScreen();
+                }
+              }
+              
+              return const MainScreen();
+            },
           );
+        } else {
+          return const AuthScreen();
         }
-        
-        final termsAccepted = termsSnapshot.data ?? false;
-        if (!termsAccepted) {
-          return const TermsOfServiceScreen();
-        }
-        
-        return StreamBuilder<AuthState>(
-          stream: SupabaseAuthService.authStateChanges,
-          builder: (context, snapshot) {
-            final session = snapshot.data?.session;
-            if (session != null) {
-              return FutureBuilder(
-                future: SupabaseAuthService.getUserProfile(),
-                builder: (context, userSnapshot) {
-                  if (userSnapshot.connectionState == ConnectionState.waiting) {
-                    return const Scaffold(
-                      body: Center(child: CircularProgressIndicator()),
-                    );
-                  }
-                  
-                  final user = userSnapshot.data;
-                  if (user == null || !user.isProfileComplete) {
-                    return const ProfileSetupScreen();
-                  }
-                  
-                  return const MainScreen();
-                },
-              );
-            } else {
-              return const AuthScreen();
-            }
-          },
-        );
       },
     );
-  }
-  
-  Future<bool> _checkTermsAcceptance() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      return prefs.getBool('terms_accepted') ?? false;
-    } catch (e) {
-      return false;
-    }
   }
 }
