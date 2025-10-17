@@ -90,31 +90,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                             const SizedBox(height: 20),
                             
-                            // Email
-                            if (_appUser?.email != null) ...[
-                              _buildInfoRow(
-                                'Email',
-                                _appUser!.email!,
-                                Icons.email_outlined,
-                              ),
-                              const SizedBox(height: 16),
-                            ],
                             
-                            // User ID (Supabase user ID)
+                            // Email (from Supabase auth user)
                             _buildInfoRow(
-                              'User ID',
-                              _appUser?.id ?? 'Unknown',
-                              Icons.fingerprint_outlined,
+                              'Email',
+                              SupabaseAuthService.currentUser?.email ?? 'Unknown',
+                              Icons.email_outlined,
                             ),
                             
-                            const SizedBox(height: 16),
-                            
-                            // Custom User ID (from our users table)
-                            _buildInfoRow(
-                              'Custom User ID',
-                              _appUser?.customUserId ?? 'Unknown',
-                              Icons.tag,
-                            ),
                             
                             const SizedBox(height: 16),
                             
