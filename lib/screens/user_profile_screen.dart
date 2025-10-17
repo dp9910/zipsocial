@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart';
 import '../services/supabase_auth_service.dart'; // Changed import
+import '../services/moderation_service.dart';
 import 'followers_screen.dart';
 import 'following_screen.dart';
 
@@ -34,6 +35,23 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   Future<void> _loadUserProfile() async {
     try {
+      // First check if the current user is blocked by the profile owner
+      final currentUser = SupabaseAuthService.currentUser;
+      
+      if (currentUser != null) {
+        final isBlockedByUser = await ModerationService.isBlockedByUser(widget.userId);
+        
+        if (isBlockedByUser) {
+          if (mounted) {
+            setState(() {
+              _isLoading = false;
+              _isAccessDenied = true; // Access denied due to blocking
+            });
+          }
+          return;
+        }
+      }
+
       final user = await SupabaseAuthService.getUserProfileById(widget.userId); // Changed service call
       if (mounted) {
         setState(() {
@@ -133,7 +151,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               const SizedBox(height: 16),
               Text(
                 _isAccessDenied 
-                    ? 'Access Restricted'
+                    ? 'Profile Blocked'
                     : 'User not found',
                 style: TextStyle(
                   fontSize: 20,
@@ -144,7 +162,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               const SizedBox(height: 8),
               Text(
                 _isAccessDenied 
-                    ? 'This user has restricted access to their profile.'
+                    ? 'This user has blocked you, so you cannot view their profile.'
                     : 'The user you are looking for does not exist.',
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),

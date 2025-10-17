@@ -3,6 +3,7 @@ import '../models/conversation.dart';
 import '../models/message.dart';
 import '../models/user.dart';
 import 'supabase_auth_service.dart';
+import 'moderation_service.dart';
 
 class ChatService {
   static final _client = Supabase.instance.client;
@@ -86,6 +87,16 @@ class ChatService {
       final currentUser = SupabaseAuthService.currentUser;
       if (currentUser == null) return null;
 
+      // Check if users are blocked from messaging each other
+      final isBlocked = await ModerationService.areUsersBlockedFromMessaging(
+        currentUser.id, 
+        otherUserId
+      );
+      
+      if (isBlocked) {
+        throw Exception('Unable to start conversation. One of the users has blocked the other.');
+      }
+
       final response = await _client.rpc('get_or_create_conversation', params: {
         'user1_id': currentUser.id,
         'user2_id': otherUserId,
@@ -143,10 +154,23 @@ class ChatService {
     required String conversationId,
     required String content,
     MessageType messageType = MessageType.text,
+    String? otherUserId,
   }) async {
     try {
       final currentUser = SupabaseAuthService.currentUser;
       if (currentUser == null) return null;
+
+      // If otherUserId is provided, check if users are blocked
+      if (otherUserId != null) {
+        final isBlocked = await ModerationService.areUsersBlockedFromMessaging(
+          currentUser.id, 
+          otherUserId
+        );
+        
+        if (isBlocked) {
+          throw Exception('Cannot send message. One of the users has blocked the other.');
+        }
+      }
 
       final response = await _client
           .from('messages')

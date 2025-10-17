@@ -10,9 +10,61 @@ class ModerationService {
     if (user == null) throw Exception('Not authenticated');
 
     try {
-      await _client.rpc('block_user', params: {
-        'target_user_id': targetUserId,
-      });
+      // 1. Create or update the block record
+      final existingBlock = await _client
+          .from('user_blocks')
+          .select('id')
+          .eq('blocker_id', user.id)
+          .eq('blocked_id', targetUserId)
+          .maybeSingle();
+
+      if (existingBlock != null) {
+        // Update existing record
+        await _client
+            .from('user_blocks')
+            .update({
+              'is_blocked': true,
+              'updated_at': DateTime.now().toUtc().toIso8601String(),
+            })
+            .eq('blocker_id', user.id)
+            .eq('blocked_id', targetUserId);
+      } else {
+        // Insert new record
+        await _client.from('user_blocks').insert({
+          'blocker_id': user.id,
+          'blocked_id': targetUserId,
+          'is_blocked': true,
+          'created_at': DateTime.now().toUtc().toIso8601String(),
+          'updated_at': DateTime.now().toUtc().toIso8601String(),
+        });
+      }
+
+      // 2. Handle unfollowing - remove blocked user from blocker's following list
+      try {
+        await SupabaseAuthService.unfollowUser(targetUserId);
+      } catch (e) {
+        print('Note: Could not unfollow user during block (might not be following): $e');
+      }
+
+      // 3. Handle bidirectional follower removal - break ALL follow relationships between the users
+      try {
+        // Remove blocker from blocked user's following list (if blocked user was following blocker)
+        await _client
+            .from('user_follows')
+            .delete()
+            .eq('follower_id', targetUserId)
+            .eq('following_id', user.id);
+        
+        // Also remove blocked user from blocker's following list (redundant but ensures consistency)
+        await _client
+            .from('user_follows')
+            .delete()
+            .eq('follower_id', user.id)
+            .eq('following_id', targetUserId);
+      } catch (e) {
+        print('Note: Could not remove follower relationships during block: $e');
+      }
+
     } catch (e) {
       throw Exception('Failed to block user: $e');
     }
@@ -24,10 +76,20 @@ class ModerationService {
     if (user == null) throw Exception('Not authenticated');
 
     try {
-      await _client.rpc('unblock_user', params: {
-        'target_user_id': targetUserId,
-      });
+      print('DEBUG: Unblocking user $targetUserId by ${user.id}');
+      
+      // Update the block record to set is_blocked = false
+      await _client.from('user_blocks')
+          .update({
+            'is_blocked': false,
+            'updated_at': DateTime.now().toUtc().toIso8601String(),
+          })
+          .eq('blocker_id', user.id)
+          .eq('blocked_id', targetUserId);
+      
+      print('DEBUG: Successfully unblocked user $targetUserId');
     } catch (e) {
+      print('DEBUG: Error unblocking user: $e');
       throw Exception('Failed to unblock user: $e');
     }
   }
@@ -116,6 +178,57 @@ class ModerationService {
           .maybeSingle();
 
       return response != null;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Check if current user is blocked by another user (reverse check)
+  static Future<bool> isBlockedByUser(String targetUserId) async {
+    final user = SupabaseAuthService.currentUser;
+    if (user == null) return false;
+
+    try {
+      // Query to check if the current user is blocked by the target user
+      final response = await _client
+          .from('user_blocks')
+          .select('*')
+          .or('and(blocker_id.eq.$targetUserId,blocked_id.eq.${user.id}),and(blocker_id.eq.${user.id},blocked_id.eq.$targetUserId)')
+          .eq('is_blocked', true);
+
+      final foundBlock = response.where((block) => 
+        block['blocker_id'] == targetUserId && 
+        block['blocked_id'] == user.id && 
+        block['is_blocked'] == true
+      ).isNotEmpty;
+
+      return foundBlock;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Check if users are blocked from messaging each other (bidirectional)
+  static Future<bool> areUsersBlockedFromMessaging(String userId1, String userId2) async {
+    try {
+      // Check if userId1 blocked userId2
+      final block1Response = await _client
+          .from('user_blocks')
+          .select('*')
+          .eq('blocker_id', userId1)
+          .eq('blocked_id', userId2)
+          .eq('is_blocked', true);
+      
+      // Check if userId2 blocked userId1
+      final block2Response = await _client
+          .from('user_blocks')
+          .select('*')
+          .eq('blocker_id', userId2)
+          .eq('blocked_id', userId1)
+          .eq('is_blocked', true);
+
+      final isBlocked = block1Response.isNotEmpty || block2Response.isNotEmpty;
+      return isBlocked;
     } catch (e) {
       return false;
     }

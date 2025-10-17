@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/message.dart';
 import '../services/chat_service.dart';
+import '../services/moderation_service.dart';
 import '../services/supabase_auth_service.dart';
 import '../utils/user_colors.dart';
 
@@ -26,6 +27,8 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
   List<Message> _messages = [];
   bool _isLoading = true;
   bool _isSending = false;
+  bool _isBlocked = false;
+  bool _isCheckingBlockStatus = true;
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   RealtimeChannel? _messageSubscription;
@@ -33,6 +36,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
   @override
   void initState() {
     super.initState();
+    _checkBlockingStatus();
     _loadMessages();
     _subscribeToMessages();
     _markAsRead();
@@ -40,6 +44,40 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
     // Set current user ID for message ownership checks
     final currentUser = SupabaseAuthService.currentUser;
     Message.setCurrentUserId(currentUser?.id);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Check for blocking status again when the screen regains focus
+    // This helps catch blocking changes from other screens
+    _checkBlockingStatus();
+  }
+
+  Future<void> _checkBlockingStatus() async {
+    try {
+      final currentUser = SupabaseAuthService.currentUser;
+      if (currentUser == null) return;
+
+      // Check if either user has blocked the other (bidirectional check)
+      final isBlocked = await ModerationService.areUsersBlockedFromMessaging(
+        currentUser.id, 
+        widget.otherUserId
+      );
+      
+      if (mounted) {
+        setState(() {
+          _isBlocked = isBlocked;
+          _isCheckingBlockStatus = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isCheckingBlockStatus = false;
+        });
+      }
+    }
   }
 
   @override
@@ -93,7 +131,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
 
   Future<void> _sendMessage() async {
     final content = _messageController.text.trim();
-    if (content.isEmpty || _isSending) return;
+    if (content.isEmpty || _isSending || _isBlocked) return;
 
     setState(() => _isSending = true);
     _messageController.clear();
@@ -102,6 +140,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
       final message = await ChatService.sendMessage(
         conversationId: widget.conversationId,
         content: content,
+        otherUserId: widget.otherUserId,
       );
 
       if (message != null && mounted) {
@@ -306,70 +345,116 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                       ),
           ),
 
-          // Message input
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              border: Border(
-                top: BorderSide(
-                  color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
-                ),
-              ),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _messageController,
-                    decoration: InputDecoration(
-                      hintText: 'Type a message...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: const BorderSide(color: Color(0xFF4ECDC4)),
-                      ),
-                      filled: true,
-                      fillColor: Theme.of(context).scaffoldBackgroundColor,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
+          // Message input or blocked message
+          _isCheckingBlockStatus
+              ? Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    border: Border(
+                      top: BorderSide(
+                        color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
                       ),
                     ),
-                    maxLines: null,
-                    textCapitalization: TextCapitalization.sentences,
-                    onSubmitted: (_) => _sendMessage(),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  decoration: BoxDecoration(
-                    color: otherUserColor,
-                    shape: BoxShape.circle,
+                  child: const Center(
+                    child: CircularProgressIndicator(),
                   ),
-                  child: IconButton(
-                    onPressed: _isSending ? null : _sendMessage,
-                    icon: _isSending
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          )
-                        : const Icon(
-                            Icons.send,
-                            color: Colors.white,
+                )
+              : _isBlocked
+                  ? Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.errorContainer.withOpacity(0.1),
+                        border: Border(
+                          top: BorderSide(
+                            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
                           ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.block,
+                            color: Theme.of(context).colorScheme.error,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'You cannot send messages in this conversation. One of the users has blocked the other.',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface,
+                        border: Border(
+                          top: BorderSide(
+                            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                          ),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _messageController,
+                              decoration: InputDecoration(
+                                hintText: 'Type a message...',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(24),
+                                  borderSide: BorderSide(color: Colors.grey.shade300),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(24),
+                                  borderSide: const BorderSide(color: Color(0xFF4ECDC4)),
+                                ),
+                                filled: true,
+                                fillColor: Theme.of(context).scaffoldBackgroundColor,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                              ),
+                              maxLines: null,
+                              textCapitalization: TextCapitalization.sentences,
+                              onSubmitted: (_) => _sendMessage(),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: otherUserColor,
+                              shape: BoxShape.circle,
+                            ),
+                            child: IconButton(
+                              onPressed: _isSending ? null : _sendMessage,
+                              icon: _isSending
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                      ),
+                                    )
+                                  : const Icon(
+                                      Icons.send,
+                                      color: Colors.white,
+                                    ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
         ],
       ),
     );
