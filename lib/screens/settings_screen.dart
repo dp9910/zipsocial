@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'; // Import Supabase User
 import 'package:url_launcher/url_launcher.dart';
 import '../services/supabase_auth_service.dart'; // Changed import
 import '../models/user.dart'; // AppUser model
-import 'edit_profile_screen.dart'; // Assuming this will be updated to use AppUser
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -335,11 +333,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 ),
                                 actions: [
                                   TextButton(
-                                    onPressed: () => Navigator.of(context).pop(false),
+                                    onPressed: () {
+                                      FocusScope.of(context).unfocus();
+                                      Navigator.of(context).pop(false);
+                                    },
                                     child: const Text('Cancel'),
                                   ),
                                   TextButton(
-                                    onPressed: () => Navigator.of(context).pop(true),
+                                    onPressed: () {
+                                      FocusScope.of(context).unfocus();
+                                      Navigator.of(context).pop(true);
+                                    },
                                     style: TextButton.styleFrom(foregroundColor: Colors.red),
                                     child: const Text('Delete'),
                                   ),

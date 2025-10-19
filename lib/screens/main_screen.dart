@@ -31,11 +31,27 @@ class _MainScreenState extends State<MainScreen> {
     ];
   }
 
-  Future<void> _onTabTap(int index) async {
-    // Dismiss keyboard when changing tabs
+  void _dismissKeyboardCompletely() {
+    // Comprehensive keyboard dismissal
     FocusScope.of(context).unfocus();
+    FocusManager.instance.primaryFocus?.unfocus();
+    // Additional dismissal for persistent keyboards
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        FocusScope.of(context).unfocus();
+        FocusManager.instance.primaryFocus?.unfocus();
+      }
+    });
+  }
+
+  Future<void> _onTabTap(int index) async {
+    // Dismiss keyboard when changing tabs - enhanced dismissal
+    _dismissKeyboardCompletely();
     
     if (index == 2) {
+      // Ensure keyboard is fully dismissed before navigation
+      await Future.delayed(const Duration(milliseconds: 100));
+      
       // Navigate to create post as a modal
       final result = await Navigator.of(context).push(
         MaterialPageRoute(
@@ -44,22 +60,46 @@ class _MainScreenState extends State<MainScreen> {
         ),
       );
       
-      // If post was created, refresh home feed, loop feed, and profile
+      if (!mounted) return;
+      
+      // If post was created, navigate to home tab and refresh feeds
       if (result == true) {
+        // Switch to home tab first
+        setState(() => _currentIndex = 0);
+        
+        // Then refresh all feeds
         (_homeKey.currentState as dynamic)?.refreshFeed();
         (_loopKey.currentState as dynamic)?.refreshPosts();
         (_profileKey.currentState as dynamic)?.refreshProfile();
+        
+        // Ensure keyboard stays dismissed
+        await Future.delayed(const Duration(milliseconds: 100));
+        if (mounted) {
+          _dismissKeyboardCompletely();
+        }
       }
     } else {
       setState(() => _currentIndex = index);
+      // Ensure keyboard stays dismissed after tab change
+      await Future.delayed(const Duration(milliseconds: 50));
+      if (mounted) {
+        _dismissKeyboardCompletely();
+      }
     }
+  }
+
+  @override
+  void deactivate() {
+    // Ensure keyboard is dismissed when main screen becomes inactive
+    _dismissKeyboardCompletely();
+    super.deactivate();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex == 3 ? 2 : (_currentIndex == 1 ? 1 : 0),
+        body: IndexedStack(
+          index: _currentIndex == 3 ? 2 : (_currentIndex == 1 ? 1 : 0),
         children: [
           _screens[0], // Home
           _screens[1], // Loop

@@ -158,11 +158,17 @@ class _PostCardState extends State<PostCard> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
+            onPressed: () {
+              FocusScope.of(context).unfocus();
+              Navigator.of(context).pop(false);
+            },
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: () {
+              FocusScope.of(context).unfocus();
+              Navigator.of(context).pop(true);
+            },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Block'),
           ),
@@ -199,11 +205,17 @@ class _PostCardState extends State<PostCard> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
+            onPressed: () {
+              FocusScope.of(context).unfocus();
+              Navigator.of(context).pop(false);
+            },
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: () {
+              FocusScope.of(context).unfocus();
+              Navigator.of(context).pop(true);
+            },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Delete'),
           ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../models/post.dart';
-import '../models/user.dart'; // Corrected import for AppUser
 import '../services/post_service.dart';
 import '../services/supabase_auth_service.dart'; // Import SupabaseAuthService
 import '../widgets/post_card.dart';
@@ -66,6 +65,28 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _dismissKeyboardCompletely() {
+    // Comprehensive keyboard dismissal for zip code field
+    FocusScope.of(context).unfocus();
+    _zipcodeFocusNode.unfocus();
+    FocusManager.instance.primaryFocus?.unfocus();
+    // Additional dismissal for persistent numeric keyboards
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        FocusScope.of(context).unfocus();
+        _zipcodeFocusNode.unfocus();
+        FocusManager.instance.primaryFocus?.unfocus();
+      }
+    });
+  }
+
+  @override
+  void deactivate() {
+    // Dismiss keyboard when screen becomes inactive (tab switch, navigation, etc.)
+    _dismissKeyboardCompletely();
+    super.deactivate();
+  }
+
   @override
   void dispose() {
     _zipcodeController.dispose();
@@ -119,12 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        // Dismiss keyboard when tapping outside
-        FocusScope.of(context).unfocus();
-      },
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Theme.of(context).brightness == Brightness.dark 
@@ -294,10 +310,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             if (value.isNotEmpty) {
                               _loadFeed();
                             }
-                            FocusScope.of(context).unfocus();
+                            _dismissKeyboardCompletely();
                           },
                           onEditingComplete: () {
-                            FocusScope.of(context).unfocus();
+                            _dismissKeyboardCompletely();
                           },
                         ),
                       ),
@@ -324,7 +340,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       child: ElevatedButton(
                         onPressed: () {
-                          FocusScope.of(context).unfocus();
+                          _dismissKeyboardCompletely();
                           _loadFeed();
                         },
                         style: ElevatedButton.styleFrom(
@@ -566,6 +582,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               padding: const EdgeInsets.only(bottom: 20),
                               child: PostCard(
                                 post: post,
+                                onPostUpdated: _loadFeed,
                               ),
                             );
                           },
@@ -574,7 +591,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-    ),
     );
   }
 

@@ -82,11 +82,15 @@ class _FollowingScreenState extends State<FollowingScreen> {
         content: Text('Unfollow ${userToUnfollow.nickname ?? userToUnfollow.customUserId}? You will no longer see their posts in your feed.'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () {
+              FocusScope.of(context).unfocus();
+              Navigator.of(context).pop();
+            },
             child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
+              FocusScope.of(context).unfocus();
               Navigator.of(context).pop();
               _unfollowUser(userToUnfollow);
             },

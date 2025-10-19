@@ -87,6 +87,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
       final conversationId = await ChatService.getOrCreateConversation(user.id);
       
       if (mounted) {
+        FocusScope.of(context).unfocus();
         Navigator.of(context).pop(); // Close loading dialog
         
         if (conversationId != null) {
@@ -102,6 +103,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
           // Return true to indicate a chat was started
           if (mounted) {
+            FocusScope.of(context).unfocus();
             Navigator.of(context).pop(true);
           }
         } else {
@@ -115,6 +117,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
       }
     } catch (e) {
       if (mounted) {
+        FocusScope.of(context).unfocus();
         Navigator.of(context).pop(); // Close loading dialog
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -128,7 +131,9 @@ class _NewChatScreenState extends State<NewChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
       appBar: AppBar(
         title: const Text(
           'New Chat',
@@ -170,6 +175,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
           ),
         ],
       ),
+    ),
     );
   }
 

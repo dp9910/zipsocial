@@ -177,7 +177,9 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
       resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: SingleChildScrollView(
@@ -477,6 +479,7 @@ class _AuthScreenState extends State<AuthScreen> {
           ),
         ),
       ),
+    ),
     );
   }
 }

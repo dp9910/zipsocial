@@ -194,8 +194,10 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
   Widget build(BuildContext context) {
     final otherUserColor = UserColors.getUserColor(widget.otherUserId);
     
-    return Scaffold(
-      appBar: AppBar(
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        appBar: AppBar(
         systemOverlayStyle: SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: Theme.of(context).brightness == Brightness.dark ? Brightness.light : Brightness.dark,
@@ -457,6 +459,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                     ),
         ],
       ),
+    ),
     );
   }
 

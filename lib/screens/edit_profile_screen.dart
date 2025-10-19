@@ -33,6 +33,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   void dispose() {
+    // Ensure keyboard is dismissed when leaving the screen
+    FocusScope.of(context).unfocus();
     _nicknameController.dispose();
     _bioController.dispose();
     _preferredZipcodeController.dispose();
@@ -62,6 +64,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       );
 
       if (mounted) {
+        FocusScope.of(context).unfocus();
         Navigator.of(context).pop(true); // Return true to indicate changes were saved
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Profile updated successfully!')),
@@ -81,7 +84,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<bool> _onWillPop() async {
-    if (!_hasChanges) return true;
+    if (!_hasChanges) {
+      FocusScope.of(context).unfocus();
+      return true;
+    }
 
     final shouldPop = await showDialog<bool>(
       context: context,
@@ -90,11 +96,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         content: const Text('You have unsaved changes. Are you sure you want to go back?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
+            onPressed: () {
+              FocusScope.of(context).unfocus();
+              Navigator.of(context).pop(false);
+            },
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: () {
+              FocusScope.of(context).unfocus();
+              Navigator.of(context).pop(true);
+            },
             child: const Text('Discard'),
           ),
         ],
@@ -133,14 +145,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ],
         ),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: GestureDetector(
-            onTap: () {
-              // Dismiss keyboard when tapping anywhere on the screen
-              FocusScope.of(context).unfocus();
-            },
+            padding: const EdgeInsets.all(24),
             child: Form(
-            key: _formKey,
+              key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -397,7 +404,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ],
             ),
           ),
-        ),
         ),
       ),
     );

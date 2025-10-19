@@ -387,11 +387,15 @@ class _CommentWidgetState extends State<CommentWidget> {
         content: const Text('Are you sure you want to delete this comment?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () {
+              FocusScope.of(context).unfocus();
+              Navigator.of(context).pop();
+            },
             child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
+              FocusScope.of(context).unfocus();
               Navigator.of(context).pop();
               widget.onDelete?.call(widget.comment.id);
             },
@@ -421,11 +425,15 @@ class _CommentWidgetState extends State<CommentWidget> {
         content: const Text('This comment will be reported for review. Do you want to continue?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () {
+              FocusScope.of(context).unfocus();
+              Navigator.of(context).pop();
+            },
             child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () async {
+              FocusScope.of(context).unfocus();
               Navigator.of(context).pop();
               
               // Optimistic update

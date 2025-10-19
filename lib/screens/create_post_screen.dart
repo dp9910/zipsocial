@@ -59,12 +59,19 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       );
 
       if (mounted) {
+        // Dismiss keyboard before showing snackbar and navigation
+        FocusScope.of(context).unfocus();
+        
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Post created successfully!'),
             backgroundColor: Color(0xFF4ECDC4),
           ),
         );
+        
+        // Dismiss keyboard before navigating
+        FocusScope.of(context).unfocus();
+        await Future.delayed(const Duration(milliseconds: 200));
         Navigator.pop(context, true); // Return true to indicate post was created
       }
     } catch (e) {
@@ -86,12 +93,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     final surfaceColor = isDarkMode ? Colors.grey.shade800 : Colors.grey.shade50;
     final borderColor = isDarkMode ? Colors.grey.shade700 : AppTheme.primary.withOpacity(0.3);
     
-    return GestureDetector(
-      onTap: () {
-        // Dismiss keyboard when tapping outside
-        FocusScope.of(context).unfocus();
-      },
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
@@ -112,7 +114,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 color: textColor,
                 size: 22,
               ),
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                FocusScope.of(context).unfocus();
+                Navigator.pop(context);
+              },
             ),
           ),
           title: Text(
@@ -456,7 +461,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           ),
         ],
       ),
-    ),
     );
   }
 

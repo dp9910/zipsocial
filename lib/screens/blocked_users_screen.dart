@@ -66,11 +66,15 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
         content: Text('Are you sure you want to unblock @$username?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () {
+              FocusScope.of(context).unfocus();
+              Navigator.of(context).pop();
+            },
             child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
+              FocusScope.of(context).unfocus();
               Navigator.of(context).pop();
               _unblockUser(userId, username);
             },
