@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../models/user.dart';
 import '../services/supabase_auth_service.dart'; // Changed import
 
@@ -122,6 +123,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       onWillPop: _onWillPop,
       child: Scaffold(
         appBar: AppBar(
+          systemOverlayStyle: SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Theme.of(context).brightness == Brightness.dark ? Brightness.light : Brightness.dark,
+            statusBarBrightness: Theme.of(context).brightness,
+          ),
           title: const Text('Edit Profile'),
           backgroundColor: Colors.transparent,
           elevation: 0,

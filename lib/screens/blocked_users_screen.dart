@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../services/moderation_service.dart';
 import '../config/theme.dart';
 
@@ -92,6 +93,11 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
     
     return Scaffold(
       appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Theme.of(context).brightness == Brightness.dark ? Brightness.light : Brightness.dark,
+          statusBarBrightness: Theme.of(context).brightness,
+        ),
         title: const Text('Blocked Users'),
         backgroundColor: Colors.transparent,
         elevation: 0,

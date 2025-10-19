@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../models/post.dart';
 import '../models/user.dart';
 import '../services/post_service.dart';
@@ -56,6 +57,11 @@ class _UserPostsScreenState extends State<UserPostsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Theme.of(context).brightness == Brightness.dark ? Brightness.light : Brightness.dark,
+          statusBarBrightness: Theme.of(context).brightness,
+        ),
         title: Text('${widget.user.nickname}\'s Posts'),
         backgroundColor: Colors.transparent,
         elevation: 0,

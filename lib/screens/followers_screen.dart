@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../models/user.dart';
 import '../services/supabase_auth_service.dart';
 import '../screens/user_profile_screen.dart';
@@ -106,6 +107,11 @@ class _FollowersScreenState extends State<FollowersScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Theme.of(context).brightness == Brightness.dark ? Brightness.light : Brightness.dark,
+          statusBarBrightness: Theme.of(context).brightness,
+        ),
         title: Text(isOwnProfile ? 'Your Followers' : '${widget.user.nickname}\'s Followers'),
         backgroundColor: Colors.transparent,
         elevation: 0,
