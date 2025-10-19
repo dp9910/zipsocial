@@ -127,7 +127,7 @@ class PostService {
         .select('''
           *,
           users!posts_user_id_fkey(nickname),
-          post_interactions!left(user_id, vote, is_saved)
+          post_interactions!left(user_id, vote, is_saved, is_reported)
         ''')
         .eq('zipcode', zipcode)
         .eq('is_active', true);
@@ -176,7 +176,7 @@ class PostService {
           .select('''
             *,
             users!posts_user_id_fkey(nickname),
-            post_interactions!left(user_id, vote, is_saved)
+            post_interactions!left(user_id, vote, is_saved, is_reported)
           ''')
           .eq('user_id', userId)
           .eq('is_active', true)
@@ -218,7 +218,7 @@ class PostService {
           .select('''
             *,
             users!posts_user_id_fkey(nickname),
-            post_interactions!left(user_id, vote, is_saved)
+            post_interactions!left(user_id, vote, is_saved, is_reported)
           ''')
           .inFilter('user_id', followingIds)
           .eq('is_active', true)
@@ -340,7 +340,7 @@ class PostInteractionService {
         .select('''
           *,
           users!posts_user_id_fkey(nickname),
-          post_interactions!inner(user_id, vote, is_saved, updated_at)
+          post_interactions!inner(user_id, vote, is_saved, is_reported, updated_at)
         ''')
         .eq('post_interactions.user_id', user.id)
         .eq('post_interactions.is_saved', true)

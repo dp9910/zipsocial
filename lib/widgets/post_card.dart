@@ -23,6 +23,7 @@ class _PostCardState extends State<PostCard> {
   late int _upvotes;
   late int _downvotes;
   late bool _isSaved;
+  late bool _isReported;
   late int _reportCount;
 
   @override
@@ -32,6 +33,7 @@ class _PostCardState extends State<PostCard> {
     _upvotes = widget.post.upvotes;
     _downvotes = widget.post.downvotes;
     _isSaved = widget.post.isSaved;
+    _isReported = widget.post.isReported;
     _reportCount = widget.post.reportCount;
   }
 
@@ -43,6 +45,7 @@ class _PostCardState extends State<PostCard> {
       _upvotes = widget.post.upvotes;
       _downvotes = widget.post.downvotes;
       _isSaved = widget.post.isSaved;
+      _isReported = widget.post.isReported;
       _reportCount = widget.post.reportCount;
     }
   }
@@ -81,10 +84,16 @@ class _PostCardState extends State<PostCard> {
   }
 
   Future<void> _onReport() async {
+    // If user has already reported this post, ignore the click silently
+    if (_isReported) {
+      return;
+    }
+
     final originalReportCount = _reportCount;
 
     setState(() {
       _reportCount++;
+      _isReported = true;
     });
 
     try {
@@ -93,6 +102,7 @@ class _PostCardState extends State<PostCard> {
     } catch (e) {
       setState(() {
         _reportCount = originalReportCount;
+        _isReported = false;
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
@@ -632,6 +642,7 @@ class _PostCardState extends State<PostCard> {
                   Expanded(
                     child: _ReportButton(
                       reportCount: _reportCount,
+                      isReported: _isReported,
                       onPressed: _onReport,
                       isDark: isDark,
                     ),
@@ -691,11 +702,13 @@ class _PostCardState extends State<PostCard> {
 // Prominent report button component
 class _ReportButton extends StatelessWidget {
   final int reportCount;
+  final bool isReported;
   final VoidCallback onPressed;
   final bool isDark;
 
   const _ReportButton({
     required this.reportCount,
+    required this.isReported,
     required this.onPressed,
     this.isDark = false,
   });
@@ -703,7 +716,7 @@ class _ReportButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasReports = reportCount > 0;
-    final color = hasReports ? Colors.red : (isDark 
+    final color = isReported || hasReports ? Colors.red : (isDark 
         ? Theme.of(context).colorScheme.onSurface.withOpacity(0.6)
         : Colors.grey.shade600);
 
@@ -716,10 +729,10 @@ class _ReportButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            color: hasReports 
+            color: isReported || hasReports 
                 ? Colors.red.withOpacity(0.1)
                 : Colors.transparent,
-            border: hasReports 
+            border: isReported || hasReports 
                 ? Border.all(color: Colors.red.withOpacity(0.3), width: 1)
                 : null,
           ),
@@ -728,11 +741,11 @@ class _ReportButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                hasReports ? Icons.flag : Icons.flag_outlined,
+                isReported || hasReports ? Icons.flag : Icons.flag_outlined,
                 size: 20, // Slightly larger than other buttons
                 color: color,
               ),
-              if (hasReports) ...[
+              if (isReported || hasReports) ...[
                 const SizedBox(width: 4),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),

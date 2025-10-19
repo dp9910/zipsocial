@@ -143,7 +143,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   : Text(
                       'Save',
                       style: TextStyle(
-                        color: _hasChanges ? const Color(0xFF4ECDC4) : Colors.grey.shade400,
+                        color: _hasChanges 
+                            ? const Color(0xFF4ECDC4) 
+                            : Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
                         fontWeight: FontWeight.w600,
                       ),
                     ),

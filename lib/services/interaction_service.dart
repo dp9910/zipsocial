@@ -45,6 +45,10 @@ class InteractionService {
           .maybeSingle();
 
       if (existingInteraction != null) {
+        // Check if already reported
+        if (existingInteraction['is_reported'] == true) {
+          throw Exception('You have already reported this post');
+        }
         // Update existing record
         await _supabase
             .from('post_interactions')
@@ -74,18 +78,7 @@ class InteractionService {
           .update({'report_count': reportCount})
           .eq('id', postId);
 
-      // Also add to reported_posts table for admin tracking
-      try {
-        await _supabase.from('reported_posts').insert({
-          'post_id': postId,
-          'reporter_user_id': user.id,
-          'reported_at': DateTime.now().toUtc().toIso8601String(),
-          'status': 'pending', // pending, reviewed, resolved
-        });
-      } catch (e) {
-        // Don't fail the main report if this fails (table might not exist yet)
-        print('Failed to log to reported_posts table: $e');
-      }
+      // Note: Using post_interactions table to track reports instead of separate reported_posts table
 
     } catch (e) {
       rethrow;
@@ -101,7 +94,7 @@ class InteractionService {
         'post_id': postId,
         'user_id': user.id,
         'is_saved': isSaved,
-      });
+      }, onConflict: 'post_id,user_id');
     } catch (e) {
       rethrow;
     }

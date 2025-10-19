@@ -171,8 +171,12 @@ class ContentFilterService {
         'created_at': DateTime.now().toUtc().toIso8601String(),
       });
     } catch (e) {
-      // Don't throw error if logging fails, just continue
-      print('Failed to log content filter result: $e');
+      // Silently handle RLS policy violations and other database errors
+      // Logging failures should not break the main content filtering functionality
+      // Only print error if it's not an RLS violation to avoid spam
+      if (!e.toString().contains('42501') && !e.toString().contains('row-level security policy')) {
+        print('Failed to log content filter result: $e');
+      }
     }
   }
   
@@ -188,6 +192,8 @@ class ContentFilterService {
       
       return response.length >= 5; // 5 flags in 1 hour = spam
     } catch (e) {
+      // If we can't check spam status due to RLS or other errors, default to false
+      // This prevents blocking users when the monitoring system is unavailable
       return false;
     }
   }
