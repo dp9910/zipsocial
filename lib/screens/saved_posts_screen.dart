@@ -92,6 +92,7 @@ class _SavedPostsScreenState extends State<SavedPostsScreen> {
                       return PostCard(
                         post: _savedPosts[index],
                         onPostUpdated: _onPostUpdated,
+                        refreshOnSave: true, // Refresh when posts are unsaved
                       );
                     },
                   ),

@@ -11,8 +11,9 @@ import '../utils/time_formatter.dart';
 class PostCard extends StatefulWidget {
   final Post post;
   final VoidCallback? onPostUpdated; // Reintroducing this field
+  final bool refreshOnSave; // Whether to refresh parent when post is saved/unsaved
 
-  const PostCard({Key? key, required this.post, this.onPostUpdated}) : super(key: key);
+  const PostCard({Key? key, required this.post, this.onPostUpdated, this.refreshOnSave = false}) : super(key: key);
 
   @override
   State<PostCard> createState() => _PostCardState();
@@ -70,7 +71,7 @@ class _PostCardState extends State<PostCard> {
 
     try {
       await InteractionService.toggleVote(widget.post.id, _userVote);
-      widget.onPostUpdated?.call(); // Invoke callback
+      // No need to refresh feed for vote changes
     } catch (e) {
       setState(() {
         _userVote = originalVote;
@@ -98,7 +99,7 @@ class _PostCardState extends State<PostCard> {
 
     try {
       await InteractionService.reportPost(widget.post.id);
-      widget.onPostUpdated?.call(); // Invoke callback
+      // No need to refresh feed for report actions
     } catch (e) {
       setState(() {
         _reportCount = originalReportCount;
@@ -119,7 +120,10 @@ class _PostCardState extends State<PostCard> {
 
     try {
       await InteractionService.savePost(widget.post.id, _isSaved);
-      widget.onPostUpdated?.call(); // Invoke callback
+      // Only refresh if explicitly requested (e.g., from saved posts screen)
+      if (widget.refreshOnSave) {
+        widget.onPostUpdated?.call();
+      }
     } catch (e) {
       setState(() {
         _isSaved = originalIsSaved;
