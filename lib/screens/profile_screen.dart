@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../services/supabase_auth_service.dart';
 import '../models/user.dart';
 import 'edit_profile_screen.dart';
@@ -51,6 +52,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Theme.of(context).brightness == Brightness.dark ? Brightness.light : Brightness.dark,
+          statusBarBrightness: Theme.of(context).brightness,
+        ),
         title: const Text('Your Profile'),
         automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
