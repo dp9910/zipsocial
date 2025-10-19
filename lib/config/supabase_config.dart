@@ -1,10 +1,17 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseConfig {
-  static const String url = 'https://xtvtewfmzvmpzahlmbsj.supabase.co';
-  static const String anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh0dnRld2ZtenZtcHphaGxtYnNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk2MTQ1NjMsImV4cCI6MjA3NTE5MDU2M30.k1WvFeTpM1wOzvN6f2_i3rxb7dEyQXvu2FLeQZrtGhQ';
+  static String get url => dotenv.env['SUPABASE_URL'] ?? '';
+  static String get anonKey => dotenv.env['SUPABASE_ANON_KEY'] ?? '';
 
   static Future<void> initialize() async {
+    await dotenv.load(fileName: ".env");
+    
+    if (url.isEmpty || anonKey.isEmpty) {
+      throw Exception('Supabase configuration missing in .env file');
+    }
+    
     await Supabase.initialize(
       url: url,
       anonKey: anonKey,

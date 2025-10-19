@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/post.dart';
 import '../services/post_service.dart';
-import '../services/supabase_auth_service.dart';
 import '../widgets/post_card.dart';
 import 'chat_list_screen.dart';
 

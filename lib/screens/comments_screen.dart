@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../models/comment.dart';
 import '../services/comment_service.dart';
 import '../services/supabase_auth_service.dart';
-import '../config/theme.dart';
 import '../widgets/comment_widget.dart';
 
 class CommentsScreen extends StatefulWidget {

@@ -1,5 +1,4 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../config/supabase_config.dart';
 import '../models/post.dart';
 import 'supabase_auth_service.dart'; // Changed import
 import 'content_filter_service.dart';

@@ -3,7 +3,6 @@ import '../models/user.dart';
 import '../services/supabase_auth_service.dart'; // Changed import
 import '../services/moderation_service.dart';
 import 'followers_screen.dart';
-import 'following_screen.dart';
 
 class UserProfileScreen extends StatefulWidget {
   final String userId;

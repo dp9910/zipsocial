@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user.dart';
@@ -47,8 +47,13 @@ class SupabaseAuthService {
 
   static Future<void> signInWithGoogle() async {
     try {
-      const webClientId = '867310496279-cshu2jj10llk18ek68fh1bhdvec6kbov.apps.googleusercontent.com';
-      const iosClientId = '867310496279-s4n7jhbrm5c3r74314nug67hdm04ch9n.apps.googleusercontent.com';
+      final webClientId = dotenv.env['GOOGLE_WEB_CLIENT_ID'] ?? '';
+      final iosClientId = dotenv.env['GOOGLE_IOS_CLIENT_ID'] ?? '';
+      
+      if (webClientId.isEmpty || iosClientId.isEmpty) {
+        throw Exception('Google OAuth configuration missing in .env file');
+      }
+      
       final GoogleSignIn googleSignIn = GoogleSignIn(
         clientId: iosClientId,
         serverClientId: webClientId,
