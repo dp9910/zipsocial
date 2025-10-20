@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'loop_screen.dart';
 import 'create_post_screen.dart';
+import 'notifications_screen.dart';
 import 'profile_screen.dart';
 import '../config/theme.dart';
+import '../widgets/notification_badge.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -16,6 +18,8 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
   final GlobalKey<State<HomeScreen>> _homeKey = GlobalKey<State<HomeScreen>>();
   final GlobalKey<State<LoopScreen>> _loopKey = GlobalKey<State<LoopScreen>>();
+  final GlobalKey<NotificationBadgeState> _notificationBadgeKey = GlobalKey<NotificationBadgeState>();
+  final GlobalKey<State<NotificationsScreen>> _notificationsKey = GlobalKey<State<NotificationsScreen>>();
   final GlobalKey<State<ProfileScreen>> _profileKey = GlobalKey<State<ProfileScreen>>();
   
   late final List<Widget> _screens;
@@ -27,6 +31,7 @@ class _MainScreenState extends State<MainScreen> {
       HomeScreen(key: _homeKey),
       LoopScreen(key: _loopKey),
       const CreatePostScreen(),
+      NotificationsScreen(key: _notificationsKey),
       ProfileScreen(key: _profileKey),
     ];
   }
@@ -70,6 +75,8 @@ class _MainScreenState extends State<MainScreen> {
         // Then refresh all feeds
         (_homeKey.currentState as dynamic)?.refreshFeed();
         (_loopKey.currentState as dynamic)?.refreshPosts();
+        (_notificationsKey.currentState as dynamic)?.refreshNotifications();
+        _notificationBadgeKey.currentState?.refreshBadge();
         (_profileKey.currentState as dynamic)?.refreshProfile();
         
         // Ensure keyboard stays dismissed
@@ -99,11 +106,12 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: IndexedStack(
-          index: _currentIndex == 3 ? 2 : (_currentIndex == 1 ? 1 : 0),
+          index: _currentIndex == 4 ? 3 : (_currentIndex == 3 ? 2 : (_currentIndex == 1 ? 1 : 0)),
         children: [
           _screens[0], // Home
           _screens[1], // Loop
-          _screens[3], // Profile
+          _screens[3], // Notifications
+          _screens[4], // Profile
         ],
       ),
       bottomNavigationBar: Container(
@@ -131,20 +139,27 @@ class _MainScreenState extends State<MainScreen> {
             fontWeight: FontWeight.bold,
             fontSize: 12,
           ),
-          items: const [
-            BottomNavigationBarItem(
+          items: [
+            const BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: 'Home',
             ),
-            BottomNavigationBarItem(
+            const BottomNavigationBarItem(
               icon: Icon(Icons.loop),
               label: 'Loop',
             ),
-            BottomNavigationBarItem(
+            const BottomNavigationBarItem(
               icon: Icon(Icons.add_box_outlined),
               label: 'Post',
             ),
             BottomNavigationBarItem(
+              icon: NotificationBadge(
+                key: _notificationBadgeKey,
+                child: const Icon(Icons.notifications),
+              ),
+              label: 'Notifications',
+            ),
+            const BottomNavigationBarItem(
               icon: Icon(Icons.person),
               label: 'Profile',
             ),

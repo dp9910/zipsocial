@@ -6,6 +6,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user.dart';
+import '../services/notification_service.dart';
 
 class SupabaseAuthService {
   static final _supabase = Supabase.instance.client;
@@ -329,6 +330,15 @@ class SupabaseAuthService {
 
       // Update following count for current user
       await _updateUserCount(user.id, 'following_count', 1);
+
+      // Send notification to the user being followed
+      try {
+        final notificationService = NotificationService(_supabase);
+        await notificationService.notifyUserFollowed(targetUserId);
+      } catch (e) {
+        // Don't fail the follow action if notification fails
+        print('Failed to send follow notification: $e');
+      }
     } catch (e) {
       throw Exception('Failed to follow user: $e');
     }
@@ -351,6 +361,15 @@ class SupabaseAuthService {
 
       // Update following count for current user
       await _updateUserCount(user.id, 'following_count', -1);
+
+      // Send notification to the user being unfollowed
+      try {
+        final notificationService = NotificationService(_supabase);
+        await notificationService.notifyUserUnfollowed(targetUserId);
+      } catch (e) {
+        // Don't fail the unfollow action if notification fails
+        print('Failed to send unfollow notification: $e');
+      }
     } catch (e) {
       throw Exception('Failed to unfollow user: $e');
     }

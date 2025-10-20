@@ -4,6 +4,7 @@ import '../models/message.dart';
 import '../models/user.dart';
 import 'supabase_auth_service.dart';
 import 'moderation_service.dart';
+import '../services/notification_service.dart';
 
 class ChatService {
   static final _client = Supabase.instance.client;
@@ -225,6 +226,17 @@ class ChatService {
           .single();
 
       final userData = response['users'] as Map<String, dynamic>?;
+      
+      // Send notification if otherUserId is provided
+      if (otherUserId != null) {
+        try {
+          final notificationService = NotificationService(_client);
+          await notificationService.notifyMessageSent(otherUserId, content);
+        } catch (e) {
+          print('Failed to send message notification: $e');
+        }
+      }
+      
       return Message(
         id: response['id'] as String,
         conversationId: response['conversation_id'] as String,

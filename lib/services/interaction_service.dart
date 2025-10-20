@@ -2,12 +2,20 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/supabase_config.dart';
+import '../services/notification_service.dart';
 
 class InteractionService {
   static final _supabase = Supabase.instance.client;
 
   static Future<void> toggleVote(String postId, bool? isUpvote) async {
     try {
+      // Get post details for notification
+      final post = await _supabase
+          .from('posts')
+          .select('user_id, content')
+          .eq('id', postId)
+          .single();
+
       final url = Uri.parse('${SupabaseConfig.url}/functions/v1/toggle-vote');
       final headers = {
         'Content-Type': 'application/json',
@@ -19,12 +27,24 @@ class InteractionService {
         'vote': isUpvote == null ? null : (isUpvote ? 'up' : 'down'),
       });
 
-
       final response = await http.post(url, headers: headers, body: body);
-
 
       if (response.statusCode != 200) {
         throw Exception('Failed to toggle vote: ${response.body}');
+      }
+
+      // Send notification for upvotes only
+      if (isUpvote == true) {
+        try {
+          final notificationService = NotificationService(_supabase);
+          await notificationService.notifyPostLiked(
+            postId,
+            post['user_id'],
+            post['content'],
+          );
+        } catch (e) {
+          print('Failed to send like notification: $e');
+        }
       }
     } catch (e) {
       rethrow;
@@ -95,6 +115,27 @@ class InteractionService {
         'user_id': user.id,
         'is_saved': isSaved,
       }, onConflict: 'post_id,user_id');
+
+      // Send notification when post is saved
+      if (isSaved) {
+        try {
+          // Get post details for notification
+          final post = await _supabase
+              .from('posts')
+              .select('user_id, content')
+              .eq('id', postId)
+              .single();
+
+          final notificationService = NotificationService(_supabase);
+          await notificationService.notifyPostSaved(
+            postId,
+            post['user_id'],
+            post['content'],
+          );
+        } catch (e) {
+          print('Failed to send save notification: $e');
+        }
+      }
     } catch (e) {
       rethrow;
     }

@@ -43,7 +43,7 @@ class ContentTags {
     }
   }
 
-  static String toString(ContentTag tag) {
+  static String tagToString(ContentTag tag) {
     switch (tag) {
       case ContentTag.political:
         return 'political';
@@ -67,7 +67,7 @@ class ContentTags {
   }
 
   static List<String> toStringList(List<ContentTag> tags) {
-    return tags.map((tag) => toString(tag)).toList();
+    return tags.map((tag) => tagToString(tag)).toList();
   }
 
   static List<ContentTag> getAllTags() => ContentTag.values;

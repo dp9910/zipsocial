@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/comment.dart';
 import 'supabase_auth_service.dart';
 import 'content_filter_service.dart';
+import '../services/notification_service.dart';
 
 class CommentService {
   static final _supabase = Supabase.instance.client;
@@ -123,6 +124,26 @@ class CommentService {
 
       // The comment count will be automatically updated by the database trigger
       final comment = Comment.fromJson(response);
+
+      // Send notification to post owner about new comment
+      try {
+        // Get post details
+        final post = await _supabase
+            .from('posts')
+            .select('user_id, content')
+            .eq('id', postId)
+            .single();
+
+        final notificationService = NotificationService(_supabase);
+        await notificationService.notifyPostCommented(
+          postId,
+          post['user_id'],
+          post['content'],
+          content,
+        );
+      } catch (e) {
+        print('Failed to send comment notification: $e');
+      }
 
       // If content was flagged but not rejected, inform the user
       if (filterResult.action == FilterAction.flagged) {
