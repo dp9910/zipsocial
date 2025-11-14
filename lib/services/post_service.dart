@@ -74,13 +74,8 @@ class PostService {
 
     final post = Post.fromJson(response);
     
-    // If content was flagged but not rejected, inform the user
-    if (filterResult.action == FilterAction.flagged) {
-      throw Exception('Post created but flagged for review: ${filterResult.message}');
-    } else if (filterResult.action == FilterAction.autoHidden) {
-      throw Exception('Post created but hidden due to inappropriate content. It will be reviewed by moderators.');
-    }
-
+    // Post was created successfully - return it regardless of flagging status
+    // The UI can handle showing appropriate messages based on filter result
     return post;
   }
 
