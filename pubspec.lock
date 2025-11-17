@@ -145,6 +145,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.1"
+  filter_text:
+    dependency: "direct main"
+    description:
+      name: filter_text
+      sha256: d7c59b39e8e755107ba6c9dd5ba7f8adb740da9caf1480b6e9dbcc75f485024f
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.2"
   flutter:
     dependency: "direct main"
     description: flutter

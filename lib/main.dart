@@ -8,10 +8,12 @@ import 'screens/profile_setup_screen.dart';
 import 'screens/terms_of_service_screen.dart';
 import 'screens/new_user_terms_screen.dart';
 import 'services/supabase_auth_service.dart';
+import 'services/comprehensive_filter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SupabaseConfig.initialize();
+  ComprehensiveFilterService.initialize();
   runApp(const ZipSocialApp());
 }
 

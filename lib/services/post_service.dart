@@ -1,7 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/post.dart';
 import 'supabase_auth_service.dart'; // Changed import
-import 'content_filter_service.dart';
+import 'comprehensive_filter.dart';
 
 class PostService {
   static final _client = Supabase.instance.client;
@@ -20,13 +20,13 @@ class PostService {
     if (userProfile == null) throw Exception('User profile not found');
 
     // Check if user is spamming
-    final isSpamming = await ContentFilterService.isUserSpamming(user.id);
+    final isSpamming = await ComprehensiveFilterService.isUserSpamming(user.id);
     if (isSpamming) {
       throw Exception('Please wait before posting again. Your account has been flagged for potential spam.');
     }
 
     // Filter content before posting
-    final filterResult = ContentFilterService.filterContent(content, 'post');
+    final filterResult = ComprehensiveFilterService.filterContent(content, 'post');
     
     // Reject content if it's too inappropriate
     if (filterResult.action == FilterAction.rejected) {
@@ -56,7 +56,7 @@ class PostService {
     final postId = response['id'];
 
     // Log content filtering result
-    await ContentFilterService.logFilterResult(
+    await ComprehensiveFilterService.logFilterResult(
       contentType: 'post',
       contentId: postId,
       userId: user.id,
