@@ -20,6 +20,7 @@ class Post {
   final bool? userVote;
   final bool isSaved;
   final bool isReported; // has current user reported this post
+  final bool userHasCommented; // has current user commented on this post
   final int commentCount;
 
   Post({
@@ -40,6 +41,7 @@ class Post {
     this.userVote,
     this.isSaved = false,
     this.isReported = false,
+    this.userHasCommented = false,
     this.commentCount = 0,
   });
 
@@ -48,6 +50,7 @@ class Post {
     bool? currentUserVote;
     bool isSavedByCurrentUser = false;
     bool isReportedByCurrentUser = false;
+    bool currentUserHasCommented = false;
 
     if (interactions != null && interactions.isNotEmpty) {
       final userInteraction = interactions.firstWhere(
@@ -65,6 +68,7 @@ class Post {
         }
         isSavedByCurrentUser = userInteraction['is_saved'] ?? false;
         isReportedByCurrentUser = userInteraction['is_reported'] ?? false;
+        currentUserHasCommented = userInteraction['has_commented'] ?? false;
       }
     }
 
@@ -100,6 +104,7 @@ class Post {
       userVote: currentUserVote,
       isSaved: isSavedByCurrentUser,
       isReported: isReportedByCurrentUser,
+      userHasCommented: currentUserHasCommented,
       commentCount: json['comment_count'] ?? 0,
     );
   }
@@ -123,6 +128,7 @@ class Post {
     bool? userVote,
     bool? isSaved,
     bool? isReported,
+    bool? userHasCommented,
     int? commentCount,
   }) {
     return Post(
@@ -143,6 +149,7 @@ class Post {
       userVote: userVote ?? this.userVote,
       isSaved: isSaved ?? this.isSaved,
       isReported: isReported ?? this.isReported,
+      userHasCommented: userHasCommented ?? this.userHasCommented,
       commentCount: commentCount ?? this.commentCount,
     );
   }

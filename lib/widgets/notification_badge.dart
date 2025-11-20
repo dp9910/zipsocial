@@ -16,7 +16,7 @@ class NotificationBadge extends StatefulWidget {
 }
 
 // Make the state class public so it can be accessed from main_screen.dart
-class NotificationBadgeState extends State<NotificationBadge> {
+class NotificationBadgeState extends State<NotificationBadge> with WidgetsBindingObserver {
   int _unreadCount = 0;
   late final NotificationService _notificationService;
 
@@ -24,7 +24,23 @@ class NotificationBadgeState extends State<NotificationBadge> {
   void initState() {
     super.initState();
     _notificationService = NotificationService(Supabase.instance.client);
+    WidgetsBinding.instance.addObserver(this);
     _loadUnreadCount();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      // Refresh badge when app comes to foreground
+      _loadUnreadCount();
+    }
   }
 
   Future<void> _loadUnreadCount() async {
@@ -36,7 +52,11 @@ class NotificationBadgeState extends State<NotificationBadge> {
         });
       }
     } catch (e) {
-      // Handle error silently
+      if (mounted) {
+        setState(() {
+          _unreadCount = 0;
+        });
+      }
     }
   }
 

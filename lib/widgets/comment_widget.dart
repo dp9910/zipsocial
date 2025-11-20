@@ -163,22 +163,25 @@ class _CommentWidgetState extends State<CommentWidget> {
             decoration: BoxDecoration(
               color: widget.comment.depth > 0 
                   ? (isDark 
-                      ? Theme.of(context).colorScheme.surface.withOpacity(0.3)
-                      : Colors.grey.shade800)
+                      ? Colors.grey.shade900.withOpacity(0.4)
+                      : Colors.grey.shade50)
                   : (isDark 
-                      ? Theme.of(context).colorScheme.surface.withOpacity(0.7)
-                      : Colors.grey.shade900),
+                      ? Colors.grey.shade800.withOpacity(0.6)
+                      : Colors.white),
               borderRadius: BorderRadius.circular(12),
               border: widget.comment.depth > 0 
                   ? Border.all(color: _indentColor, width: 2)
-                  : (isDark 
-                      ? Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.3))
-                      : null),
+                  : Border.all(
+                      color: isDark 
+                          ? Theme.of(context).colorScheme.outline.withOpacity(0.3)
+                          : Colors.grey.shade300,
+                      width: 1.5,
+                    ),
               boxShadow: isDark 
                 ? null 
                 : [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.grey.withOpacity(0.1),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),
@@ -227,8 +230,8 @@ class _CommentWidgetState extends State<CommentWidget> {
                         widget.comment.timeAgo,
                         style: TextStyle(
                           color: isDark 
-                            ? Theme.of(context).colorScheme.secondary
-                            : Colors.grey.shade300,
+                            ? Theme.of(context).colorScheme.onSurface.withOpacity(0.6)
+                            : Colors.grey.shade600,
                           fontSize: 12,
                         ),
                       ),
@@ -287,9 +290,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                   Text(
                     widget.comment.content,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: isDark 
-                        ? Theme.of(context).colorScheme.onSurface
-                        : Colors.white,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -636,8 +637,11 @@ class _CommentInputState extends State<CommentInput> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: widget.parentId != null 
-              ? AppTheme.primary.withOpacity(0.3)
-              : Theme.of(context).colorScheme.outline.withOpacity(0.3),
+              ? AppTheme.primary.withOpacity(0.4)
+              : (Theme.of(context).brightness == Brightness.dark 
+                  ? Theme.of(context).colorScheme.outline.withOpacity(0.3)
+                  : Colors.grey.shade300),
+          width: widget.parentId != null ? 1.5 : 1,
         ),
       ),
       child: Column(

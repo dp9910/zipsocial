@@ -26,6 +26,7 @@ class _PostCardState extends State<PostCard> {
   late bool _isSaved;
   late bool _isReported;
   late int _reportCount;
+  late bool _userHasCommented;
 
   @override
   void initState() {
@@ -36,6 +37,7 @@ class _PostCardState extends State<PostCard> {
     _isSaved = widget.post.isSaved;
     _isReported = widget.post.isReported;
     _reportCount = widget.post.reportCount;
+    _userHasCommented = widget.post.userHasCommented;
   }
 
   @override
@@ -48,6 +50,7 @@ class _PostCardState extends State<PostCard> {
       _isSaved = widget.post.isSaved;
       _isReported = widget.post.isReported;
       _reportCount = widget.post.reportCount;
+      _userHasCommented = widget.post.userHasCommented;
     }
   }
 
@@ -132,6 +135,12 @@ class _PostCardState extends State<PostCard> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
+  }
+
+  Future<void> _onCommentsUpdated() async {
+    // When the user returns from comments screen, refresh the post data
+    // to get updated comment count and user comment status
+    widget.onPostUpdated?.call();
   }
 
   Future<void> _handleMenuAction(String action) async {
@@ -269,19 +278,20 @@ class _PostCardState extends State<PostCard> {
     return Container(
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: borderColor,
-          width: isDark ? 1.5 : 2.5,
+          color: isDark 
+              ? Theme.of(context).colorScheme.outline.withOpacity(0.2)
+              : Colors.grey.shade300,
+          width: isDark ? 1 : 1.5,
         ),
         boxShadow: [
-          BoxShadow(
-            color: isDark 
-                ? Colors.black.withOpacity(0.3)
-                : Colors.grey.withOpacity(0.15),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
+          if (!isDark)
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.08),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
         ],
       ),
       child: Padding(
@@ -293,43 +303,69 @@ class _PostCardState extends State<PostCard> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // User Avatar
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        AppTheme.primary,
-                        AppTheme.primary.withOpacity(0.8),
-                      ],
+                // User Avatar with "You" indicator
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => UserProfileScreen(
+                              userId: widget.post.userId,
+                              customUserId: widget.post.username,
+                            ),
+                          ),
+                        );
+                      },
+                      child: _buildUserAvatar(),
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.primary.withOpacity(0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+                    // "You" indicator badge
+                    if (widget.post.userId == SupabaseAuthService.currentUser?.id)
+                      Positioned(
+                        right: -4,
+                        top: -4,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primary,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: isDark 
+                                  ? Theme.of(context).colorScheme.surface
+                                  : Colors.white,
+                              width: 2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: (isDark ? Colors.black : Colors.grey.shade600)
+                                    .withOpacity(0.3),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            'YOU',
+                            style: TextStyle(
+                              color: isDark ? Colors.black : Colors.white,
+                              fontSize: 8,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
                       ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.person,
-                    color: Colors.white,
-                    size: 24,
-                  ),
+                  ],
                 ),
                 const SizedBox(width: 12),
                 
-                // User info and metadata
+                // User info - cleaner hierarchy
                 Expanded(
-                  flex: 2,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // User name and handle
+                      // Display name (larger, primary)
                       GestureDetector(
                         onTap: () {
                           Navigator.of(context).push(
@@ -341,87 +377,96 @@ class _PostCardState extends State<PostCard> {
                             ),
                           );
                         },
-                        child: RichText(
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                          text: TextSpan(
-                            children: [
-                              // Add "You:" prefix for current user's posts
-                              if (widget.post.userId == SupabaseAuthService.currentUser?.id) 
-                                TextSpan(
-                                  text: 'You: ',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 16,
-                                    color: AppTheme.primary,
-                                  ),
-                                ),
-                              TextSpan(
-                                text: widget.post.nickname ?? 'Anonymous',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 16,
-                                  color: isDark 
-                                      ? Theme.of(context).colorScheme.onSurface
-                                      : Colors.grey.shade900,
-                                ),
-                              ),
-                              TextSpan(
-                                text: ' @${widget.post.username}',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                  color: AppTheme.primary,
-                                ),
-                              ),
-                            ],
+                        child: Text(
+                          widget.post.nickname ?? 'Anonymous',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                            color: isDark 
+                                ? Theme.of(context).colorScheme.onSurface
+                                : Colors.grey.shade900,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
                       
-                      // Time and location
+                      // Username (smaller, secondary)
+                      Text(
+                        '@${widget.post.username}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 13,
+                          color: isDark 
+                              ? Theme.of(context).colorScheme.onSurface.withOpacity(0.6)
+                              : Colors.grey.shade600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 6),
+                      
+                      // Metadata row (time • location • category)
                       Row(
-                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            Icons.access_time,
-                            size: 14,
-                            color: isDark 
-                                ? Theme.of(context).colorScheme.onSurface.withOpacity(0.6)
-                                : Colors.grey.shade600,
-                          ),
-                          const SizedBox(width: 4),
-                          Flexible(
-                            child: Text(
-                              TimeFormatter.formatRelativeTime(widget.post.createdAt),
-                              style: TextStyle(
-                                color: isDark 
-                                    ? Theme.of(context).colorScheme.onSurface.withOpacity(0.6)
-                                    : Colors.grey.shade600,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              overflow: TextOverflow.ellipsis,
+                          // Time
+                          Text(
+                            TimeFormatter.formatRelativeTime(widget.post.createdAt),
+                            style: TextStyle(
+                              color: isDark 
+                                  ? Theme.of(context).colorScheme.onSurface.withOpacity(0.7)
+                                  : Colors.grey.shade600,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          
+                          // Dot separator
+                          Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 6),
+                            width: 3,
+                            height: 3,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isDark 
+                                  ? Theme.of(context).colorScheme.onSurface.withOpacity(0.5)
+                                  : Colors.grey.shade500,
+                            ),
+                          ),
+                          
+                          // Location
                           Icon(
                             Icons.location_on,
-                            size: 14,
+                            size: 12,
                             color: AppTheme.primary,
                           ),
-                          const SizedBox(width: 4),
-                          Flexible(
-                            child: Text(
-                              widget.post.zipcode,
-                              style: TextStyle(
-                                color: AppTheme.primary,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              overflow: TextOverflow.ellipsis,
+                          const SizedBox(width: 2),
+                          Text(
+                            widget.post.zipcode,
+                            style: TextStyle(
+                              color: AppTheme.primary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
                             ),
+                          ),
+                          
+                          // Dot separator
+                          Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 6),
+                            width: 3,
+                            height: 3,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isDark 
+                                  ? Theme.of(context).colorScheme.onSurface.withOpacity(0.5)
+                                  : Colors.grey.shade500,
+                            ),
+                          ),
+                          
+                          // Category (compact)
+                          Flexible(
+                            child: _buildCompactCategoryTag(),
                           ),
                         ],
                       ),
@@ -429,101 +474,56 @@ class _PostCardState extends State<PostCard> {
                   ),
                 ),
                 
-                // Category chip and menu
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Category chip
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 100),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: _getTagColor(widget.post.tag).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: _getTagColor(widget.post.tag).withOpacity(0.4),
-                            width: 2,
+                // Menu button (separated from content)
+                PopupMenuButton<String>(
+                  icon: Icon(
+                    Icons.more_horiz,
+                    size: 20,
+                    color: isDark 
+                        ? Theme.of(context).colorScheme.onSurface.withOpacity(0.5)
+                        : Colors.grey.shade500,
+                  ),
+                  onSelected: (value) => _handleMenuAction(value),
+                  itemBuilder: (context) {
+                    final currentUser = SupabaseAuthService.currentUser;
+                    final isOwnPost = currentUser?.id == widget.post.userId;
+                    
+                    return [
+                      if (isOwnPost)
+                        PopupMenuItem(
+                          value: 'delete_post',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete_outline, size: 16, color: Colors.red),
+                              const SizedBox(width: 8),
+                              const Text('Delete post'),
+                            ],
                           ),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              _getTagIcon(widget.post.tag),
-                              size: 12,
-                              color: _getTagColor(widget.post.tag),
-                            ),
-                            const SizedBox(width: 4),
-                            Flexible(
-                              child: Text(
-                                widget.post.tagDisplay,
-                                style: TextStyle(
-                                  color: _getTagColor(widget.post.tag),
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                            ),
-                          ],
+                      if (!isOwnPost) ...[
+                        PopupMenuItem(
+                          value: 'hide_post',
+                          child: Row(
+                            children: [
+                              Icon(Icons.visibility_off_outlined, size: 16, color: Colors.orange),
+                              const SizedBox(width: 8),
+                              const Text('Hide this post'),
+                            ],
+                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    // Three-dot menu
-                    PopupMenuButton<String>(
-                      icon: Icon(
-                        Icons.more_vert,
-                        size: 20,
-                        color: isDark 
-                            ? Theme.of(context).colorScheme.onSurface.withOpacity(0.7)
-                            : Colors.grey.shade600,
-                      ),
-                      onSelected: (value) => _handleMenuAction(value),
-                      itemBuilder: (context) {
-                        final currentUser = SupabaseAuthService.currentUser;
-                        final isOwnPost = currentUser?.id == widget.post.userId;
-                        
-                        return [
-                          if (isOwnPost)
-                            PopupMenuItem(
-                              value: 'delete_post',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.delete, size: 16, color: Colors.red),
-                                  const SizedBox(width: 8),
-                                  const Text('Delete post'),
-                                ],
-                              ),
-                            ),
-                          if (!isOwnPost) ...[
-                            PopupMenuItem(
-                              value: 'hide_post',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.visibility_off, size: 16, color: Colors.orange),
-                                  const SizedBox(width: 8),
-                                  const Text('Hide this post'),
-                                ],
-                              ),
-                            ),
-                            PopupMenuItem(
-                              value: 'block_user',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.block, size: 16, color: Colors.red),
-                                  const SizedBox(width: 8),
-                                  const Text('Block user'),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ];
-                      },
-                    ),
-                  ],
+                        PopupMenuItem(
+                          value: 'block_user',
+                          child: Row(
+                            children: [
+                              Icon(Icons.block_outlined, size: 16, color: Colors.red),
+                              const SizedBox(width: 8),
+                              const Text('Block user'),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ];
+                  },
                 ),
               ],
             ),
@@ -535,14 +535,14 @@ class _PostCardState extends State<PostCard> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: isDark 
-                    ? Theme.of(context).colorScheme.surface.withOpacity(0.5)
+                    ? Theme.of(context).colorScheme.surface.withOpacity(0.3)
                     : Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: isDark 
-                      ? Theme.of(context).colorScheme.outline.withOpacity(0.2)
-                      : Colors.grey.shade400,
-                  width: isDark ? 1 : 1.5,
+                      ? Theme.of(context).colorScheme.outline.withOpacity(0.15)
+                      : Colors.grey.shade300,
+                  width: 1,
                 ),
               ),
               child: Text(
@@ -597,14 +597,14 @@ class _PostCardState extends State<PostCard> {
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
               decoration: BoxDecoration(
                 color: isDark 
-                    ? Theme.of(context).colorScheme.surface.withOpacity(0.3)
+                    ? Theme.of(context).colorScheme.surface.withOpacity(0.2)
                     : Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: isDark 
-                      ? Theme.of(context).colorScheme.outline.withOpacity(0.2)
-                      : Colors.grey.shade400,
-                  width: isDark ? 1 : 1.5,
+                      ? Theme.of(context).colorScheme.outline.withOpacity(0.15)
+                      : Colors.grey.shade300,
+                  width: 1,
                 ),
               ),
               child: Row(
@@ -631,14 +631,23 @@ class _PostCardState extends State<PostCard> {
                   ),
                   Expanded(
                     child: _ActionButton(
-                      icon: Icons.chat_bubble_outline,
+                      icon: _userHasCommented 
+                          ? Icons.chat_bubble 
+                          : Icons.chat_bubble_outline,
                       count: widget.post.commentCount,
-                      onPressed: () {
-                        Navigator.of(context).push(
+                      isActive: _userHasCommented,
+                      activeColor: AppTheme.primary,
+                      onPressed: () async {
+                        await Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (context) => CommentsScreen(postId: widget.post.id),
+                            builder: (context) => CommentsScreen(
+                              postId: widget.post.id,
+                              initialCommentCount: widget.post.commentCount,
+                            ),
                           ),
                         );
+                        // Refresh post data when returning from comments
+                        _onCommentsUpdated();
                       },
                       isDark: isDark,
                     ),
@@ -670,6 +679,58 @@ class _PostCardState extends State<PostCard> {
   }
 
 
+  // Build improved user avatar with better visual design
+  Widget _buildUserAvatar() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isDark 
+            ? Theme.of(context).colorScheme.surface.withOpacity(0.8)
+            : Colors.grey.shade100,
+        border: Border.all(
+          color: isDark 
+              ? Theme.of(context).colorScheme.outline.withOpacity(0.3)
+              : Colors.grey.shade300,
+          width: 1.5,
+        ),
+      ),
+      child: Icon(
+        Icons.person_outline,
+        color: isDark 
+            ? Theme.of(context).colorScheme.onSurface.withOpacity(0.7)
+            : Colors.grey.shade600,
+        size: 20,
+      ),
+    );
+  }
+
+  // Build compact category tag for metadata row
+  Widget _buildCompactCategoryTag() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          _getTagIcon(widget.post.tag),
+          size: 10,
+          color: _getTagColor(widget.post.tag),
+        ),
+        const SizedBox(width: 3),
+        Text(
+          widget.post.tagDisplay,
+          style: TextStyle(
+            color: _getTagColor(widget.post.tag),
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+
   Color _getTagColor(PostTag tag) {
     switch (tag) {
       case PostTag.news:
@@ -686,13 +747,13 @@ class _PostCardState extends State<PostCard> {
   IconData _getTagIcon(PostTag tag) {
     switch (tag) {
       case PostTag.news:
-        return Icons.newspaper;
+        return Icons.article_outlined;
       case PostTag.funFacts:
-        return Icons.lightbulb;
+        return Icons.lightbulb_outline;
       case PostTag.events:
-        return Icons.event;
+        return Icons.event_outlined;
       case PostTag.random:
-        return Icons.casino;
+        return Icons.shuffle;
     }
   }
 

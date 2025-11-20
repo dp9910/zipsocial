@@ -3,11 +3,13 @@ import '../models/comment.dart';
 import '../services/comment_service.dart';
 import '../services/supabase_auth_service.dart';
 import '../widgets/comment_widget.dart';
+import '../config/theme.dart';
 
 class CommentsScreen extends StatefulWidget {
   final String postId;
+  final int? initialCommentCount; // Pass the comment count from the post
 
-  const CommentsScreen({super.key, required this.postId});
+  const CommentsScreen({super.key, required this.postId, this.initialCommentCount});
 
   @override
   State<CommentsScreen> createState() => _CommentsScreenState();
@@ -19,10 +21,12 @@ class _CommentsScreenState extends State<CommentsScreen> {
   bool _isRefreshing = false;
   Comment? _replyingTo;
   String? _currentUserId;
+  int? _displayCommentCount;
 
   @override
   void initState() {
     super.initState();
+    _displayCommentCount = widget.initialCommentCount;
     _initializeUser();
     _loadComments();
   }
@@ -40,6 +44,10 @@ class _CommentsScreenState extends State<CommentsScreen> {
       final comments = await CommentService.getThreadedComments(widget.postId);
       setState(() {
         _comments = comments;
+        // Update display count to actual loaded comments if no initial count provided
+        if (_displayCommentCount == null) {
+          _displayCommentCount = _getTotalCommentCount();
+        }
       });
     } catch (e) {
       if (mounted) {
@@ -61,7 +69,13 @@ class _CommentsScreenState extends State<CommentsScreen> {
   }
 
   void _onCommentAdded(Comment comment) {
-    // Refresh the entire comment tree to get updated counts
+    // Update count immediately for better UX
+    setState(() {
+      if (_displayCommentCount != null) {
+        _displayCommentCount = _displayCommentCount! + 1;
+      }
+    });
+    // Refresh the entire comment tree to get updated structure
     _refreshComments();
   }
 
@@ -100,6 +114,12 @@ class _CommentsScreenState extends State<CommentsScreen> {
   Future<void> _onDeleteComment(String commentId) async {
     try {
       await CommentService.deleteComment(commentId);
+      // Update count immediately for better UX
+      setState(() {
+        if (_displayCommentCount != null && _displayCommentCount! > 0) {
+          _displayCommentCount = _displayCommentCount! - 1;
+        }
+      });
       _refreshComments();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -131,7 +151,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Comments (${_getTotalCommentCount()})'),
+        title: Text('Comments (${_displayCommentCount ?? 0})'),
         centerTitle: true,
         actions: [
           IconButton(
@@ -167,10 +187,16 @@ class _CommentsScreenState extends State<CommentsScreen> {
           // Comments list
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primary),
+                      strokeWidth: 2,
+                    ),
+                  )
                 : _comments.isEmpty
                     ? _buildEmptyState()
                     : RefreshIndicator(
+                        color: AppTheme.primary,
                         onRefresh: _refreshComments,
                         child: ListView.builder(
                           padding: const EdgeInsets.all(16),
@@ -194,35 +220,52 @@ class _CommentsScreenState extends State<CommentsScreen> {
   }
 
   Widget _buildEmptyState() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return RefreshIndicator(
+      color: AppTheme.primary,
       onRefresh: _refreshComments,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: Container(
           height: MediaQuery.of(context).size.height * 0.5,
-          child: const Center(
+          child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.chat_bubble_outline,
-                  size: 64,
-                  color: Colors.grey,
-                ),
-                SizedBox(height: 16),
-                Text(
-                  'No comments yet',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey,
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isDark 
+                        ? Theme.of(context).colorScheme.surface.withOpacity(0.3)
+                        : Colors.grey.shade100,
+                  ),
+                  child: Icon(
+                    Icons.chat_bubble_outline,
+                    size: 40,
+                    color: AppTheme.primary.withOpacity(0.7),
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 16),
+                Text(
+                  'No Comments Yet',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: isDark 
+                        ? Theme.of(context).colorScheme.onSurface
+                        : Colors.grey.shade700,
+                  ),
+                ),
+                const SizedBox(height: 8),
                 Text(
                   'Be the first to share your thoughts!',
                   style: TextStyle(
-                    color: Colors.grey,
+                    fontSize: 14,
+                    color: isDark 
+                        ? Theme.of(context).colorScheme.onSurface.withOpacity(0.6)
+                        : Colors.grey.shade500,
                   ),
                 ),
               ],

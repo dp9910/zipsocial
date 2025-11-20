@@ -178,37 +178,42 @@ class Comment {
 class CommentThreadBuilder {
   static List<Comment> buildThreads(List<Comment> flatComments) {
     final Map<String, Comment> commentMap = {};
-    final List<Comment> topLevelComments = [];
+    final Map<String, List<Comment>> childrenMap = {};
 
-    // First pass: Create map of all comments
+    // First pass: Create map of all comments and initialize children lists
     for (final comment in flatComments) {
       commentMap[comment.id] = comment;
+      childrenMap[comment.id] = [];
     }
 
-    // Second pass: Build the tree structure
+    // Second pass: Group children by parent
     for (final comment in flatComments) {
-      if (comment.parentId == null) {
-        // Top-level comment
-        topLevelComments.add(comment);
-      } else {
-        // Reply - add to parent's replies list
-        final parent = commentMap[comment.parentId];
-        if (parent != null) {
-          // Create new parent with updated replies list
-          final updatedReplies = List<Comment>.from(parent.replies)..add(comment);
-          final updatedParent = parent.copyWith(replies: updatedReplies);
-          commentMap[parent.id] = updatedParent;
-          
-          // Update in top-level list if it's a top-level comment
-          if (parent.parentId == null) {
-            final index = topLevelComments.indexWhere((c) => c.id == parent.id);
-            if (index != -1) {
-              topLevelComments[index] = updatedParent;
-            }
-          }
-        }
+      if (comment.parentId != null && childrenMap.containsKey(comment.parentId)) {
+        childrenMap[comment.parentId]!.add(comment);
       }
     }
+
+    // Third pass: Build the tree structure recursively
+    Comment buildTree(Comment comment) {
+      final children = childrenMap[comment.id] ?? [];
+      if (children.isEmpty) {
+        return comment;
+      }
+
+      // Sort children by creation time (oldest first for replies)
+      children.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      
+      // Recursively build child trees
+      final replies = children.map((child) => buildTree(child)).toList();
+      
+      return comment.copyWith(replies: replies);
+    }
+
+    // Get top-level comments and build their trees
+    final topLevelComments = flatComments
+        .where((comment) => comment.parentId == null)
+        .map((comment) => buildTree(comment))
+        .toList();
 
     // Sort top-level comments by creation time (newest first)
     topLevelComments.sort((a, b) => b.createdAt.compareTo(a.createdAt));

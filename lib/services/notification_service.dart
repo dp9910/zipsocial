@@ -174,7 +174,8 @@ class NotificationService {
           .from('notifications')
           .select('id')
           .eq('recipient_user_id', user.id)
-          .eq('is_read', false);
+          .eq('is_read', false)
+          .order('created_at', ascending: false);
 
       return response.length;
     } catch (e) {

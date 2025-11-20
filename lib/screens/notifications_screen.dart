@@ -12,7 +12,9 @@ import './chat_conversation_screen.dart';
 import '../services/supabase_auth_service.dart';
 
 class NotificationsScreen extends StatefulWidget {
-  const NotificationsScreen({super.key});
+  final VoidCallback? onBadgeUpdate;
+  
+  const NotificationsScreen({super.key, this.onBadgeUpdate});
 
   @override
   State<NotificationsScreen> createState() => _NotificationsScreenState();
@@ -63,6 +65,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Future<void> refreshNotifications() async {
     await _loadNotifications();
     await _loadUnreadCount();
+    
+    // Also refresh the main badge
+    widget.onBadgeUpdate?.call();
   }
 
   Future<void> _loadNotifications() async {
@@ -111,6 +116,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
     // Update in database
     await _notificationService.markAsRead(notification.id);
+    
+    // Notify badge to refresh
+    widget.onBadgeUpdate?.call();
   }
 
   Future<void> _markAllAsRead() async {
@@ -122,11 +130,17 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
     // Update in database
     await _notificationService.markAllAsRead();
+    
+    // Notify badge to refresh
+    widget.onBadgeUpdate?.call();
   }
 
   Future<void> _refreshNotifications() async {
     await _loadNotifications();
     await _loadUnreadCount();
+    
+    // Also refresh the main badge
+    widget.onBadgeUpdate?.call();
   }
 
   IconData _getNotificationIcon(AppNotification notification) {

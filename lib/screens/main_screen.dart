@@ -31,7 +31,10 @@ class _MainScreenState extends State<MainScreen> {
       HomeScreen(key: _homeKey),
       LoopScreen(key: _loopKey),
       const CreatePostScreen(),
-      NotificationsScreen(key: _notificationsKey),
+      NotificationsScreen(
+        key: _notificationsKey, 
+        onBadgeUpdate: () => _notificationBadgeKey.currentState?.refreshBadge(),
+      ),
       ProfileScreen(key: _profileKey),
     ];
   }
@@ -52,6 +55,11 @@ class _MainScreenState extends State<MainScreen> {
   Future<void> _onTabTap(int index) async {
     // Dismiss keyboard when changing tabs - enhanced dismissal
     _dismissKeyboardCompletely();
+    
+    // Refresh badge when leaving notifications tab
+    if (_currentIndex == 3 && index != 3) {
+      _notificationBadgeKey.currentState?.refreshBadge();
+    }
     
     if (index == 2) {
       // Ensure keyboard is fully dismissed before navigation
@@ -87,6 +95,13 @@ class _MainScreenState extends State<MainScreen> {
       }
     } else {
       setState(() => _currentIndex = index);
+      
+      // Refresh notification badge when navigating to notifications tab
+      if (index == 3) {
+        _notificationBadgeKey.currentState?.refreshBadge();
+        (_notificationsKey.currentState as dynamic)?.refreshNotifications();
+      }
+      
       // Ensure keyboard stays dismissed after tab change
       await Future.delayed(const Duration(milliseconds: 50));
       if (mounted) {
