@@ -10,6 +10,10 @@ import '../services/notification_service.dart';
 
 class SupabaseAuthService {
   static final _supabase = Supabase.instance.client;
+  
+  // Cache for user profile to reduce redundant API calls
+  static AppUser? _cachedUserProfile;
+  static String? _cachedUserId;
 
   static User? get currentUser => _supabase.auth.currentUser;
   static bool get isSignedIn => currentUser != null;
@@ -206,10 +210,16 @@ class SupabaseAuthService {
 
   static Stream<AuthState> get authStateChanges => _supabase.auth.onAuthStateChange;
 
-  static Future<AppUser?> getUserProfile() async {
+  static Future<AppUser?> getUserProfile({bool forceRefresh = false}) async {
     final user = currentUser;
     if (user == null) {
+      _clearProfileCache();
       return null;
+    }
+
+    // Return cached profile if available and not forcing refresh
+    if (!forceRefresh && _cachedUserProfile != null && _cachedUserId == user.id) {
+      return _cachedUserProfile;
     }
 
     try {
@@ -221,6 +231,7 @@ class SupabaseAuthService {
 
       // If no user record found, the account was deleted
       if (response == null) {
+        _clearProfileCache();
         // Sign out the user since their account no longer exists
         await signOut();
         return null;
@@ -230,17 +241,32 @@ class SupabaseAuthService {
       
       // Check if user is marked as deleted (backup check)
       if (response['is_deleted'] == true) {
+        _clearProfileCache();
         // Sign out deleted users automatically
         await signOut();
         return null;
       }
       
+      // Cache the profile
+      _cachedUserProfile = appUser;
+      _cachedUserId = user.id;
+      
       return appUser;
     } catch (e) {
+      _clearProfileCache();
       // If there's an error fetching user profile, sign them out
       await signOut();
       return null;
     }
+  }
+
+  static void _clearProfileCache() {
+    _cachedUserProfile = null;
+    _cachedUserId = null;
+  }
+
+  static void clearProfileCache() {
+    _clearProfileCache();
   }
 
   static Future<AppUser?> getUserProfileById(String userId) async {
@@ -288,7 +314,14 @@ class SupabaseAuthService {
           .eq('id', user.id)
           .select()
           .single();
-      return AppUser.fromJson(response);
+      
+      final updatedUser = AppUser.fromJson(response);
+      
+      // Update cache with new profile
+      _cachedUserProfile = updatedUser;
+      _cachedUserId = user.id;
+      
+      return updatedUser;
     } catch (e) {
       rethrow;
     }

@@ -25,7 +25,12 @@ class NotificationBadgeState extends State<NotificationBadge> with WidgetsBindin
     super.initState();
     _notificationService = NotificationService(Supabase.instance.client);
     WidgetsBinding.instance.addObserver(this);
-    _loadUnreadCount();
+    // Defer notification loading to after UI renders for faster startup
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _loadUnreadCount();
+      }
+    });
   }
 
   @override

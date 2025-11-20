@@ -32,7 +32,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     super.initState();
     _notificationService = NotificationService(Supabase.instance.client);
     _loadInitialNotifications();
-    _listenForNewNotifications();
+    // _listenForNewNotifications(); // Disabled - see method comment
     _loadUnreadCount();
   }
 
@@ -43,6 +43,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   void _listenForNewNotifications() {
+    // Disable real-time streaming for now to avoid PostgrestException
+    // The app will refresh notifications when the user navigates to the screen
+    // and when they pull to refresh
+    
+    // TODO: Re-enable streaming once Supabase stream configuration is fixed
+    /*
     _notificationSubscription = _notificationService.getNotificationStream().listen((notification) {
       if (mounted) {
         setState(() {
@@ -51,9 +57,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         });
       }
     }, onError: (error) {
-      // Handle stream errors if necessary
       print('Error in notification stream: $error');
     });
+    */
   }
   
   Future<void> _loadInitialNotifications() async {

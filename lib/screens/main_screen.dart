@@ -22,21 +22,45 @@ class _MainScreenState extends State<MainScreen> {
   final GlobalKey<State<NotificationsScreen>> _notificationsKey = GlobalKey<State<NotificationsScreen>>();
   final GlobalKey<State<ProfileScreen>> _profileKey = GlobalKey<State<ProfileScreen>>();
   
-  late final List<Widget> _screens;
+  late final List<Widget?> _screens;
+  final Set<int> _loadedScreens = {0}; // Home screen is loaded by default
 
   @override
   void initState() {
     super.initState();
+    // Initialize with only home screen, others will be lazy-loaded
     _screens = [
-      HomeScreen(key: _homeKey),
-      LoopScreen(key: _loopKey),
-      const CreatePostScreen(),
-      NotificationsScreen(
-        key: _notificationsKey, 
-        onBadgeUpdate: () => _notificationBadgeKey.currentState?.refreshBadge(),
-      ),
-      ProfileScreen(key: _profileKey),
+      HomeScreen(key: _homeKey), // Load home immediately
+      null, // LoopScreen - lazy load
+      null, // CreatePostScreen - lazy load  
+      null, // NotificationsScreen - lazy load
+      null, // ProfileScreen - lazy load
     ];
+  }
+
+  Widget _getScreen(int index) {
+    if (!_loadedScreens.contains(index)) {
+      // Lazy load the screen when first accessed
+      switch (index) {
+        case 1:
+          _screens[1] = LoopScreen(key: _loopKey);
+          break;
+        case 2:
+          _screens[2] = const CreatePostScreen();
+          break;
+        case 3:
+          _screens[3] = NotificationsScreen(
+            key: _notificationsKey,
+            onBadgeUpdate: () => _notificationBadgeKey.currentState?.refreshBadge(),
+          );
+          break;
+        case 4:
+          _screens[4] = ProfileScreen(key: _profileKey);
+          break;
+      }
+      _loadedScreens.add(index);
+    }
+    return _screens[index]!;
   }
 
   void _dismissKeyboardCompletely() {
@@ -123,10 +147,10 @@ class _MainScreenState extends State<MainScreen> {
         body: IndexedStack(
           index: _currentIndex == 4 ? 3 : (_currentIndex == 3 ? 2 : (_currentIndex == 1 ? 1 : 0)),
         children: [
-          _screens[0], // Home
-          _screens[1], // Loop
-          _screens[3], // Notifications
-          _screens[4], // Profile
+          _getScreen(0), // Home
+          _getScreen(1), // Loop
+          _getScreen(3), // Notifications
+          _getScreen(4), // Profile
         ],
       ),
       bottomNavigationBar: Container(

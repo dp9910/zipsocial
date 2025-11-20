@@ -188,29 +188,43 @@ class NotificationService {
   Stream<AppNotification> getNotificationStream() {
     final user = SupabaseAuthService.currentUser;
     if (user == null) {
-      return Stream.value(AppNotification.fromJson({}));
+      return Stream.empty();
     }
 
     return _client
-        .from('notifications:recipient_user_id=eq.${user.id}')
-        .stream(primaryKey: ['id']).map((maps) => maps.first)
+        .from('notifications')
+        .stream(primaryKey: ['id'])
+        .eq('recipient_user_id', user.id)
+        .order('created_at')
+        .map((maps) {
+          if (maps.isEmpty) return null;
+          return maps.first;
+        })
+        .where((data) => data != null)
+        .cast<Map<String, dynamic>>()
         .asyncMap((notificationData) async {
-      final actorId = notificationData['actor_user_id'];
+      try {
+        final actorId = notificationData['actor_user_id'];
 
-      // Fetch actor details
-      final actorResponse = await _client
-          .from('users')
-          .select('nickname, custom_user_id')
-          .eq('id', actorId)
-          .single();
+        // Fetch actor details
+        final actorResponse = await _client
+            .from('users')
+            .select('nickname, custom_user_id')
+            .eq('id', actorId)
+            .single();
 
-      // Combine data
-      final fullNotificationData = {
-        ...notificationData,
-        'actor_user': actorResponse,
-      };
+        // Combine data
+        final fullNotificationData = {
+          ...notificationData,
+          'actor_user': actorResponse,
+        };
 
-      return AppNotification.fromJson(fullNotificationData);
+        return AppNotification.fromJson(fullNotificationData);
+      } catch (e) {
+        print('Error processing notification stream data: $e');
+        // Return a fallback notification or null
+        return AppNotification.fromJson(notificationData);
+      }
     });
   }
 

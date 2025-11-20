@@ -52,9 +52,29 @@ class AuthWrapper extends StatelessWidget {
           return FutureBuilder(
             future: SupabaseAuthService.getUserProfile(),
             builder: (context, userSnapshot) {
+              // Show loading only briefly while checking user state
               if (userSnapshot.connectionState == ConnectionState.waiting) {
-                return const Scaffold(
-                  body: Center(child: CircularProgressIndicator()),
+                return Scaffold(
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                  body: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primary),
+                          strokeWidth: 2,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Loading...',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 );
               }
               

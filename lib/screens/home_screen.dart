@@ -24,10 +24,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeFeed();
+    // Defer initialization to after the first frame renders for faster startup
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _initializeFeed();
+      }
+    });
   }
 
   Future<void> _initializeFeed() async {
+    // Use cached profile to avoid redundant API calls
     final userProfile = await SupabaseAuthService.getUserProfile();
     final newZipcode = userProfile?.preferredZipcode ?? '';
     
@@ -35,6 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _zipcodeController.text = newZipcode;
       });
+      // Load feed asynchronously without blocking UI
       _loadFeed();
     } else {
       // For new users, don't set a default zipcode, let them input their own
