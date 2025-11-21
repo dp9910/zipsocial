@@ -177,7 +177,12 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             ),
           ),
         ),
-      body: Column(
+      body: GestureDetector(
+        onTap: () {
+          // Dismiss keyboard when tapping anywhere on screen
+          FocusScope.of(context).unfocus();
+        },
+        child: Column(
         children: [
           Expanded(
             child: SingleChildScrollView(
@@ -460,6 +465,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             ),
           ),
         ],
+        ),
       ),
     );
   }

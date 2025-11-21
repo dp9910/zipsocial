@@ -152,7 +152,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ),
           ],
         ),
-        body: SingleChildScrollView(
+        body: GestureDetector(
+          onTap: () {
+            // Dismiss keyboard when tapping anywhere on screen
+            FocusScope.of(context).unfocus();
+          },
+          child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: Form(
               key: _formKey,
@@ -411,6 +416,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
               ],
             ),
+          ),
           ),
         ),
       ),

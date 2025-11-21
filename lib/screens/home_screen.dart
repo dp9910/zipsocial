@@ -149,7 +149,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: CustomScrollView(
+      body: GestureDetector(
+        onTap: () {
+          // Dismiss keyboard when tapping anywhere on screen
+          _dismissKeyboardCompletely();
+        },
+        child: CustomScrollView(
         slivers: [
           // Compact App Bar with Search
           SliverAppBar(
@@ -429,6 +434,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
         ],
+        ),
       ),
     );
   }
