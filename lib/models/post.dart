@@ -9,6 +9,7 @@ class Post {
   final String? nickname;
   final String zipcode;
   final String content;
+  final String? imageUrl;
   final PostTag tag;
   final List<String> contentTags;
   final Map<String, dynamic>? eventDetails;
@@ -30,6 +31,7 @@ class Post {
     this.nickname,
     required this.zipcode,
     required this.content,
+    this.imageUrl,
     required this.tag,
     this.contentTags = const [],
     this.eventDetails,
@@ -93,6 +95,7 @@ class Post {
       nickname: nickname,
       zipcode: json['zipcode'],
       content: json['content'],
+      imageUrl: json['image_url'],
       tag: _stringToTag(json['tag']),
       contentTags: contentTags,
       eventDetails: json['event_details'],
@@ -117,6 +120,7 @@ class Post {
     String? nickname,
     String? zipcode,
     String? content,
+    String? imageUrl,
     PostTag? tag,
     List<String>? contentTags,
     Map<String, dynamic>? eventDetails,
@@ -138,6 +142,7 @@ class Post {
       nickname: nickname ?? this.nickname,
       zipcode: zipcode ?? this.zipcode,
       content: content ?? this.content,
+      imageUrl: imageUrl ?? this.imageUrl,
       tag: tag ?? this.tag,
       contentTags: contentTags ?? this.contentTags,
       eventDetails: eventDetails ?? this.eventDetails,

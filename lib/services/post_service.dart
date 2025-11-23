@@ -12,6 +12,7 @@ class PostService {
     required PostTag tag,
     List<String> contentTags = const [],
     Map<String, dynamic>? eventDetails,
+    String? imageUrl,
   }) async {
     final user = SupabaseAuthService.currentUser; // Changed service call
     if (user == null) throw Exception('User not authenticated');
@@ -44,6 +45,7 @@ class PostService {
           'username': userProfile.customUserId,
           'zipcode': zipcode,
           'content': content,
+          'image_url': imageUrl,
           'tag': _tagToString(tag),
           'content_tags': contentTags,
           'event_details': eventDetails,

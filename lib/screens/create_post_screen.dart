@@ -1,6 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/post.dart';
 import '../services/post_service.dart';
+import '../services/image_upload_service.dart';
 import '../config/theme.dart';
 
 class CreatePostScreen extends StatefulWidget {
@@ -21,6 +24,37 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   
   PostTag _selectedTag = PostTag.random;
   bool _isLoading = false;
+  File? _selectedImage;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImage() async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1080,
+        maxHeight: 1080,
+        imageQuality: 80,
+      );
+      
+      if (image != null) {
+        setState(() {
+          _selectedImage = File(image.path);
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error picking image: $e')),
+        );
+      }
+    }
+  }
+
+  void _removeImage() {
+    setState(() {
+      _selectedImage = null;
+    });
+  }
 
   Future<void> _createPost() async {
     if (_contentController.text.isEmpty || _zipcodeController.text.isEmpty) {
@@ -40,6 +74,12 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     setState(() => _isLoading = true);
 
     try {
+      // Upload image if selected
+      String? imageUrl;
+      if (_selectedImage != null) {
+        imageUrl = await ImageUploadService.uploadPostImage(_selectedImage!);
+      }
+
       Map<String, dynamic>? eventDetails;
       if (_selectedTag == PostTag.events) {
         eventDetails = {
@@ -56,6 +96,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         zipcode: _zipcodeController.text,
         tag: _selectedTag,
         eventDetails: eventDetails,
+        imageUrl: imageUrl,
       );
 
       if (mounted) {
@@ -255,6 +296,95 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                   ),
                   
                   const SizedBox(height: 24),
+                  
+                  // Image Section
+                  if (_selectedImage != null) ...[
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: isDarkMode ? Colors.black26 : Colors.grey.withOpacity(0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Stack(
+                          children: [
+                            Image.file(
+                              _selectedImage!,
+                              width: double.infinity,
+                              height: 200,
+                              fit: BoxFit.cover,
+                            ),
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: GestureDetector(
+                                onTap: _removeImage,
+                                child: Container(
+                                  decoration: const BoxDecoration(
+                                    color: Colors.black54,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  padding: const EdgeInsets.all(8),
+                                  child: const Icon(
+                                    Icons.close,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ] else ...[
+                    // Add Image Button
+                    GestureDetector(
+                      onTap: _pickImage,
+                      child: Container(
+                        height: 120,
+                        decoration: BoxDecoration(
+                          color: surfaceColor,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: borderColor, style: BorderStyle.solid),
+                          boxShadow: [
+                            BoxShadow(
+                              color: isDarkMode ? Colors.black26 : Colors.grey.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.add_photo_alternate,
+                              size: 48,
+                              color: AppTheme.primary.withOpacity(0.7),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Add Photo',
+                              style: TextStyle(
+                                color: textColor.withOpacity(0.7),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                   
                   // Zip Code
                   Container(

@@ -557,6 +557,60 @@ class _PostCardState extends State<PostCard> {
                 ),
               ),
             ),
+            
+            // Post image
+            if (widget.post.imageUrl != null && widget.post.imageUrl!.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  widget.post.imageUrl!,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) {
+                      return child;
+                    }
+                    return Container(
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: isDark 
+                            ? Theme.of(context).colorScheme.surface.withOpacity(0.3)
+                            : Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded / 
+                                loadingProgress.expectedTotalBytes!
+                              : null,
+                          valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primary),
+                        ),
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: isDark 
+                            ? Theme.of(context).colorScheme.surface.withOpacity(0.3)
+                            : Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.broken_image,
+                          size: 48,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
                 if (widget.post.tag == PostTag.events && widget.post.eventDetails != null) ...[
                   const SizedBox(height: 12),
                   Container(
