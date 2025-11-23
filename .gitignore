@@ -85,3 +85,4 @@ google-services.json
 /web/
 lib/generated_plugin_registrant.dart
 *.json
+.vercel
