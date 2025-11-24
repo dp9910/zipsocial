@@ -88,6 +88,15 @@ class Post {
       }
     }
 
+    // Calculate actual comment count from comments data (excluding deleted ones)
+    int actualCommentCount = 0;
+    if (json['comments'] != null && json['comments'] is List) {
+      final comments = json['comments'] as List;
+      actualCommentCount = comments.where((comment) => 
+          comment['is_deleted'] == false || comment['is_deleted'] == null
+      ).length;
+    }
+
     return Post(
       id: json['id'],
       userId: json['user_id'],
@@ -108,7 +117,7 @@ class Post {
       isSaved: isSavedByCurrentUser,
       isReported: isReportedByCurrentUser,
       userHasCommented: currentUserHasCommented,
-      commentCount: json['comment_count'] ?? 0,
+      commentCount: actualCommentCount,
     );
   }
 

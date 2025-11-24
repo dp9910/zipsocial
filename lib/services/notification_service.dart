@@ -184,6 +184,20 @@ class NotificationService {
     }
   }
 
+  /// Get a stream that triggers when notifications change (for badge updates)
+  Stream<void> getNotificationUpdateStream() {
+    final user = SupabaseAuthService.currentUser;
+    if (user == null) {
+      return Stream.empty();
+    }
+
+    return _client
+        .from('notifications')
+        .stream(primaryKey: ['id'])
+        .eq('recipient_user_id', user.id)
+        .map((_) => null); // Just trigger updates, don't need data
+  }
+
   /// Get a stream of new notifications
   Stream<AppNotification> getNotificationStream() {
     final user = SupabaseAuthService.currentUser;

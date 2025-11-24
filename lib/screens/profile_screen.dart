@@ -27,9 +27,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _loadUserProfile();
   }
 
-  Future<void> _loadUserProfile() async {
+  Future<void> _loadUserProfile({bool forceRefresh = false}) async {
     try {
-      final user = await SupabaseAuthService.getUserProfile();
+      final user = await SupabaseAuthService.getUserProfile(forceRefresh: forceRefresh);
       if (mounted) {
         setState(() {
           _user = user;
@@ -45,7 +45,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void refreshProfile() {
     setState(() => _isLoading = true);
-    _loadUserProfile();
+    _loadUserProfile(forceRefresh: true);
   }
 
   @override
@@ -182,7 +182,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       ),
                                     );
                                     // Refresh profile when returning from posts screen
-                                    _loadUserProfile();
+                                    _loadUserProfile(forceRefresh: true);
                                   },
                                 ),
                                 _buildStatCard(
@@ -194,12 +194,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       MaterialPageRoute(
                                         builder: (context) => FollowersScreen(
                                           user: _user!,
-                                          onFollowerCountChanged: _loadUserProfile,
+                                          onFollowerCountChanged: () => _loadUserProfile(forceRefresh: true),
                                         ),
                                       ),
                                     );
                                     // Refresh profile when returning from followers screen
-                                    _loadUserProfile();
+                                    _loadUserProfile(forceRefresh: true);
                                   },
                                 ),
                                 _buildStatCard(
@@ -211,12 +211,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       MaterialPageRoute(
                                         builder: (context) => FollowingScreen(
                                           user: _user!,
-                                          onFollowingCountChanged: _loadUserProfile,
+                                          onFollowingCountChanged: () => _loadUserProfile(forceRefresh: true),
                                         ),
                                       ),
                                     );
                                     // Refresh profile when returning from following screen
-                                    _loadUserProfile();
+                                    _loadUserProfile(forceRefresh: true);
                                   },
                                 ),
                               ],
@@ -241,7 +241,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             
                             // Reload profile if changes were made
                             if (result == true) {
-                              _loadUserProfile();
+                              _loadUserProfile(forceRefresh: true);
                             }
                           }
                         },

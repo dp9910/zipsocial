@@ -122,7 +122,8 @@ class CommentService {
         result: filterResult,
       );
 
-      // The comment count will be automatically updated by the database trigger
+      // Comment count will be calculated dynamically from the comments data when posts are fetched
+
       final comment = Comment.fromJson(response);
 
       // Send notification to post owner about new comment
@@ -176,21 +177,32 @@ class CommentService {
     }
   }
 
+
   /// Delete a comment (soft delete)
   static Future<void> deleteComment(String commentId) async {
     try {
       final user = SupabaseAuthService.currentUser;
       if (user == null) throw Exception('User not authenticated');
 
-      // Check if user owns the comment
-      final comment = await _getCommentById(commentId);
-      if (comment == null) throw Exception('Comment not found');
-      if (comment.userId != user.id) throw Exception('Not authorized to delete this comment');
+      // Check if user owns the comment (need to get it even if deleted to verify ownership)
+      final commentData = await _supabase
+          .from('comments')
+          .select('user_id, post_id, is_deleted')
+          .eq('id', commentId)
+          .maybeSingle();
+      
+      if (commentData == null) throw Exception('Comment not found');
+      if (commentData['user_id'] != user.id) throw Exception('Not authorized to delete this comment');
+      if (commentData['is_deleted'] == true) throw Exception('Comment already deleted');
+      
+      final postId = commentData['post_id'];
 
       await _supabase
           .from('comments')
           .update({'is_deleted': true, 'content': '[deleted]'})
           .eq('id', commentId);
+
+      // Comment count will be calculated dynamically from the comments data when posts are fetched
 
     } catch (e) {
       rethrow;

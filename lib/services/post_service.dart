@@ -70,6 +70,9 @@ class PostService {
       await _client.rpc('increment_post_count', params: {
         'user_id': user.id, // Changed user.uid to user.id
       });
+      
+      // Clear profile cache to ensure fresh data on next fetch
+      SupabaseAuthService.clearProfileCache();
     } catch (e) {
       // Don't throw here - post was created successfully
     }
@@ -124,7 +127,8 @@ class PostService {
         .select('''
           *,
           users!posts_user_id_fkey(nickname),
-          post_interactions!left(user_id, vote, is_saved, is_reported)
+          post_interactions!left(user_id, vote, is_saved, is_reported),
+          comments!left(id, is_deleted)
         ''')
         .eq('zipcode', zipcode)
         .eq('is_active', true);
@@ -173,7 +177,8 @@ class PostService {
           .select('''
             *,
             users!posts_user_id_fkey(nickname),
-            post_interactions!left(user_id, vote, is_saved, is_reported)
+            post_interactions!left(user_id, vote, is_saved, is_reported),
+            comments!left(id, is_deleted)
           ''')
           .eq('user_id', userId)
           .eq('is_active', true)
@@ -215,7 +220,8 @@ class PostService {
           .select('''
             *,
             users!posts_user_id_fkey(nickname),
-            post_interactions!left(user_id, vote, is_saved, is_reported)
+            post_interactions!left(user_id, vote, is_saved, is_reported),
+            comments!left(id, is_deleted)
           ''')
           .inFilter('user_id', followingIds)
           .eq('is_active', true)

@@ -364,6 +364,9 @@ class SupabaseAuthService {
       // Update following count for current user
       await _updateUserCount(user.id, 'following_count', 1);
 
+      // Clear profile cache to ensure fresh data on next fetch
+      _clearProfileCache();
+
       // Send notification to the user being followed
       try {
         final notificationService = NotificationService(_supabase);
@@ -394,6 +397,9 @@ class SupabaseAuthService {
 
       // Update following count for current user
       await _updateUserCount(user.id, 'following_count', -1);
+
+      // Clear profile cache to ensure fresh data on next fetch
+      _clearProfileCache();
 
       // Send notification to the user being unfollowed
       try {

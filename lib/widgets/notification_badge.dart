@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/notification_service.dart';
@@ -19,6 +20,7 @@ class NotificationBadge extends StatefulWidget {
 class NotificationBadgeState extends State<NotificationBadge> with WidgetsBindingObserver {
   int _unreadCount = 0;
   late final NotificationService _notificationService;
+  StreamSubscription<void>? _notificationStreamSubscription;
 
   @override
   void initState() {
@@ -29,6 +31,7 @@ class NotificationBadgeState extends State<NotificationBadge> with WidgetsBindin
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _loadUnreadCount();
+        _subscribeToNotificationUpdates();
       }
     });
   }
@@ -36,6 +39,7 @@ class NotificationBadgeState extends State<NotificationBadge> with WidgetsBindin
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _notificationStreamSubscription?.cancel();
     super.dispose();
   }
 
@@ -43,8 +47,9 @@ class NotificationBadgeState extends State<NotificationBadge> with WidgetsBindin
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed) {
-      // Refresh badge when app comes to foreground
+      // Refresh badge and resubscribe when app comes to foreground
       _loadUnreadCount();
+      _subscribeToNotificationUpdates();
     }
   }
 
@@ -65,9 +70,33 @@ class NotificationBadgeState extends State<NotificationBadge> with WidgetsBindin
     }
   }
 
+  // Subscribe to real-time notification updates
+  void _subscribeToNotificationUpdates() {
+    _notificationStreamSubscription?.cancel();
+    
+    _notificationStreamSubscription = _notificationService
+        .getNotificationUpdateStream()
+        .listen(
+          (_) {
+            // Add small delay to prevent too frequent refreshes
+            Future.delayed(const Duration(milliseconds: 500), () {
+              if (mounted) {
+                _loadUnreadCount();
+              }
+            });
+          },
+          onError: (error) {
+            // Handle stream errors gracefully
+            print('Notification stream error: $error');
+          },
+        );
+  }
+
   // Method to refresh the badge (called from main screen)
   Future<void> refreshBadge() async {
     await _loadUnreadCount();
+    // Also resubscribe to ensure we have the right stream
+    _subscribeToNotificationUpdates();
   }
 
   @override
