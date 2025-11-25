@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../models/user.dart';
 import '../services/chat_service.dart';
 import '../utils/user_colors.dart';
+import '../widgets/message_request_dialog.dart';
 import 'chat_conversation_screen.dart';
 
 class NewChatScreen extends StatefulWidget {
@@ -73,60 +74,20 @@ class _NewChatScreenState extends State<NewChatScreen> {
   }
 
   Future<void> _startChat(AppUser user) async {
-    try {
-      // Show loading indicator
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4ECDC4)),
-          ),
-        ),
-      );
+    final displayName = user.nickname ?? user.customUserId ?? 'Unknown';
+    
+    // Show message request dialog
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => MessageRequestDialog(
+        recipientId: user.id,
+        recipientName: displayName,
+      ),
+    );
 
-      final conversationId = await ChatService.getOrCreateConversation(user.id);
-      
-      if (mounted) {
-        FocusScope.of(context).unfocus();
-        Navigator.of(context).pop(); // Close loading dialog
-        
-        if (conversationId != null) {
-          final result = await Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => ChatConversationScreen(
-                conversationId: conversationId,
-                otherUserNickname: user.nickname ?? user.customUserId ?? 'Unknown',
-                otherUserId: user.id,
-              ),
-            ),
-          );
-
-          // Return true to indicate a chat was started
-          if (mounted) {
-            FocusScope.of(context).unfocus();
-            Navigator.of(context).pop(true);
-          }
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Failed to start conversation'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        FocusScope.of(context).unfocus();
-        Navigator.of(context).pop(); // Close loading dialog
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error starting chat: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+    // If message request was sent successfully, go back to chat list
+    if (result == true && mounted) {
+      Navigator.of(context).pop(true);
     }
   }
 
@@ -343,6 +304,15 @@ class _NewChatScreenState extends State<NewChatScreen> {
                           fontSize: 14,
                           color: userColor,
                           fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Tap to send message request',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade500,
+                          fontStyle: FontStyle.italic,
                         ),
                       ),
                       if (user.preferredZipcode != null && user.preferredZipcode!.isNotEmpty) ...[

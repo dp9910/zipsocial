@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/conversation.dart';
 import '../models/message.dart';
+import '../models/message_request.dart';
 import '../models/user.dart';
 import 'supabase_auth_service.dart';
 import 'moderation_service.dart';
@@ -60,19 +61,19 @@ class ChatService {
             );
           }).toList();
 
-          // Check if users follow each other bidirectionally (required for chat access)
+          // Check if current user and other participant still follow each other
           final otherParticipant = participants.firstWhere(
             (p) => p.userId != currentUser.id,
             orElse: () => participants.first,
           );
           
-          final areMutuallyFollowing = await SupabaseAuthService.areUsersMutuallyFollowing(
+          final hasPermission = await _hasMessagingPermission(
             currentUser.id,
             otherParticipant.userId,
           );
           
-          // Only include conversations where users follow each other bidirectionally
-          if (areMutuallyFollowing) {
+          // Only include conversations where both users still follow each other
+          if (hasPermission) {
             final conversation = Conversation(
               id: convData['id'] as String,
               createdAt: DateTime.parse(convData['created_at'] as String),
@@ -111,14 +112,17 @@ class ChatService {
         throw Exception('Unable to start conversation. One of the users has blocked the other.');
       }
 
-      // Check if users follow each other bidirectionally (required for chat access)
-      final areMutuallyFollowing = await SupabaseAuthService.areUsersMutuallyFollowing(
-        currentUser.id,
-        otherUserId,
-      );
+      // Check if current user follows the other user (required to send message request)
+      final isFollowing = await SupabaseAuthService.isFollowing(currentUser.id, otherUserId);
       
-      if (!areMutuallyFollowing) {
-        throw Exception('You need to follow each other to start a conversation.');
+      if (!isFollowing) {
+        throw Exception('You need to follow this user to start a conversation.');
+      }
+
+      // Check if there's an accepted message request or existing conversation
+      final hasPermission = await _hasMessagingPermission(currentUser.id, otherUserId);
+      if (!hasPermission) {
+        throw Exception('Send a message request first.');
       }
 
       final response = await _client.rpc('get_or_create_conversation', params: {
@@ -195,14 +199,10 @@ class ChatService {
           throw Exception('Cannot send message. One of the users has blocked the other.');
         }
 
-        // Check if users follow each other bidirectionally
-        final areMutuallyFollowing = await SupabaseAuthService.areUsersMutuallyFollowing(
-          currentUser.id,
-          otherUserId,
-        );
-        
-        if (!areMutuallyFollowing) {
-          throw Exception('You need to follow each other to send messages.');
+        // Check messaging permission (accepted message request or existing conversation)
+        final hasPermission = await _hasMessagingPermission(currentUser.id, otherUserId);
+        if (!hasPermission) {
+          throw Exception('Message request not accepted yet.');
         }
       }
 
@@ -384,6 +384,235 @@ class ChatService {
       return following;
     } catch (e) {
       return [];
+    }
+  }
+
+  // Send a message request
+  static Future<MessageRequest?> sendMessageRequest({
+    required String recipientId,
+    required String messageContent,
+  }) async {
+    try {
+      final currentUser = SupabaseAuthService.currentUser;
+      if (currentUser == null) return null;
+
+      // Check if user is blocked
+      final isBlocked = await ModerationService.areUsersBlockedFromMessaging(
+        currentUser.id, 
+        recipientId
+      );
+      
+      if (isBlocked) {
+        throw Exception('Unable to send message request. One of the users has blocked the other.');
+      }
+
+      // Check if current user follows the recipient
+      final isFollowing = await SupabaseAuthService.isFollowing(currentUser.id, recipientId);
+      if (!isFollowing) {
+        throw Exception('You need to follow this user to send a message request.');
+      }
+
+      // Check if there's already a pending or accepted request
+      final existingRequest = await _getMessageRequest(currentUser.id, recipientId);
+      if (existingRequest != null) {
+        if (existingRequest.status == MessageRequestStatus.pending) {
+          throw Exception('Message request already sent.');
+        } else if (existingRequest.status == MessageRequestStatus.accepted) {
+          throw Exception('You can already message this user.');
+        } else if (existingRequest.status == MessageRequestStatus.declined) {
+          // Update the declined request with new message content
+          return await _updateMessageRequest(existingRequest.id, messageContent);
+        }
+      }
+
+      // Create new message request
+      final response = await _client
+          .from('message_requests')
+          .insert({
+            'sender_id': currentUser.id,
+            'recipient_id': recipientId,
+            'message_content': messageContent,
+            'status': 'pending',
+            'created_at': DateTime.now().toUtc().toIso8601String(),
+            'updated_at': DateTime.now().toUtc().toIso8601String(),
+          })
+          .select('''
+            *,
+            users!message_requests_sender_id_fkey(
+              nickname,
+              custom_user_id
+            )
+          ''')
+          .single();
+
+      // Send notification
+      try {
+        final notificationService = NotificationService(_client);
+        await notificationService.notifyMessageRequestReceived(recipientId, currentUser.id);
+      } catch (e) {
+        print('Failed to send message request notification: $e');
+      }
+
+      return MessageRequest.fromJson(response);
+    } catch (e) {
+      print('Error sending message request: $e');
+      return null;
+    }
+  }
+
+  // Get message requests for current user (received)
+  static Future<List<MessageRequest>> getMessageRequests() async {
+    try {
+      final currentUser = SupabaseAuthService.currentUser;
+      if (currentUser == null) return [];
+
+      final response = await _client
+          .from('message_requests')
+          .select('''
+            *,
+            users!message_requests_sender_id_fkey(
+              nickname,
+              custom_user_id
+            )
+          ''')
+          .eq('recipient_id', currentUser.id)
+          .eq('status', 'pending')
+          .order('created_at', ascending: false);
+
+      return response.map((data) => MessageRequest.fromJson(data)).toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // Handle message request (accept/decline)
+  static Future<bool> handleMessageRequest(String requestId, bool accept) async {
+    try {
+      final status = accept ? 'accepted' : 'declined';
+      
+      // Update the message request status
+      await _client
+          .from('message_requests')
+          .update({
+            'status': status,
+            'updated_at': DateTime.now().toUtc().toIso8601String(),
+          })
+          .eq('id', requestId);
+
+      // If accepted, create a conversation and send the initial message
+      if (accept) {
+        // Get the message request details
+        final request = await _client
+            .from('message_requests')
+            .select('sender_id, recipient_id, message_content')
+            .eq('id', requestId)
+            .single();
+
+        final senderId = request['sender_id'] as String;
+        final recipientId = request['recipient_id'] as String;
+        final messageContent = request['message_content'] as String;
+
+        // Create conversation between sender and recipient using database function
+        try {
+          final conversationId = await _client.rpc('get_or_create_conversation', params: {
+            'user1_id': senderId,
+            'user2_id': recipientId,
+          });
+
+          // Send the initial message from the request to the conversation
+          if (conversationId != null) {
+            await _client
+                .from('messages')
+                .insert({
+                  'conversation_id': conversationId,
+                  'sender_id': senderId,
+                  'content': messageContent,
+                  'message_type': 'text',
+                  'created_at': DateTime.now().toUtc().toIso8601String(),
+                  'updated_at': DateTime.now().toUtc().toIso8601String(),
+                });
+          }
+        } catch (e) {
+          print('Failed to create conversation/send message after accepting request: $e');
+        }
+      }
+
+      return true;
+    } catch (e) {
+      print('Error handling message request: $e');
+      return false;
+    }
+  }
+
+  // Check if users can message each other (private helper)
+  static Future<bool> _hasMessagingPermission(String userId1, String userId2) async {
+    try {
+      // Check if there's an accepted message request in either direction
+      final request1 = await _getMessageRequest(userId1, userId2);
+      final request2 = await _getMessageRequest(userId2, userId1);
+      
+      final hasAcceptedRequest = (request1?.status == MessageRequestStatus.accepted) ||
+                                 (request2?.status == MessageRequestStatus.accepted);
+      
+      if (!hasAcceptedRequest) return false;
+      
+      // Additionally check if both users still follow each other
+      // If either user unfollows, chat permission is revoked
+      final user1FollowsUser2 = await SupabaseAuthService.isFollowing(userId1, userId2);
+      final user2FollowsUser1 = await SupabaseAuthService.isFollowing(userId2, userId1);
+      
+      return user1FollowsUser2 && user2FollowsUser1;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Get message request between two users (private helper)
+  static Future<MessageRequest?> _getMessageRequest(String senderId, String recipientId) async {
+    try {
+      final response = await _client
+          .from('message_requests')
+          .select('''
+            *,
+            users!message_requests_sender_id_fkey(
+              nickname,
+              custom_user_id
+            )
+          ''')
+          .eq('sender_id', senderId)
+          .eq('recipient_id', recipientId)
+          .maybeSingle();
+
+      if (response == null) return null;
+      return MessageRequest.fromJson(response);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Update existing message request (private helper)
+  static Future<MessageRequest?> _updateMessageRequest(String requestId, String newMessageContent) async {
+    try {
+      final response = await _client
+          .from('message_requests')
+          .update({
+            'message_content': newMessageContent,
+            'status': 'pending',
+            'updated_at': DateTime.now().toUtc().toIso8601String(),
+          })
+          .eq('id', requestId)
+          .select('''
+            *,
+            users!message_requests_sender_id_fkey(
+              nickname,
+              custom_user_id
+            )
+          ''')
+          .single();
+
+      return MessageRequest.fromJson(response);
+    } catch (e) {
+      return null;
     }
   }
 }

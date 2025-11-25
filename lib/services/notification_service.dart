@@ -378,6 +378,16 @@ class NotificationService {
     );
   }
 
+  /// User sent a message request
+  Future<void> notifyMessageRequestReceived(String recipientUserId, String senderUserId) async {
+    await createNotification(
+      recipientUserId: recipientUserId,
+      actorUserId: senderUserId,
+      type: NotificationType.userSentMessage,  // Using same type for now, can be changed later
+      targetContent: 'wants to send you a message',
+    );
+  }
+
   /// User created a new post (notify followers)
   Future<void> notifyFollowersOfNewPost(String postId, String? postContent) async {
     final currentUser = SupabaseAuthService.currentUser;

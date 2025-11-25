@@ -437,21 +437,25 @@ class SupabaseAuthService {
     }
   }
 
-  static Future<bool> isFollowing(String targetUserId) async {
-    final user = currentUser;
-    if (user == null) return false;
-
+  static Future<bool> isFollowing(String followerId, String targetUserId) async {
     try {
       final response = await _supabase
           .from('followers')
           .select()
-          .eq('follower_id', user.id)
+          .eq('follower_id', followerId)
           .eq('following_id', targetUserId)
           .maybeSingle();
       return response != null;
     } catch (e) {
       return false;
     }
+  }
+
+  // Convenience method for current user
+  static Future<bool> isCurrentUserFollowing(String targetUserId) async {
+    final user = currentUser;
+    if (user == null) return false;
+    return isFollowing(user.id, targetUserId);
   }
 
   // Check if two users follow each other bidirectionally (for chat access)

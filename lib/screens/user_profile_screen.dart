@@ -71,7 +71,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   Future<void> _checkFollowStatus() async {
     try {
-      final isFollowing = await SupabaseAuthService.isFollowing(widget.userId); // Changed service call
+      final isFollowing = await SupabaseAuthService.isCurrentUserFollowing(widget.userId); // Changed service call
       if (mounted) {
         setState(() => _isFollowing = isFollowing);
       }

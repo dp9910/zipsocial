@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/conversation.dart';
+import '../models/message_request.dart';
 import '../services/chat_service.dart';
 import '../services/supabase_auth_service.dart';
 import '../utils/user_colors.dart';
+import '../widgets/message_request_card.dart';
 import 'chat_conversation_screen.dart';
 import 'new_chat_screen.dart';
 
@@ -16,6 +18,7 @@ class ChatListScreen extends StatefulWidget {
 
 class _ChatListScreenState extends State<ChatListScreen> {
   List<Conversation> _conversations = [];
+  List<MessageRequest> _messageRequests = [];
   bool _isLoading = true;
   bool _hasError = false;
   RealtimeChannel? _conversationSubscription;
@@ -41,9 +44,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
     try {
       final conversations = await ChatService.getConversations();
+      final messageRequests = await ChatService.getMessageRequests();
+      
       if (mounted) {
         setState(() {
           _conversations = conversations;
+          _messageRequests = messageRequests;
           _isLoading = false;
         });
       }
@@ -205,8 +211,10 @@ class _ChatListScreenState extends State<ChatListScreen> {
       );
     }
 
+    final hasContent = _conversations.isNotEmpty || _messageRequests.isNotEmpty;
+
     return Scaffold(
-      body: _conversations.isEmpty
+      body: !hasContent
           ? RefreshIndicator(
               onRefresh: _refreshConversations,
               color: const Color(0xFF4ECDC4),
@@ -249,15 +257,61 @@ class _ChatListScreenState extends State<ChatListScreen> {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Start a conversation with someone you follow!',
+                          'Follow someone to start chatting with them!',
                           style: TextStyle(
                             fontSize: 16,
                             color: Theme.of(context).brightness == Brightness.dark 
                                 ? Colors.grey.shade500 
                                 : Colors.grey.shade500,
                             height: 1.4,
+                            fontWeight: FontWeight.w500,
                           ),
                           textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 24),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF4ECDC4).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: const Color(0xFF4ECDC4).withOpacity(0.3),
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.info_outline,
+                                    size: 16,
+                                    color: const Color(0xFF4ECDC4),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'How messaging works:',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFF4ECDC4),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                '1. Follow someone\n2. Send them a message request\n3. They accept → Start chatting!',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: const Color(0xFF4ECDC4),
+                                  height: 1.4,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Text(
@@ -297,13 +351,103 @@ class _ChatListScreenState extends State<ChatListScreen> {
           : RefreshIndicator(
               onRefresh: _refreshConversations,
               color: const Color(0xFF4ECDC4),
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: _conversations.length,
-                itemBuilder: (context, index) {
-                  final conversation = _conversations[index];
-                  return _buildConversationItem(conversation);
-                },
+              child: CustomScrollView(
+                slivers: [
+                  // Message Requests Section
+                  if (_messageRequests.isNotEmpty) ...[
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.mark_email_unread_outlined,
+                              color: const Color(0xFF4ECDC4),
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Message Requests',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF4ECDC4),
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF4ECDC4).withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                '${_messageRequests.length}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF4ECDC4),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          return MessageRequestCard(
+                            request: _messageRequests[index],
+                            onRequestHandled: _refreshConversations,
+                          );
+                        },
+                        childCount: _messageRequests.length,
+                      ),
+                    ),
+                    SliverToBoxAdapter(child: const SizedBox(height: 16)),
+                  ],
+                  
+                  // Conversations Section
+                  if (_conversations.isNotEmpty) ...[
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.chat_bubble_outline,
+                              color: Theme.of(context).colorScheme.primary,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Chats',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: Theme.of(context).colorScheme.primary,
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            return _buildConversationItem(_conversations[index]);
+                          },
+                          childCount: _conversations.length,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
       floatingActionButton: _conversations.isNotEmpty
